@@ -1,11 +1,17 @@
 import { translate, localizeMarkup, SUPPORTED_LANGUAGES } from './i18n.js';
 import { DEFAULT_SETTINGS, loadSettings, saveSettings, normalizeSettings, brightnessAppearance, createSoundPlayer } from './preferences.js';
+import { STORY_VERSION, getStory, storyText, storyDecisions, normalizeStory, storyOptionAvailability } from './story.js';
+import { renderStory } from './story-view.js';
 
 const app = document.querySelector('#app');
 const toastElement = document.querySelector('#toast');
 const STORAGE = 'akim-simulator-v1';
+const STORY_STORAGE = 'akim-story-v1';
 const preferences = (() => { try { return loadSettings(localStorage); } catch { return { ...DEFAULT_SETTINGS }; } })();
 const state = { data: null, evaluation: null, decisions: [], category: 'transport', district: 'nura', mapMode: 'after', page: 'menu', name: translate('Мой городской сценарий', preferences.language), report: null, saved: [], busy: false, analyzing: false, targets: {}, undo: null, loading: true, loadError: '' };
+state.story = { choices: [], step: 0, selected: null, evaluation: null, confirmRestart: false };
+state.storyBusy = false;
+state.storyRestorePending = false;
 const sound = createSoundPlayer(() => preferences, window);
 const locale = () => ({ ru: 'ru-RU', kk: 'kk-KZ', en: 'en-US' })[preferences.language];
 const localize = html => localizeMarkup(html, preferences.language);
@@ -84,6 +90,7 @@ function toast(message, isError = false, undo = false) {
 }
 
 function persist() {
+  if (!state.data || state.loading || state.loadError) return;
   try { localStorage.setItem(STORAGE, JSON.stringify({ version: state.data.version, decisions: state.decisions, name: state.name, saved: state.saved })); }
   catch { toast('Хранилище браузера недоступно. Экспортируйте отчёт, чтобы сохранить результат.', true); }
 }
@@ -144,6 +151,11 @@ function render() {
   const focus = !pageChanged && document.activeElement?.id === 'main' && pendingFocus ? pendingFocus : captureRenderFocus();
   syncViewRevision();
   applyPreferences();
+  if (state.page === 'story') {
+    app.innerHTML = renderStory({ data: state.data, story: state.story, language: preferences.language, busy: state.storyBusy || state.busy || state.analyzing, icon, num, signed });
+    restoreRenderFocus(focus);
+    return;
+  }
   if (['menu', 'settings', 'exited'].includes(state.page)) {
     app.innerHTML = localize(state.page === 'menu' ? menuView() : state.page === 'settings' ? settingsView() : exitView());
     restoreRenderFocus(focus);
@@ -155,7 +167,7 @@ function render() {
     <a class="brand" href="#simulation" data-action="nav" data-page="simulation"><img src="/favicon.svg" alt=""/><span>Аким на 5 часов<small>ASTANA CITY LAB</small></span></a>
     <div class="nav-label">ВАШ ГОРОД</div><nav class="nav" aria-label="Основная навигация">${nav.map(([page, name, label]) => `<button class="nav-btn ${state.page === page ? 'active' : ''}" data-action="nav" data-page="${page}" ${state.page === page ? 'aria-current="page"' : ''}>${icon(name)}<span>${label}</span>${page === 'compare' && state.saved.length ? `<span class="nav-count">${state.saved.length}</span>` : ''}</button>`).join('')}</nav>
     <div class="sidebar-bottom"><div class="side-note"><span class="note-icon">${icon('green')}</span><strong>Город начинается с вас</strong><p>Пять решений сегодня.<br/>Качество жизни — на годы вперёд.</p></div><div class="team"><span class="avatar">S</span><div><strong>Команда Seniors</strong><small>Городская лаборатория</small></div>${icon('chevron')}</div></div>
-  </aside><div class="workspace"><header class="topbar"><div class="breadcrumbs">Городская лаборатория ${icon('chevron')} <b>${pageName}</b></div><div class="mobile-brand"><img src="/favicon.svg" alt=""/>Аким на 5 часов</div><div class="top-actions"><span class="status-label"><i class="live-dot"></i>Синтетический город</span><button class="game-menu-shortcut" data-action="game-menu" aria-label="Главное меню">${icon('menu')}<span>Главное меню</span></button><button class="help-btn" data-action="nav" data-page="method">${icon('help')}Правила игры</button></div></header>
+  </aside><div class="workspace"><header class="topbar"><div class="breadcrumbs">Городская лаборатория ${icon('chevron')} <b>${pageName}</b></div><div class="mobile-brand"><img src="/favicon.svg" alt=""/>Аким на 5 часов</div><div class="top-actions"><span class="status-label"><i class="live-dot"></i>Синтетический город</span><button class="game-menu-shortcut" data-action="game-menu" aria-label="Главное меню">${icon('menu')}<span>Главное меню</span></button><button class="game-menu-shortcut" data-action="story-resume" aria-label="${esc(storyText('backToStory', preferences.language))}">${icon('book')}<span data-i18n-skip>${esc(storyText('backToStory', preferences.language))}</span></button><button class="help-btn" data-action="nav" data-page="method">${icon('help')}Правила игры</button></div></header>
   <main class="main" id="main" tabindex="-1">${state.page === 'simulation' ? simulationView() : state.page === 'report' ? reportView() : state.page === 'compare' ? comparisonView() : methodologyView()}<footer class="bottom-bar"><span>${icon('city')}ASTANA CITY LAB <strong>· Сделаем город лучше вместе</strong></span><span>Учебная модель · Данные условные · Seniors, 2026</span></footer></main></div>`;
   app.innerHTML = localize(app.innerHTML);
   restoreRenderFocus(focus);
@@ -182,13 +194,13 @@ function updatePreference(key, value) {
 function menuView() {
   return `<main class="game-screen" id="main" tabindex="-1"><div class="menu-content">
     <div class="game-brand"><img src="/favicon.svg" alt=""/><div>Аким на 5 часов<small>ASTANA CITY LAB</small></div></div>
-    <div class="menu-copy"><div class="eyebrow">Астана · Симулятор городских решений</div><h1>Город начинается с ваших решений.</h1><p>Пять решений. Один город. Ваше будущее.</p></div>
+    <div class="menu-copy"><div class="eyebrow">Астана · Симулятор городских решений</div><h1 data-i18n-skip>${esc(storyText('title', preferences.language))}</h1><p data-i18n-skip>${esc(storyText('subtitle', preferences.language))}</p></div>
     <nav class="menu-actions" aria-label="Главное меню">
       <button class="menu-button primary" data-action="start-game" ${state.loading ? 'disabled' : ''}>${icon('play')}<span>Начать игру</span><span class="menu-button-number" aria-hidden="true">01</span></button>
       <button class="menu-button" data-action="open-settings">${icon('settings')}<span>Настройки</span><span class="menu-button-number" aria-hidden="true">02</span></button>
       <button class="menu-button exit" data-action="exit-game">${icon('exit')}<span>Выйти из игры</span><span class="menu-button-number" aria-hidden="true">03</span></button>
     </nav>
-    <p class="menu-session-note ${state.loadError ? 'error' : ''}" role="status">${state.loading ? 'Загружаем районы и инициативы…' : state.loadError ? esc(state.loadError) : state.decisions.length ? 'Ваш сценарий сохранён.' : 'Ваши решения сохраняются при выходе.'}</p>
+    <p class="menu-session-note ${state.loadError ? 'error' : ''}" role="status">${state.loading ? 'Загружаем районы и инициативы…' : state.loadError ? esc(state.loadError) : state.story.choices.length || state.decisions.length ? 'Ваш сценарий сохранён.' : 'Ваши решения сохраняются при выходе.'}</p>
     <footer class="menu-footer">${icon('shield')}<span>Учебная модель · Данные условные · Seniors, 2026</span></footer>
   </div><aside class="menu-scene" aria-hidden="true"><img src="/city-map.svg" alt=""/><div class="menu-scene-note"><span>ASTANA · CITY OF TOMORROW</span><h2>Большие перемены начинаются с малого.</h2><div class="menu-facts"><div><strong>5</strong><span>районов</span></div><div><strong>100</strong><span>единиц бюджета</span></div><div><strong>∞</strong><span>возможностей</span></div></div></div></aside></main>`;
 }
@@ -222,6 +234,76 @@ function openScreen(page) {
   render();
   window.scrollTo({ top: 0, behavior: 'instant' });
   document.querySelector('#main')?.focus({ preventScroll: true });
+}
+
+function persistStory() {
+  if (!state.data || state.loading || state.loadError || state.storyRestorePending) return;
+  try {
+    localStorage.setItem(STORY_STORAGE, JSON.stringify({ version: STORY_VERSION, datasetVersion: state.data.version, choices: state.story.choices, step: state.story.step }));
+  } catch { toast('Хранилище браузера недоступно. Экспортируйте отчёт, чтобы сохранить результат.', true); }
+}
+
+function moveStory(step) {
+  if (state.storyBusy || !Number.isInteger(step) || step < 0 || step > state.story.choices.length || step > 5) return;
+  state.story.step = step;
+  state.story.selected = state.story.choices[step] ?? null;
+  state.story.confirmRestart = false;
+  persistStory();
+  openScreen('story');
+}
+
+async function confirmStoryChoice() {
+  if (state.storyBusy || state.story.step >= 5) return;
+  const { choices, step, selected } = state.story;
+  const availability = storyOptionAvailability(choices, step, selected, state.data.initiatives, state.data.budget);
+  if (!availability.allowed) { toast(storyText(availability.reason === 'budget' ? 'locked' : availability.reason, preferences.language), true); return; }
+  if (choices[step] === selected) return;
+  const next = [...choices.slice(0, step), selected];
+  state.storyBusy = true;
+  render();
+  try {
+    const evaluation = await api('/api/evaluate', storyDecisions(next));
+    state.story.choices = next;
+    state.story.evaluation = evaluation;
+    persistStory();
+    void sound.play('success');
+  } catch (error) { toast(error.message, true); }
+  finally { state.storyBusy = false; render(); }
+}
+
+async function openStoryScenario(withAnalysis = false) {
+  if (state.storyBusy || state.busy || state.analyzing || state.story.choices.length !== 5) return;
+  syncViewRevision();
+  const departure = viewRevision.departure;
+  const sourcePage = state.page;
+  if (await setDecisions(storyDecisions(state.story.choices))) {
+    state.name = storyText('title', preferences.language);
+    state.report = null;
+    persist();
+    syncViewRevision();
+    if (sourcePage !== state.page || departure !== viewRevision.departure) return;
+    openScreen('simulation');
+    if (withAnalysis) await analyze();
+  }
+}
+
+async function restoreStory() {
+  state.story = { choices: [], step: 0, selected: null, evaluation: state.data.baseline, confirmRestart: false };
+  state.storyRestorePending = false;
+  let restored;
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORY_STORAGE) || 'null');
+    restored = saved?.datasetVersion === state.data.version ? normalizeStory(saved) : null;
+  } catch { return; /* Malformed or unavailable storage starts a fresh session. */ }
+  if (!restored) return;
+  const { choices, step } = restored;
+  if (choices.length && !storyOptionAvailability(choices, choices.length - 1, choices.at(-1), state.data.initiatives, state.data.budget).allowed) return;
+  // A valid save is never replaced until its server evaluation succeeds.
+  // Network errors reach boot's retry UI; exit cannot overwrite this save.
+  state.storyRestorePending = true;
+  const evaluation = choices.length ? await api('/api/evaluate', storyDecisions(choices)) : state.data.baseline;
+  state.story = { choices, step, selected: choices[step] ?? null, evaluation, confirmRestart: false };
+  state.storyRestorePending = false;
 }
 
 function pageHeader(eyebrow, title, subtitle, buttons = '') {
@@ -419,14 +501,36 @@ document.addEventListener('click', async event => {
   }
   if (!['exit-game', 'test-sound', 'toggle-sound'].includes(action)) void sound.play();
   if (action === 'start-game') {
-    if (!state.data) { await boot(); if (!state.data) return; }
-    openScreen('simulation');
+    if (!state.data || state.loadError || state.storyRestorePending) { await boot(); if (!state.data || state.loadError) return; }
+    openScreen('story');
+    return;
+  }
+  if (action === 'story-simulator') { openScreen('simulation'); return; }
+  if (action === 'story-resume') { openScreen('story'); return; }
+  if (action.startsWith('story-')) {
+    if (state.storyBusy || state.busy || state.analyzing) return;
+    if (action === 'story-select') {
+      const selected = Number(button.dataset.id);
+      if (storyOptionAvailability(state.story.choices, state.story.step, selected, state.data.initiatives, state.data.budget).allowed) { state.story.selected = selected; render(); }
+    }
+    if (action === 'story-confirm') await confirmStoryChoice();
+    if (action === 'story-next' && state.story.choices[state.story.step] === state.story.selected) moveStory(state.story.step + 1);
+    if (action === 'story-back') moveStory(state.story.step - 1);
+    if (action === 'story-edit') moveStory(0);
+    if (action === 'story-restart') { state.story.confirmRestart = true; render(); document.querySelector('[data-action="story-restart-confirm"]')?.focus(); }
+    if (action === 'story-restart-cancel') { state.story.confirmRestart = false; render(); document.querySelector('[data-action="story-restart"]')?.focus(); }
+    if (action === 'story-restart-confirm' && state.story.confirmRestart) {
+      state.story = { choices: [], step: 0, selected: null, evaluation: state.data.baseline, confirmRestart: false };
+      persistStory(); openScreen('story');
+    }
+    if (action === 'story-analyze') await openStoryScenario(true);
+    if (action === 'story-open-scenario') await openStoryScenario();
     return;
   }
   if (action === 'game-menu') { openScreen('menu'); return; }
   if (action === 'open-settings') { openScreen('settings'); return; }
   if (action === 'exit-game') {
-    if (state.data) persist();
+    if (state.data) { persist(); persistStory(); }
     openScreen('exited');
     // The exit screen also works in normal tabs which browsers do not let scripts close.
     if (window.opener) { try { window.close(); } catch { /* User can close the tab. */ } }
@@ -550,6 +654,7 @@ async function boot() {
   render();
   try {
     state.data = await api('/api/bootstrap'); state.evaluation = state.data.baseline;
+    await restoreStory();
     let stored;
     try { stored = JSON.parse(localStorage.getItem(STORAGE) || 'null'); } catch { /* Empty or unavailable storage starts a fresh session. */ }
     if (stored?.version === state.data.version) {

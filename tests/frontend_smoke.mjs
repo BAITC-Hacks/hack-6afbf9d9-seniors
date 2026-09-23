@@ -10,6 +10,8 @@ import { request } from 'node:http';
 import vm from 'node:vm';
 import * as localization from '../public/i18n.js';
 import * as gamePreferences from '../public/preferences.js';
+import * as storyModel from '../public/story.js';
+import * as storyPresentation from '../public/story-view.js';
 
 function localApi(path, decisions) {
   return new Promise((resolve, reject) => {
@@ -60,7 +62,7 @@ const events = {};
 let downloaded;
 let downloadClicks = 0;
 const context = vm.createContext({
-  ...localization, ...gamePreferences,
+  ...localization, ...gamePreferences, ...storyModel, ...storyPresentation,
   bootstrap, example,
   document: {
     documentElement: { lang: 'ru', style: { setProperty() {} } },
@@ -88,6 +90,10 @@ run('state.data=bootstrap; state.evaluation=bootstrap.baseline; state.loading=fa
 assert.ok(nodes.app.innerHTML.includes('Начать игру'));
 assert.equal((nodes.app.innerHTML.match(/data-action=/g) || []).length, 3);
 await click('start-game');
+assert.equal(run('state.page'), 'story');
+assert.ok(nodes.app.innerHTML.includes('Айгуль Садыкова'));
+assert.ok(nodes.app.innerHTML.includes('/portraits/character-0.png'));
+await click('story-simulator');
 assert.ok(nodes.app.innerHTML.includes('52,56'));
 assert.ok(nodes.app.innerHTML.includes('city-map.svg'));
 assert.equal(bootstrap.budget, 100);
@@ -163,6 +169,8 @@ await click('game-menu');
 assert.ok(nodes.app.innerHTML.includes('Start game'));
 assert.ok(nodes.app.innerHTML.includes('Exit game'));
 await click('start-game');
+assert.ok(nodes.app.innerHTML.includes('Aigul'));
+await click('story-simulator');
 assert.ok(nodes.app.innerHTML.includes('Your city. Your decisions.'));
 assert.equal(run('state.evaluation.score'), 52.56);
 await click('game-menu');
@@ -184,6 +192,126 @@ assert.ok(nodes.app.innerHTML.includes('Игра завершена'));
 assert.equal(run('decisionKey(state.decisions)'), decisionsBeforeExit);
 await click('game-menu');
 await click('start-game');
-assert.equal(run('state.page'), 'simulation');
+assert.equal(run('state.page'), 'story');
 
-console.log('PASS: frontend workflows, reports, history, menu, settings, language, storage and exit.');
+// A full story uses real server calculations and leaves the sandbox draft intact.
+context.fetch = async (path, options) => ({ ok: true, json: async () => path === '/api/analyze' ? example : await localApi(path, options?.body ? JSON.parse(options.body).decisions : undefined) });
+for (let step = 0; step < 5; step += 1) {
+  assert.equal(run('state.story.step'), step);
+  assert.equal(run('state.story.selected'), null);
+  assert.ok(nodes.app.innerHTML.includes(`/portraits/character-${step}.png`));
+  assert.ok(!/\{(?:current|total)\}/.test(nodes.app.innerHTML), 'Progress labels must interpolate their counts.');
+  await click('story-select', { id: '0' });
+  assert.equal(run('state.story.choices.length'), step, 'A preview must not spend money.');
+  await click('story-confirm');
+  assert.equal(run('state.story.choices.length'), step + 1);
+  assert.equal(run('state.story.evaluation.decisions.length'), step + 1);
+  assert.ok(nodes.app.innerHTML.includes('story-acknowledgement'));
+  await click('story-next');
+}
+assert.equal(run('state.story.step'), 5);
+assert.equal(run('state.story.evaluation.spent'), 83);
+assert.equal(run('state.story.evaluation.complete'), true);
+assert.equal(run('decisionKey(state.decisions)'), decisionsBeforeExit);
+assert.ok(nodes.app.innerHTML.includes('ASTANA QUALITY OF LIFE SCORE'));
+assert.ok(!/undefined|NaN/.test(nodes.app.innerHTML));
+const storyScore = run('state.story.evaluation.score');
+const storySave = storage.get('akim-story-v1');
+run('state.story.choices=[]; state.story.step=0; state.story.evaluation=null');
+await run('restoreStory()');
+assert.equal(run('state.story.step'), 5);
+assert.equal(run('state.story.choices.length'), 5);
+assert.equal(run('state.story.evaluation.score'), storyScore);
+assert.equal(JSON.parse(storySave).datasetVersion, bootstrap.version);
+
+// Revisiting a meeting is harmless until a different answer is confirmed.
+await click('story-edit');
+assert.equal(run('state.story.choices.length'), 5);
+await click('story-select', { id: '2' });
+assert.equal(run('state.story.choices.length'), 5);
+await click('story-confirm');
+assert.equal(run('state.story.choices.length'), 1);
+assert.equal(run('state.story.evaluation.spent'), 10);
+assert.notEqual(run('state.story.evaluation.score'), storyScore);
+await click('story-restart');
+await click('story-restart-cancel');
+assert.equal(run('state.story.choices.length'), 1);
+await click('story-restart');
+await click('story-restart-confirm');
+assert.equal(run('state.story.choices.length'), 0);
+assert.equal(run('state.story.evaluation.remaining'), 100);
+
+// Expensive choices are blocked before they make the final meetings impossible.
+for (const id of ['0', '1']) {
+  await click('story-select', { id });
+  await click('story-confirm');
+  await click('story-next');
+}
+await click('story-select', { id: '2' }); // 24 + 25 + 30 + minimum 10 + 14 = 103.
+assert.equal(run('state.story.selected'), null);
+assert.ok(nodes.app.innerHTML.includes('story-choice-reason'));
+assert.equal(run('state.story.evaluation.spent'), 49);
+await click('story-select', { id: '0' });
+context.fetch = async () => ({ ok: false, json: async () => ({ error: 'Story evaluation rejected' }) });
+await click('story-confirm');
+assert.equal(run('state.story.choices.length'), 2);
+assert.equal(run('state.storyBusy'), false);
+
+// Corrupt progress is discarded; stored numeric results are always ignored.
+storage.set('akim-story-v1', JSON.stringify({ version: 1, datasetVersion: bootstrap.version, choices: [99], step: 1 }));
+await run('restoreStory()');
+assert.equal(run('state.story.choices.length'), 0);
+storage.set('akim-story-v1', storySave);
+context.fetch = async (path, options) => ({ ok: true, json: async () => await localApi(path, options?.body ? JSON.parse(options.body).decisions : undefined) });
+await run('restoreStory()');
+await click('story-open-scenario');
+assert.equal(run('state.page'), 'simulation');
+assert.equal(run('state.evaluation.score'), storyScore);
+assert.equal(run('state.decisions.length'), 5);
+assert.equal(run('state.story.choices.length'), 5);
+
+// The story hands its own calculation to the existing analysis/report flow.
+await click('story-resume');
+context.fetch = async (path, options) => {
+  const payload = JSON.parse(options.body);
+  const evaluated = await localApi('/api/evaluate', payload.decisions);
+  return { ok: true, json: async () => path === '/api/analyze' ? { evaluation: evaluated, analysis: { ...example.analysis, language: payload.language } } : evaluated };
+};
+await click('story-analyze');
+assert.equal(run('state.page'), 'report');
+assert.equal(run('state.report.evaluation.score'), storyScore);
+assert.equal(run('state.report.evaluation.spent'), 83);
+
+// A response cannot reopen the game after the player has left it.
+await click('story-resume');
+let resolveStoryTransfer;
+context.fetch = () => new Promise(resolve => { resolveStoryTransfer = resolve; });
+const transfer = click('story-open-scenario');
+await click('exit-game');
+resolveStoryTransfer({ ok: true, json: async () => evaluation });
+await transfer;
+assert.equal(run('state.page'), 'exited');
+
+// A transient restore failure must not erase valid saved progress on exit.
+const preservedStory = storage.get('akim-story-v1');
+const preservedDraft = storage.get('akim-simulator-v1');
+context.fetch = async path => {
+  if (path === '/api/bootstrap') return { ok: true, json: async () => bootstrap };
+  throw new Error('Temporary network failure');
+};
+run('state.page="menu"');
+await run('boot()');
+assert.equal(run('state.storyRestorePending'), true);
+assert.ok(run('state.loadError.length') > 0);
+await click('exit-game');
+assert.equal(storage.get('akim-story-v1'), preservedStory);
+assert.equal(storage.get('akim-simulator-v1'), preservedDraft);
+context.fetch = async (path, options) => ({ ok: true, json: async () => await localApi(path, options?.body ? JSON.parse(options.body).decisions : undefined) });
+await click('game-menu');
+await click('start-game');
+assert.equal(run('state.page'), 'story');
+assert.equal(run('state.storyRestorePending'), false);
+assert.equal(run('state.story.choices.length'), 5);
+assert.equal(run('state.loadError'), '');
+
+console.log('PASS: frontend workflows, reports, history, menu, settings, story, budget, language, storage and exit.');

@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "test:ui": "node tests/frontend_smoke.mjs",
-    "test:settings": "node tests/preferences.test.mjs"
+    "test:settings": "node tests/preferences.test.mjs",
+    "test:story": "node tests/story.test.mjs"
   }
 }
