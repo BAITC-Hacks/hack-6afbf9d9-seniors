@@ -113,6 +113,14 @@
     <text x="553" y="248">АКОРДА</text>
     <text x="354" y="281" fill="#85aaa8" font-size="9" letter-spacing="3" transform="rotate(-5 354 281)">ЕСИЛЬ</text>
   </g>
+  <!-- Synthetic district overlays; these are not administrative boundaries. -->
+  <g fill="#94a3b8" fill-opacity=".28" stroke="#ffffff" stroke-width="2" pointer-events="none">
+    <path id="saryarka" d="M0 0H365L371 88 392 167 425 231 357 282 179 286 0 249Z"/>
+    <path id="baikonur" d="M365 0H618L648 85 674 244 531 257 425 231 392 167 371 88Z"/>
+    <path id="almaty" d="M618 0H900V231L819 265 674 244 648 85Z"/>
+    <path id="nura" d="M0 249L179 286 260 300 266 417 289 500H0Z"/>
+    <path id="esil" d="M260 300L357 282 425 231 531 257 674 244 819 265 900 231V500H289L266 417Z"/>
+  </g>
   <!-- Very faint district divisions avoid suggesting exact administrative boundaries. -->
   <g fill="none" stroke="#b8c9bc" stroke-width="1.2" stroke-dasharray="4 6" opacity=".45">
     <path d="M365-10L371 88 392 167 425 231"/><path d="M618-10L648 85 674 213"/>

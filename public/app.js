@@ -150,6 +150,65 @@ function restoreRenderFocus(snapshot) {
   }
 }
 
+let mapSvgPromise;
+let currentMapDeltas = {};
+
+function evaluationDeltas(result) {
+  const evaluation = result.evaluation || result;
+  return result.deltas || evaluation.deltas || Object.fromEntries(
+    (evaluation.districts || []).map(d => [d.id, d.delta]),
+  );
+}
+
+function updateMapColors(deltas) {
+  currentMapDeltas = deltas && typeof deltas === 'object' && !Array.isArray(deltas) ? { ...deltas } : {};
+  const svg = document.querySelector('#city-map svg');
+  if (!svg?.querySelectorAll) return; // The map may not be mounted yet.
+  for (const [id, delta] of Object.entries(currentMapDeltas)) {
+    // Only known districts and finite numbers; never interpolate untrusted selectors.
+    if (!Object.hasOwn(mapPositions, id) || typeof delta !== 'number' || !Number.isFinite(delta)) continue;
+    const color = delta > 0 ? '#84cc16' : delta < 0 ? '#ef4444' : '#94a3b8';
+    for (const region of svg.querySelectorAll('[id], [class]')) {
+      if (region.id !== id && !region.classList.contains(id)) continue;
+      const shapes = region.matches('path, polygon, polyline, rect, circle, ellipse')
+        ? [region] : region.querySelectorAll('path, polygon, polyline, rect, circle, ellipse');
+      for (const shape of shapes) shape.style.setProperty('fill', color);
+    }
+  }
+}
+
+async function mountCityMap() {
+  const container = document.querySelector('#city-map');
+  if (!container?.isConnected || typeof DOMParser === 'undefined') return;
+  try {
+    // Load only the bundled same-origin asset. Keep the image fallback on failure.
+    mapSvgPromise ||= fetch('/city-map.svg', { signal: AbortSignal.timeout(10000) })
+      .then(response => {
+        if (!response.ok) throw new Error('Map unavailable');
+        return response.text();
+      }).then(source => {
+        const parsed = new DOMParser().parseFromString(source, 'image/svg+xml');
+        const svg = parsed.documentElement;
+        if (parsed.querySelector('parsererror') || svg.localName !== 'svg') throw new Error('Invalid SVG');
+        // Do not insert active content, external references or event handlers.
+        svg.querySelectorAll('script, foreignObject, style, a, animate, animateTransform, set').forEach(el => el.remove());
+        for (const el of [svg, ...svg.querySelectorAll('*')]) {
+          for (const attr of [...el.attributes]) {
+            if (/^on/i.test(attr.name) || attr.name === 'style' || attr.localName === 'href' && !attr.value.startsWith('#')) el.removeAttributeNode(attr);
+          }
+        }
+        return svg;
+      }).catch(error => { mapSvgPromise = null; throw error; });
+    const template = await mapSvgPromise;
+    if (!container.isConnected) return; // A newer render replaced this container.
+    const svg = document.importNode(template, true);
+    svg.setAttribute('width', '100%');
+    svg.setAttribute('height', '100%');
+    container.replaceChildren(svg);
+    updateMapColors(currentMapDeltas);
+  } catch { /* The static map remains available if loading or parsing fails. */ }
+}
+
 function render() {
   const pageChanged = viewRevision.page !== state.page;
   const focus = !pageChanged && document.activeElement?.id === 'main' && pendingFocus ? pendingFocus : captureRenderFocus();
@@ -175,6 +234,10 @@ function render() {
   </aside><div class="workspace"><header class="topbar"><div class="breadcrumbs">Городская лаборатория ${icon('chevron')} <b>${pageName}</b></div><div class="mobile-brand"><img src="/favicon.svg" alt=""/>Аким на 5 часов</div><div class="top-actions"><span class="status-label"><i class="live-dot"></i>Синтетический город</span><button class="game-menu-shortcut" data-action="game-menu" aria-label="Главное меню">${icon('menu')}<span>Главное меню</span></button><button class="game-menu-shortcut" data-action="story-resume" aria-label="${esc(storyText('backToStory', preferences.language))}">${icon('book')}<span data-i18n-skip>${esc(storyText('backToStory', preferences.language))}</span></button><button class="help-btn" data-action="nav" data-page="method">${icon('help')}Правила игры</button></div></header>
   <main class="main" id="main" tabindex="-1">${state.page === 'simulation' ? simulationView() : state.page === 'report' ? reportView() : state.page === 'compare' ? comparisonView() : methodologyView()}<footer class="bottom-bar"><span>${icon('city')}ASTANA CITY LAB <strong>· Сделаем город лучше вместе</strong></span><span>Учебная модель · Данные условные · Seniors, 2026</span></footer></main></div>`;
   app.innerHTML = localize(app.innerHTML);
+  updateMapColors(state.mapMode === 'before'
+    ? Object.fromEntries(Object.keys(mapPositions).map(id => [id, 0]))
+    : evaluationDeltas(state.evaluation || {}));
+  void mountCityMap();
   restoreRenderFocus(focus);
 }
 
@@ -365,7 +428,7 @@ function districtCategoryValue(d, id) {
 function mapView() {
   const current = state.evaluation.districts.find(d => d.id === state.district);
   return `<section class="panel" aria-label="Карта и показатели районов"><div class="panel-header"><div><h2 class="panel-title">Пульс города</h2><p class="panel-subtitle">5 районов. Одно общее будущее.</p></div><div class="map-mode" aria-label="Показатели на карте"><button class="${state.mapMode === 'before' ? 'active' : ''}" data-action="map-mode" data-mode="before" aria-pressed="${state.mapMode === 'before'}">Сейчас</button><button class="${state.mapMode === 'after' ? 'active' : ''}" data-action="map-mode" data-mode="after" aria-pressed="${state.mapMode === 'after'}">Прогноз</button></div></div>
-  <div class="map-canvas"><img class="map-art" src="/city-map.svg" alt="Схематическая карта Астаны с рекой Есиль и городской застройкой"/><div class="map-compass">С${icon('compass')}</div>${state.evaluation.districts.map(d => { const pos = mapPositions[d.id]; const score = state.mapMode === 'before' ? d.before : d.after; return `<button class="map-pill ${d.id === state.district ? 'active' : ''} ${score < 53 ? 'low' : ''}" style="left:${pos[0]}%;top:${pos[1]}%" data-action="district" data-district="${d.id}" aria-pressed="${d.id === state.district}" aria-label="Район ${esc(d.name)}, оценка ${num(score)}">${esc(d.name)}<b>${num(score, 1)}</b></button>`; }).join('')}<span class="map-watermark">СХЕМАТИЧЕСКАЯ КАРТА · ГРАНИЦЫ УСЛОВНЫ</span><div class="map-legend">Ниже<span class="legend-scale"></span>Выше</div></div>
+  <div class="map-canvas"><div id="city-map" class="map-art"><img class="map-art" src="/city-map.svg" alt="Схематическая карта Астаны с рекой Есиль и городской застройкой"/></div><div class="map-compass">С${icon('compass')}</div>${state.evaluation.districts.map(d => { const pos = mapPositions[d.id]; const score = state.mapMode === 'before' ? d.before : d.after; return `<button class="map-pill ${d.id === state.district ? 'active' : ''} ${score < 53 ? 'low' : ''}" style="left:${pos[0]}%;top:${pos[1]}%" data-action="district" data-district="${d.id}" aria-pressed="${d.id === state.district}" aria-label="Район ${esc(d.name)}, оценка ${num(score)}">${esc(d.name)}<b>${num(score, 1)}</b></button>`; }).join('')}<span class="map-watermark">СХЕМАТИЧЕСКАЯ КАРТА · ГРАНИЦЫ УСЛОВНЫ</span><div class="map-legend">Ниже<span class="legend-scale"></span>Выше</div></div>
   <div class="district-summary"><div><strong>${esc(current.name)}</strong><small>${num(current.population * 100, 0)}% населения города</small></div><div class="mini-indicators">${state.data.categories.map(c => { const value = districtCategoryValue(current, c.id); return `<div class="mini-indicator"><div><span>${esc(c.shortName || c.name)}</span><b>${num(value, 0)}</b></div><div class="tiny-track"><span style="width:${Math.min(100, value)}%"></span></div></div>`; }).join('')}</div></div></section>`;
 }
 
@@ -458,6 +521,7 @@ async function setDecisions(next, message = '') {
     const evaluation = await api('/api/evaluate', next);
     state.decisions = next;
     state.evaluation = evaluation;
+    updateMapColors(evaluationDeltas(evaluation));
     persist();
     if (message) toast(message);
     return true;
@@ -489,6 +553,7 @@ async function analyze() {
       && requestedName === (state.name.trim() || 'Мой городской сценарий')
       && preferences.language === requestedLanguage && state.report === requestedReport && !state.busy && ['simulation', 'report'].includes(state.page);
     if (stillCurrent) {
+      updateMapColors(evaluationDeltas(result));
       state.report = saved;
       state.page = 'report';
       window.scrollTo({ top: 0, behavior: 'instant' });
