@@ -15,7 +15,7 @@ function localApi(path, decisions) {
   return new Promise((resolve, reject) => {
     const body = decisions === undefined ? null : JSON.stringify({ decisions });
     const req = request({
-      hostname: '127.0.0.1', port: 8080, path,
+      hostname: '127.0.0.1', port: Number(process.env.TEST_PORT || 8080), path,
       method: body ? 'POST' : 'GET', timeout: 5000,
       headers: body ? { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) } : {},
     }, response => {
@@ -93,7 +93,8 @@ assert.ok(nodes.app.innerHTML.includes('city-map.svg'));
 assert.equal(bootstrap.budget, 100);
 assert.equal(evaluation.score, 56.54);
 
-context.fetch = async path => ({ ok: true, json: async () => path === '/api/analyze' ? example : evaluation });
+const optimum = await localApi('/api/optimize', choices);
+context.fetch = async path => ({ ok: true, json: async () => path === '/api/optimize' ? optimum : path === '/api/analyze' ? example : evaluation });
 await click('preset');
 assert.equal(run('state.decisions.length'), 5);
 assert.equal(run('state.evaluation.spent'), 95);
@@ -102,6 +103,11 @@ assert.equal(run('state.page'), 'report');
 assert.ok(nodes.app.innerHTML.includes('M10+M12'));
 assert.ok(nodes.app.innerHTML.includes('Демонстрационный разбор'));
 assert.equal(run('state.saved.length'), 1);
+assert.ok(nodes.app.innerHTML.includes('data-action="optimize"'));
+await click('optimize');
+assert.equal(run('state.report.optimizer.bestScore'), optimum.bestScore);
+assert.equal(run('state.report.optimizing'), false);
+assert.ok(!nodes.app.innerHTML.includes('data-action="optimize"'));
 for (const page of ['simulation', 'report', 'compare', 'method']) {
   await click('nav', { page });
   assert.ok(!/undefined|NaN/.test(nodes.app.innerHTML), `Invalid generated HTML on ${page}`);

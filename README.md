@@ -1,125 +1,89 @@
-# Аким на 5 часов
+﻿# Akim for 5 Hours
 
-Веб-симулятор городских решений для хакатона Astana Innovations. У всех участников одинаковые исходные данные и **100 условных единиц**. Выберите **ровно 5 мероприятий**, узнайте Astana Quality of Life Score и получите объяснение последствий.
+A city decision simulator for the Astana Innovations hackathon by **Seniors**. Every player starts with the same synthetic data and **100 budget units**. Choose exactly **five initiatives**, inspect the Astana Quality of Life Score, and explore the trade-offs. This is an educational model, not a forecast of actual conditions in Astana.
 
-Проект команды **Seniors**. Датасет синтетический, перенесён из задания; это учебная модель, а не прогноз реальных показателей Астаны.
+[Russian project description](README.ru.md) | [Deployment guide in Russian](DEPLOY.ru.md)
 
-## Быстрый запуск
+## Quick start
 
-Нужен **Python 3.10+** и современный браузер. Установка библиотек, Node.js, npm, база данных и сборка не требуются.
+Requires **Python 3.10+** and a modern browser. No third-party Python packages, database, Node.js or build step are needed to run the app.
 
 ```bash
 python server.py
 ```
 
-В Windows, если команда `python` недоступна:
+On Windows, use `py server.py` if needed. Open **http://127.0.0.1:8080**. Do not open `public/index.html` directly: the interface uses the server API. Stop with Ctrl+C.
 
-```powershell
-py server.py
-```
+The default host is `127.0.0.1`. Override it with `--host`; set the port with `--port` or the `PORT` environment variable (default 8080).
 
-Откройте **http://127.0.0.1:8080**. Не открывайте `public/index.html` напрямую: интерфейс использует API локального сервера.
+## Two-minute demo
 
-Другой порт: `python server.py --port 8081`. Сервер по умолчанию слушает только `127.0.0.1`; остановка — `Ctrl+C`.
+1. Start a game: budget 100, baseline Score **52.56**, zero of five decisions.
+2. Select initiatives and districts. City-wide initiatives do not require a district.
+3. Inspect the map and current/forecast indicators as your choices change.
+4. Load the reference example: M7, M8 and M10 in Nura, M12 city-wide, M5 in Saryarka. Cost: **95**. Score: **56.54**.
+5. Evaluate the scenario to see strengths, risks, district changes and recommendations.
+6. In the report, click **Show the best plan** to see the optimal five decisions, their districts and the gap between your Score and the optimum.
+7. Export JSON or print the report, including to PDF through your browser. Change decisions and compare saved scenarios.
 
-## Демонстрация за две минуты
+Drafts and up to 12 distinct recent reports are stored in this browser's `localStorage`; there is no shared leaderboard. Settings include Russian, Kazakh and English, sound volume/mute, and game brightness. Language changes apply to the interface and new reports; saved report text and user names remain unchanged. Brightness affects the app, not the monitor or printout. Sounds start after user interaction. Exiting preserves the draft.
 
-1. Откройте приложение и нажмите **«Начать игру»**: бюджет **100**, базовый Score **52,56**, решений **0/5**. Ранее сохранённый черновик можно продолжить.
-2. Выберите направление, мероприятие и район. Для городской меры район не нужен.
-3. Карта и показатели пересчитываются после каждого решения. Переключатель «Сейчас / Прогноз» сравнивает исходные и новые оценки районов.
-4. Соберите 5 решений в пределах бюджета и нажмите **«Оценить мой сценарий»**.
-5. Изучите итог, изменения по районам, риски и рекомендации. Скачайте JSON или распечатайте отчёт, в том числе в PDF средствами браузера.
-6. Измените решения и выполните анализ снова. Во вкладке **«Сравнение»** сохранённые сценарии ранжируются по Score.
+## Optional AI
 
-Кнопка **«Пример из задания»** загружает контрольный набор: M7 → Нура, M8 → Нура, M10 → Нура, M12 → весь город, M5 → Сарыарка. Стоимость **95**, итоговый Score **56,54**. Здесь срабатывает синергия M10 + M12.
+Without a key, calculations and optimization work normally; explanations are explicitly labelled as a deterministic demo without an LLM.
 
-Черновик и до 12 последних разных анализов сохраняются в `localStorage` данного браузера. Сравнение локальное: общей серверной таблицы команд в этой версии нет. При новом сценарии исходные данные и бюджет одинаковы; сброс можно сразу отменить кнопкой в уведомлении.
+Copy `.env.example` to `.env`, configure `OPENAI_API_KEY`, and restart. `OPENAI_MODEL` overrides the model configured in `ai_analysis.py`. Process environment variables take precedence.
 
-## Главное меню и настройки
+The existing integration uses the Responses API with structured JSON output. The key stays on the server, `.env` is excluded from Git, and only public assets are served. Selected initiatives and calculated synthetic results are sent to the provider. Python calculates the Score; the LLM explains effects and trade-offs. Provider failures return a clearly labelled deterministic fallback.
 
-При запуске открывается главное меню с тремя кнопками: **«Начать игру»**, **«Настройки»**, **«Выйти из игры»**. Во время игры кнопка «Главное меню» находится в верхней панели. Возвращение в меню и выход не сбрасывают решения.
+## Rules
 
-В настройках доступны:
+- Budget: 100. Unused money gives no bonus.
+- Exactly five decisions for analysis and optimization; incomplete drafts can be evaluated.
+- Each initiative may occur once; at most two initiatives per category.
+- District initiatives require a target; city-wide initiatives do not.
+- M1 and M3 are incompatible everywhere.
+- M4/M7 and M5/M13 are incompatible within the same district.
+- Order does not affect results. The server owns costs, effects, scores and validation.
 
-- **Звук:** громкость 0–100%, отдельное отключение звуков и кнопка проверки. Звуки кнопок и завершения анализа синтезируются через Web Audio; фоновой музыки нет. Звук начинается только после действия пользователя и прекращается при выходе или скрытии вкладки.
-- **Яркость игры:** 50–120%, применяется сразу ко всему интерфейсу. 100% — исходное изображение. Это настройка игры, а не монитора; на печать она не влияет.
-- **Язык:** русский, казахский или английский. Переключаются интерфейс, каталог, правила и язык новых AI/демоотчётов. Пользовательские названия и текст ранее сохранённых отчётов сохраняются; для отчёта на новом языке нужно повторить анализ.
+The detailed assignment rules allow two initiatives in a category rather than requiring one in each category. The supplied reference example follows this interpretation.
 
-Настройки автоматически сохраняются отдельно от сценариев. «Сбросить настройки» возвращает громкость 50%, включённый звук, яркость 100% и русский язык. Если хранилище браузера недоступно, изменения действуют в текущей вкладке, о чём появляется уведомление.
+## Calculation
 
-Выход сохраняет сценарий и выключает звук. В окне, открытом программно, приложение также пытается закрыть окно. Для обычной вкладки показывается экран завершения с возможностью вернуться в меню: [браузеры ограничивают программное закрытие вкладок](https://developer.mozilla.org/en-US/docs/Web/API/Window/close).
-
-## Подключение AI
-
-Без ключа приложение полностью считает сценарии и показывает **демонстрационный разбор по правилам**, явно помеченный «без LLM». Этот режим не выдаётся за AI-анализ.
-
-Для настоящего AI-разбора скопируйте `.env.example` в `.env`, укажите свой ключ и перезапустите сервер:
-
-```dotenv
-OPENAI_API_KEY=your_api_key_here
-OPENAI_MODEL=gpt-4.1-mini
-```
-
-Модель можно заменить через `OPENAI_MODEL` на доступную в вашем аккаунте и поддерживающую Responses API со структурированным JSON-ответом. Альтернатива `.env` — обычные переменные окружения.
-
-Интеграция использует [OpenAI Responses API](https://developers.openai.com/api/docs/guides/text) и [Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs). Ключ остаётся на сервере. Файл `.env` исключён из Git и не раздаётся HTTP-сервером. В OpenAI отправляются выбранные меры и рассчитанные результаты синтетического сценария. LLM **не рассчитывает Score**: она объясняет уже вычисленные эффекты, сильные стороны, риски и компромиссы. При ошибке или тайм-ауте провайдера приложение возвращает демонстрационный разбор с явным уведомлением.
-
-## Точные правила
-
-- Бюджет — 100. Остаток не сгорает и не даёт бонуса.
-- Ровно 5 решений для финального анализа. Черновик из 0–4 решений можно просматривать, но нельзя отправить на финальный анализ.
-- Каждая мера встречается максимум один раз, из одного направления — максимум две меры. Таким образом, охватываются минимум три направления.
-- У районной меры обязателен район. У городской меры район не указывается.
-- M1 и M3 несовместимы в любом сочетании районов.
-- M4 и M7 запрещены в одном районе; M5 и M13 — тоже.
-- Порядок решений не влияет на результат.
-- Все правила повторно проверяет сервер. Клиент не задаёт стоимость, эффекты или Score.
-
-Подробное приложение к заданию уточняет исходное описание: **пять мероприятий, а не обязательно по одному в каждом из пяти направлений**. Контрольный пример содержит две меры соцсферы и не содержит транспортных мер; приложение поддерживает именно эти подробные правила.
-
-## Расчёт
-
-Горизонт `H = 8` кварталов. Для каждой пары «район d × показатель k»:
+The horizon is eight quarters:
 
 ```text
-I'[d,k] = clip(I[d,k] + Σ(effect[m,k] × (8 − lag[m]) / 8) + synergy[d,k], 0, 100)
-D[d]    = Σ(weight[k] × I'[d,k])
-D_avg   = Σ(population_share[d] × D[d])
-N_crit  = число пар (d,k), где I'[d,k] < 40
-Score   = 0.7 × D_avg + 0.3 × min(D[d]) − N_crit
+I'[d,k] = clip(I[d,k] + sum(effect[m,k] * (8 - lag[m]) / 8) + synergy[d,k], 0, 100)
+D[d] = sum(weight[k] * I'[d,k])
+D_avg = sum(population_share[d] * D[d])
+N_crit = number of district/indicator pairs with I'[d,k] < 40
+Score = 0.7 * D_avg + 0.3 * min(D[d]) - N_crit
 ```
 
-Районная мера изменяет только выбранный район. Городская — все пять районов. Итоговый Score дополнительно не обрезается: применяется формула задания; в диапазоне 0–100 ограничиваются сами показатели. Расчёты производятся без промежуточного округления, представление — до двух знаков.
+District initiatives affect one district; city-wide initiatives affect all five. Only indicators are clipped, not the Score. Calculations use unrounded values; display uses two decimal places. Higher is always better; exactly 40 is not critical.
 
-| Показатель | Смысл | Вес |
+| Indicator | Meaning | Weight |
 |---|---|---:|
-| T1 | Разгрузка дорог | 0.10 |
-| T2 | Доступность общественного транспорта | 0.10 |
-| E1 | Озеленение | 0.09 |
-| E2 | Качество воздуха | 0.11 |
-| S1 | Школы и детсады | 0.11 |
-| S2 | Поликлиники и первичная помощь | 0.11 |
-| B1 | Безопасность улиц | 0.09 |
-| B2 | Безопасность дорожного движения | 0.09 |
-| C1 | Надёжность ЖКХ | 0.10 |
-| C2 | Скорость решения обращений жителей | 0.10 |
+| T1 | Road congestion relief | 0.10 |
+| T2 | Public transport access | 0.10 |
+| E1 | Green spaces | 0.09 |
+| E2 | Air quality | 0.11 |
+| S1 | Schools and kindergartens | 0.11 |
+| S2 | Primary healthcare | 0.11 |
+| B1 | Street safety | 0.09 |
+| B2 | Road safety | 0.09 |
+| C1 | Utility reliability | 0.10 |
+| C2 | Resident request resolution | 0.10 |
 
-Все показатели направлены одинаково: **больше — лучше**. Значение ровно 40 не считается критическим. Веса суммируются в 1. Доли населения: Есиль 0.27, Алматы 0.24, Сарыарка 0.20, Байконур 0.13, Нура 0.16.
+Population shares: Yesil 0.27, Almaty 0.24, Saryarka 0.20, Baikonur 0.13, Nura 0.16. Synergies are not reduced by lag: M1 + M2 adds T1 +2 in M1's district; M10 + M12 adds B1 +2 in M10's district; M5 + M6 adds E2 +2 in M5's district.
 
-Синергии применяются после суммирования эффектов и **не масштабируются лагом**:
+Baseline: city average 56.8624, weakest district 49.18, two critical pairs, Score **52.55768**. Reference example: city average 58.0776, weakest district 52.9625, no critical pairs, Score **56.54307**. Category summaries normalize weights within each category; Score uses all ten original indicators.
 
-| Пара | Бонус |
-|---|---|
-| M1 + M2 | T1 +2 в районе M1 |
-| M10 + M12 | B1 +2 в районе M10 |
-| M5 + M6 | E2 +2 в районе M5 |
+## Optimizer
 
-Контрольные числа без промежуточного округления:
+`optimizer.py` exhaustively enumerates valid initiative combinations and district assignments. Sampled tests compare its fast scorer with `city_model.evaluate`. The app reads `data/optimum.json` instead of repeating the search for every request.
 
-| Сценарий | Средний балл города | Минимальный балл района | Критические пары | Score |
-|---|---:|---:|---:|---:|
-| Без решений | 56.8624 | 49.18 | 2 | 52.55768 → **52.56** |
-| Пример из задания, стоимость 95 | 58.0776 | 52.9625 | 0 | 56.54307 → **56.54** |
+Regenerate the cache whenever model rules or data change:
 
 В интерфейсе сводка по направлению — среднее двух его показателей с нормировкой весов внутри направления. Это вспомогательная визуализация; Score считается по десяти исходным показателям.
 
@@ -165,24 +129,29 @@ server.py ─────► city_model.py ─────► data/city.json
     ▼
 ai_analysis.py ─────► OpenAI Responses API (если задан ключ)
     └──────────────► объяснение по правилам (демо / отказ провайдера)
+```bash
+python -c "from optimizer import export_cache; export_cache()"
 ```
 
-| Файл | Назначение |
-|---|---|
-| `data/city.json` | Пять районов, десять показателей, веса, 14 мероприятий |
-| `city_model.py` | Серверная валидация, лаги, синергии, ограничения, Score |
-| `ai_analysis.py` | Настоящий AI-анализ и прозрачный демонстрационный режим |
-| `server.py` | API и раздача только публичных файлов |
-| `public/app.js` | Состояние интерфейса, карта, каталог, отчёт, сравнение |
-| `public/preferences.js` | Сохранение громкости, яркости и языка; звуки интерфейса |
-| `public/i18n.js` | Переводы интерфейса и каталога на казахский и английский |
-| `public/menu.css` | Главное меню, настройки и экран выхода |
-| `analysis_locale.py` | Локализованные объяснения результатов |
-| `public/styles.css` | Адаптивный интерфейс, состояния и печатная версия |
-| `public/city-map.svg` | Схематическая иллюстрация города, без внешних картографических сервисов |
-| `tests/` | Проверки модели, API и интеграции AI с подставным провайдером |
+This may take several minutes. A missing cache returns HTTP 503 for optimization; evaluation and analysis remain available. The existing `bestSingleSwap` API field searches only cached top plans and can also change districts. The UI therefore shows the full optimal plan rather than claiming that field is a guaranteed best single edit.
 
-## API
+## Architecture and API
+
+| File | Purpose |
+|---|---|
+| `server.py` | Public assets, JSON API and health check |
+| `city_model.py`, `data/city.json` | Validation, calculation and synthetic dataset |
+| `optimizer.py`, `data/optimum.json` | Exhaustive search and cached ranking |
+| `ai_analysis.py`, `analysis_locale.py` | Optional AI and localized deterministic explanations |
+| `public/` | HTML, CSS, JavaScript, SVG map; no external map service |
+| `tests/` | Model, optimizer, API and frontend checks |
+| `render.yaml` | Render web service configuration |
+
+- `GET /api/bootstrap`: catalog, baseline and AI availability.
+- `GET /health`: server health.
+- `POST /api/evaluate`: validate and evaluate a draft.
+- `POST /api/analyze`: validate five decisions and return evaluation plus explanation.
+- `POST /api/optimize`: validate five decisions and return the optimum comparison.
 
 `GET /api/bootstrap` — каталог, исходные данные, бюджет, базовый расчёт, доступность AI. `GET /health` — состояние сервера.
 
@@ -193,9 +162,11 @@ ai_analysis.py ─────► OpenAI Responses API (если задан кл
 Для языка анализа передайте дополнительное поле `"language": "ru"`, `"kk"` или `"en"`. По умолчанию — `ru`. Ответ содержит `analysis.language`; язык не влияет на числа модели.
 
 Пример тела запроса:
+Example request body:
 
 ```json
 {
+  "language": "en",
   "decisions": [
     {"categoryId": "social", "initiativeId": "M7", "districtId": "nura"},
     {"categoryId": "social", "initiativeId": "M8", "districtId": "nura"},
@@ -206,38 +177,31 @@ ai_analysis.py ─────► OpenAI Responses API (если задан кл
 }
 ```
 
-Невалидный набор возвращает `400` с объяснением, без Score. На клиенте изменения применяются только после успешной серверной проверки. При обрыве связи последний подтверждённый сценарий сохраняется.
+Optional `language`: `ru` (default), `kk`, or `en`. Analysis includes `analysis.language`; language does not affect calculations. Invalid plans return HTTP 400 without a Score. Client changes are committed only after server validation.
 
-## Проверка
+## Deployment
+
+Create a Render account, connect this repository, choose **New > Blueprint**, and select the branch containing `render.yaml`. Review the service configuration before creating it. The blueprint starts `python server.py --host 0.0.0.0`, reads the platform's `PORT`, and checks `/health`. The service starts in demo mode; an AI key can be configured through its environment settings.
+
+**No live deployment URL has been created yet.** After deployment, verify the reference example and optimizer, then add the working demo URL here. Follow [the Russian deployment guide](DEPLOY.ru.md). Configuration reference: [Render Blueprints](https://render.com/docs/blueprint-spec).
+
+## Verification
 
 ```bash
 python -m unittest discover -s tests -v
 ```
 
-В Windows можно заменить `python` на `py`. Тесты не требуют интернета или API-ключа и не отправляют платные запросы.
+Tests need no API key and make no paid requests. They cover reference calculations, constraints, synergies, API validation, private-file protection, provider failures and optimization. Some optimizer tests repeat the exhaustive search and take longer.
 
-Проверяются контрольные расчёты, бюджет, количество решений, повторения, лимиты направлений, районность мер, несовместимости, синергии, порядок решений, побочные эффекты, валидация API, недоступность приватных файлов и обработка ответов AI.
-
-Дополнительно, при наличии Node.js 18+ и запущенного сервера на порту 8080:
+Optional frontend checks require Node.js 18+ and a running server on port 8080:
 
 ```bash
 node tests/frontend_smoke.mjs
 node tests/preferences.test.mjs
 ```
 
-Эти необязательные тесты проверяют JavaScript, генерацию экранов, меню, настройки, переходы, сохранение языка, звуковые события, яркость, загрузку примера, экспорт, повреждённую историю, запоздавший AI-ответ и отказ сервера. Они не запускают браузер и не проверяют визуальную вёрстку или слышимость на физическом устройстве. Запросы к платному AI в тестах не выполняются.
+These exercise JavaScript and simulated UI interactions, not browser layout or physical audio. Manually check the map, report, mobile layout, optimizer button, language switching and restored drafts.
 
-Для ручной приёмки:
+## Limitations
 
-1. Базовый Score равен 52,56.
-2. Пример из задания стоит 95 и даёт 56,54.
-3. M1 + M3 отклоняются; M4 + M7 отклоняются в одном районе, но допустимы в разных.
-4. Шестое решение, повторная мера, третья мера одного направления и перерасход отклоняются сервером.
-5. Изменение района меры пересчитывает Score; городская мера меняет все пять районов.
-6. После перезагрузки браузера черновик восстанавливается. Разные анализы доступны в сравнении.
-
-## Границы версии
-
-Приложение рассчитано на локальную демонстрацию. В нём нет регистрации, общей базы команд, реальной географии, случайных событий и калибровки по реальным городским данным. Веб-сервер стандартной библиотеки подходит для хакатонного запуска; публичный многопользовательский сервис потребует production-сервера, аутентификации, ограничения запросов к AI и общей БД.
-
-Следующие шаги: общая таблица команд, импорт результатов, моделирование событий, поиск допустимых альтернатив и сравнение распределения инвестиций по районам.
+There is no shared database, real geography, random-event simulation or calibration against real city statistics. The standard-library HTTP server is intended for a hackathon demo. A public production service needs a suitable production server, authentication, AI request limits and shared storage.

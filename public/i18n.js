@@ -5,6 +5,16 @@ export const SUPPORTED_LANGUAGES = Object.freeze([
 ]);
 
 const entries = [
+  ['Как улучшить мой план?', 'How can I improve my plan?', 'Жоспарымды қалай жақсартамын?'],
+  ['Сравните результат с лучшим допустимым планом для этой модели города.', 'Compare your result with the best valid plan for this city model.', 'Нәтижені осы қала моделінің ең жақсы жарамды жоспарымен салыстырыңыз.'],
+  ['Ваш Score', 'Your Score', 'Сіздің Score'],
+  ['Лучший Score', 'Best Score', 'Ең жақсы Score'],
+  ['Можно прибавить', 'Potential gain', 'Қосуға болады'],
+  ['Оптимальные пять решений', 'The optimal five decisions', 'Оңтайлы бес шешім'],
+  ['Проверено допустимых планов:', 'Valid plans examined:', 'Тексерілген жарамды жоспарлар:'],
+  ['Сравниваем…', 'Comparing…', 'Салыстыру…'],
+  ['Показать лучший план', 'Show the best plan', 'Ең жақсы жоспарды көрсету'],
+  ['Результаты оптимизации пока недоступны.', 'Optimization results are not available yet.', 'Оңтайландыру нәтижелері әзірге қолжетімсіз.'],
   ['Главное меню', 'Main menu', 'Басты мәзір'],
   ['Начать игру', 'Start game', 'Ойынды бастау'],
   ['Настройки', 'Settings', 'Баптаулар'],

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import socket
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -12,7 +13,7 @@ from urllib.parse import unquote, urlsplit
 from ai_analysis import ai_status, analyze, load_environment
 from analysis_locale import validate_language
 from city_model import evaluate, load_data
-from optimizer import advise as plan_advice
+from optimizer import advise, advise as plan_advice
 from scenarios import listing as scenario_listing
 
 ROOT = Path(__file__).resolve().parent
@@ -156,7 +157,7 @@ class SimulatorHandler(BaseHTTPRequestHandler):
         path = urlsplit(self.path).path
         try:
             raw = self._read_body()
-            if path not in {"/api/evaluate", "/api/analyze", "/api/advice"}:
+            if path not in {"/api/evaluate", "/api/analyze", "/api/advice", "/api/optimize"}:
                 raise RequestError(404, "API-маршрут не найден.")
             decisions, language = self._read_decisions(raw)
             try:
@@ -172,6 +173,11 @@ class SimulatorHandler(BaseHTTPRequestHandler):
                 self._json(200, advice)
             elif path == "/api/evaluate":
                 self._json(200, result)
+            elif path == "/api/optimize":
+                advice = advise(decisions)
+                if advice is None:
+                    raise RequestError(503, "Результаты оптимизации пока недоступны.")
+                self._json(200, advice)
             else:
                 self._json(200, {"evaluation": result, "analysis": analyze(result, load_data(), language=language)})
         except RequestError as error:
@@ -187,7 +193,7 @@ def create_server(host: str = "127.0.0.1", port: int = 8080) -> ThreadingHTTPSer
 def main() -> None:
     parser = argparse.ArgumentParser(description="Аким на 5 часов — локальный сервер симулятора")
     parser.add_argument("--host", default="127.0.0.1", help="Адрес сервера (по умолчанию 127.0.0.1)")
-    parser.add_argument("--port", type=int, default=8080, help="Порт сервера (по умолчанию 8080)")
+    parser.add_argument("--port", type=int, default=os.environ.get("PORT", "8080"), help="Порт сервера (PORT или 8080)")
     args = parser.parse_args()
     load_environment()
     with create_server(args.host, args.port) as server:

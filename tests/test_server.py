@@ -86,6 +86,23 @@ class ServerTests(unittest.TestCase):
         self.assertIn("бюджет", json.loads(body)["error"].lower())
         self.assertNotIn("score", json.loads(body))
 
+    def test_optimizer_returns_verified_plan(self):
+        status, _, body = self.request("POST", "/api/optimize", {"decisions": EXAMPLE})
+        result = json.loads(body)
+        self.assertEqual(status, 200)
+        self.assertEqual(result["currentScore"], 56.54)
+        self.assertEqual(evaluate(result["bestPlan"], True)["score"], result["bestScore"])
+        self.assertGreaterEqual(result["gap"], 0)
+
+    def test_optimizer_rejects_incomplete_plan(self):
+        status, _, _ = self.request("POST", "/api/optimize", {"decisions": []})
+        self.assertEqual(status, 400)
+
+    def test_optimizer_missing_cache(self):
+        with patch("server.advise", return_value=None):
+            status, _, _ = self.request("POST", "/api/optimize", {"decisions": EXAMPLE})
+        self.assertEqual(status, 503)
+
     def test_analyze_requires_exactly_five_decisions(self):
         status, _, body = self.request("POST", "/api/analyze", {"decisions": EXAMPLE[:4]})
         self.assertEqual(status, 400)

@@ -287,13 +287,25 @@ function initiativeView(m) {
   <button class="btn add-btn full ${selected ? 'selected' : ''}" data-action="${selected ? 'remove' : 'add'}" data-id="${m.id}" ${blocked || state.busy ? 'disabled' : ''}>${icon(selected ? 'check' : 'plus')}${selected ? 'В сценарии · убрать' : 'Добавить в сценарий'}</button>${blocked ? `<p class="blocked-reason">${esc(blocked)}</p>` : ''}</article>`;
 }
 
+function optimizerView() {
+  const advice = state.report.optimizer;
+  return `<section class="panel content-panel report-section"><h2>Как улучшить мой план?</h2>
+    <p>Сравните результат с лучшим допустимым планом для этой модели города.</p>
+    ${advice ? `<div class="formula-breakdown"><div>Ваш Score<b>${num(advice.currentScore)}</b></div><div>Лучший Score<b>${num(advice.bestScore)}</b></div><div>Можно прибавить<b>${num(advice.gap)}</b></div></div>
+      <h3>Оптимальные пять решений</h3><ul>${advice.bestPlan.map(d => `<li>${esc(d.initiativeId)} · ${esc(initiative(d.initiativeId).title)} · ${esc(d.districtId ? district(d.districtId).name : 'Весь город')}</li>`).join('')}</ul>
+      <p><span>Проверено допустимых планов:</span> ${num(advice.plansExamined)}</p>` :
+      `<button class="btn primary" data-action="optimize" ${state.report.optimizing ? 'disabled' : ''}>${state.report.optimizing ? 'Сравниваем…' : 'Показать лучший план'}</button>`}
+    </section>`;
+}
+
 function reportView() {
   if (!state.report) return `${pageHeader('От решений к результатам', 'Будущее города в цифрах', 'Сначала соберите сценарий — здесь появится его подробный разбор.')}<section class="panel empty-page">${icon('chart')}<h2>Каким станет ваш город?</h2><p>Выберите ровно 5 мероприятий и нажмите «Оценить мой сценарий». Сравним показатели, найдём сильные стороны и объясним компромиссы.</p><button class="btn primary" data-action="nav" data-page="simulation">Перейти к решениям ${icon('arrow')}</button></section>`;
   const { evaluation: e, analysis: a } = state.report;
   const same = decisionKey(state.decisions) === decisionKey(e.decisions);
   const metricRows = e.metrics.map(m => `<div class="metric-compare-row"><span>${esc(category(m.id)?.shortName || m.name)}</span><div class="metric-compare-track"><span class="before" style="width:${m.before}%"></span><span class="after" style="width:${m.after}%"></span></div><b>${signed(m.delta)}</b></div>`).join('');
   return `${pageHeader('Анализ городского сценария', `<span data-i18n-skip>${esc(state.report.name || 'Ваш сценарий')}</span>`, 'Измеримый результат. Понятные последствия. Следующий шаг.', `<button class="btn" data-action="export">${icon('download')}Скачать JSON</button><button class="btn primary" data-action="print">${icon('print')}Печать отчёта</button>`)}
-  ${!same ? '<div class="draft-warning">Это сохранённый результат. Текущие решения изменились — выполните анализ заново, чтобы обновить отчёт.</div>' : ''}
+    ${!same ? '<div class="draft-warning">Это сохранённый результат. Текущие решения изменились — выполните анализ заново, чтобы обновить отчёт.</div>' : ''}
+    ${optimizerView()}
   <section class="report-hero"><div class="score-ring" style="--score:${Math.max(0, Math.min(100, e.score))}"><div><b>${num(e.score)}</b><span>QUALITY OF LIFE SCORE</span></div></div><div><div class="eyebrow">Астана через 8 кварталов</div><h2>${e.delta > 0 ? 'У города есть изменения к лучшему' : 'У каждого решения есть последствия'}</h2><p data-i18n-skip>${esc(a.summary)}</p><div class="report-tags"><span class="tag ${e.delta < 0 ? 'negative' : 'positive'}">${signed(e.delta)} к исходным ${num(e.baselineScore)}</span><span class="tag">${e.spent} из ${e.budget} ед.</span><span class="tag">5 решений · ${directionCount(e.decisions)}</span></div></div></section>
   ${(a.language || 'ru') !== preferences.language ? '<div class="draft-warning">Этот отчёт создан на другом языке. Выполните анализ заново, чтобы получить новый перевод.</div>' : ''}
   ${a.mode !== 'ai' ? `<div class="analysis-notice">${icon('info')}<span><strong>Демонстрационный разбор · без LLM.</strong> ${esc(a.notice || 'API-ключ не настроен. Объяснение сформировано правилами по рассчитанным данным. Для AI-разбора подключите OpenAI на сервере.')}</span></div>` : `<div class="analysis-notice">${icon('sparkle')}<span><strong>AI-анализ · OpenAI.</strong> Числа рассчитаны моделью; AI объясняет эффекты и компромиссы. ${esc(a.notice || '')}</span></div>`}
@@ -391,6 +403,20 @@ document.addEventListener('click', async event => {
   if (!button || button.disabled) return;
   event.preventDefault();
   const action = button.dataset.action;
+  if (action === 'optimize') {
+    const report = state.report;
+    if (!report || report.optimizing) return;
+    report.optimizing = true;
+    render();
+    try {
+      report.optimizer = await api('/api/optimize', report.evaluation.decisions);
+    } catch (error) { toast(error.message, true); }
+    finally {
+      report.optimizing = false;
+      if (state.report === report) render();
+    }
+    return;
+  }
   if (!['exit-game', 'test-sound', 'toggle-sound'].includes(action)) void sound.play();
   if (action === 'start-game') {
     if (!state.data) { await boot(); if (!state.data) return; }
