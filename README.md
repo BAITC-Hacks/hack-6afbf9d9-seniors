@@ -18,9 +18,9 @@ Every player starts with the same synthetic data and **100 budget units**. Choos
 - **AI explanation** of strengths, risks and trade-offs in Russian, Kazakh or English. The model never calculates: Python produces the numbers and the LLM describes them. Without a key the app falls back to a clearly labelled deterministic report.
 - **A proven optimum.** `optimizer.py` enumerates every valid plan — 694 395 of them — so the app can show the gap between a player's plan and the best available one, as a lookup rather than a search.
 - **Demonstration scenarios** at `/demo.html`, including a controlled pair that isolates why the weakest district dominates the Score.
-- **Story mode:** scripted meetings with city residents, each offering initiatives from the same catalogue, with an epilogue built from the server's real calculation.
+- **Story mode:** a four-scene prologue, budget planning, five investigations with ten discoveries, connected meetings, a mid-day council and a branching epilogue built from the server's real calculation.
 - **Interface:** schematic map, current/forecast comparison, saved scenario ranking, JSON export, print and PDF output, three languages, and sound, music and brightness settings.
-- **86 Python tests and 7 Node suites**, covering the reference figures, every rule, API validation, private-file protection, provider failure, the optimizer's agreement with the engine, and the figures quoted in this file.
+- **86 Python tests and 9 Node suites**, covering the reference figures, every rule, API validation, private-file protection, provider failure, the optimizer's agreement with the engine, story investigations, budget allocation and the figures quoted in this file.
 
 ## Technologies
 
@@ -59,7 +59,7 @@ The default host is `127.0.0.1`. Override it with `--host`; set the port with `-
 
 ## Two-minute demo
 
-1. Start a game: budget 100, baseline Score **52.56**, zero of five decisions.
+1. Choose **Start → Free mode**: budget 100, baseline Score **52.56**, zero of five decisions.
 2. Select initiatives and districts. City-wide initiatives do not require a district.
 3. Inspect the map and current/forecast indicators as your choices change.
 4. Load the reference example: M7, M8 and M10 in Nura, M12 city-wide, M5 in Saryarka. Cost: **95**. Score: **56.54**.
@@ -71,8 +71,8 @@ Drafts and up to 12 distinct recent reports are stored in this browser's `localS
 
 ## Story mode
 
-1. Press **Start game** to begin **"One day to save a district"**. A four-scene prologue introduces your work at the city laboratory, an urgent call appointing you temporary akim, the city map and the five-hour deadline. Enter city headquarters with budget **100** and baseline Score **52.56**. An existing save resumes its current scene; **Restart story** replays the prologue.
-2. Work through five meetings: read the dialogue, choose a reply on the right, and press **Confirm decision**. Continue to a city reaction before the next meeting. Later characters remember your decisions, and some replies change to address them.
+1. Choose **Start → Story** to begin **"One day to save a district"**. The mode selector also offers **Free mode** and **Back to menu**. A four-scene prologue introduces your work at the city laboratory, an urgent call appointing you temporary akim, the city map and the five-hour deadline. Enter city headquarters with budget **100** and baseline Score **52.56**. An existing save resumes its current scene; **Restart story** replays the prologue.
+2. Allocate spending limits, investigate before each of five meetings, choose a reply, and press **Confirm decision**. Each investigation offers two approaches and a different discovery. Continue to a city reaction before the next chapter; after transport, the mid-day council lets you keep or revisit the allocation. Later characters remember decisions and investigations, changing their replies and the evening journal.
 3. After the fifth decision and its reaction, review the day. The evening scene and one of five endings explain your priorities alongside the server-calculated Score, improvements, critical indicators and initiatives left unfunded.
 4. Press **Get a breakdown** to open the AI or demo report. Download it as JSON or print it, including to PDF through your browser.
 5. For free choice of initiatives and districts, open **Free simulator** in the top bar. The map and indicators recalculate after each decision; the Now/Forecast toggle compares original and new district scores.
@@ -94,7 +94,13 @@ The clock marks five meetings rather than counting real time. Indicator changes 
 
 Choosing a reply highlights it first; confirming submits the decisions to `/api/evaluate`. No money is spent before confirmation. Unavailable replies explain why the remaining budget could not cover the rest of the day: the client enumerates possible completions and the server revalidates the accepted initiatives. Of 162 complete routes, 127 fit within the budget of 100; the cheapest costs 67.
 
-Meeting progress is stored separately from the simulator draft. Version 2 saves store initiative IDs, scene phase and prologue frame; version 1 saves migrate automatically. Going back does not change decisions; confirming a different reply resets later meetings. Revisited scenes use only their decision prefix, including a fresh server evaluation for their map and budget. Restarting the day requires confirmation in-game and preserves existing reports. Final numbers are recalculated by the server on restore rather than read from the save. The epilogue buttons **Play in free mode** and **Get a breakdown** carry the story's decisions into the current draft.
+Meeting progress is stored separately from the simulator draft. Version 3 saves store initiative IDs, scene phase, prologue frame, approved allocations, investigations and council choice; versions 1 and 2 migrate automatically. Existing saves continue their scene with unrestricted envelopes until the player opens planning. Going back does not change decisions; confirming a different reply resets later meetings. Revisited scenes use only their decision prefix, including a fresh server evaluation for their map and budget. Restarting the day requires confirmation in-game and preserves existing reports. Final numbers are recalculated by the server on restore rather than read from the save. The epilogue buttons **Play in free mode** and **Get a breakdown** carry the story's decisions into the current draft.
+
+### Allocate and reconsider
+
+Five sliders set category spending ceilings. The opening allocation, derived from catalogue prices, is social 24, environment 20, transport 22, safety 12 and services 16, leaving 6 in reserve. Raising environment to 25 makes clean fuel available. Limits cannot total more than 100 or fall below already approved spending and the cheapest remaining story decision. Lower a different limit to free more reserve. Only approved allocations are saved; slider edits take effect after **Approve allocation**.
+
+An envelope reserves spending capacity; it does not buy a project or multiply its effects. Each selected initiative still costs its fixed catalogue price and is revalidated by `/api/evaluate`. For a previously answered meeting, **Replan from this meeting** explicitly asks to cancel that decision and its successors, reevaluates the retained prefix on the server and reopens budgeting. Earlier decisions and saved reports remain intact. Ordinary navigation or cancelling the prompt changes nothing.
 
 ### Branches and endings
 
@@ -124,7 +130,7 @@ The integration uses the Responses API with structured JSON output. The key stay
 
 ## Menu, settings and music
 
-The main menu offers **Start game**, **Settings** and **Exit**. Interface sound, music, brightness and language settings are stored in this browser.
+The main menu offers **Start**, **Settings** and **Exit**. Start opens exactly three choices: **Story**, **Free mode** and **Back to menu**. Interface sound, music, brightness and language settings are stored in this browser.
 
 - A calm background theme plays in the menu, the settings, the free simulator and during meetings. A separate finale melody plays on the epilogue screen after the fifth decision.
 - Settings carry a **Background music** toggle and a separate **music volume, 0–100%** (30% by default). Muting the interface sounds does not mute the music, and the reverse is also true. A volume of zero stops the music player entirely.
@@ -224,6 +230,8 @@ This takes about a minute. A missing cache returns HTTP 503 for optimization; ev
 | `public/story.js` | Three-language meetings, progress and budget checks |
 | `public/narrative.js` | Localized prologue, reactions, contextual dialogue and evening scenes |
 | `public/story-flow.js` | Scene navigation, save migration and ending classification |
+| `public/story-budget.js` | Category spending envelopes and remaining-story feasibility |
+| `public/campaign.js`, `public/campaign-view.js` | Localized investigations, council, budget screen and evening journal |
 | `public/story-view.js` | Dialogue and epilogue rendering |
 | `public/story.css` | Dialogue frame, portraits, choices and responsive layout |
 | `public/portraits/` | Five local character portraits |
@@ -323,7 +331,9 @@ node tests/preferences.test.mjs
 node tests/story.test.mjs
 node tests/demo_page.test.mjs
 node tests/story-flow.test.mjs
+node tests/story-budget.test.mjs
 node tests/narrative.test.mjs
+node tests/campaign.test.mjs
 node tests/music.test.mjs
 ```
 

@@ -13,6 +13,8 @@ import * as gamePreferences from '../public/preferences.js';
 import * as storyModel from '../public/story.js';
 import * as storyPresentation from '../public/story-view.js';
 import * as storyFlow from '../public/story-flow.js';
+import * as storyBudget from '../public/story-budget.js';
+import * as campaign from '../public/campaign.js';
 import { createMusicPlayer } from '../public/music.js';
 
 function localApi(path, decisions) {
@@ -66,7 +68,7 @@ const musicCalls = [];
 let downloaded;
 let downloadClicks = 0;
 const context = vm.createContext({
-  ...localization, ...gamePreferences, ...storyModel, ...storyPresentation, ...storyFlow,
+  ...localization, ...gamePreferences, ...storyModel, ...storyPresentation, ...storyFlow, ...storyBudget, ...campaign,
   createMusicPlayer(getPreferences, environment) {
     const player = createMusicPlayer(getPreferences, environment);
     return Object.fromEntries(['unlock', 'setScene', 'sync', 'stop'].map(method => [method, (...args) => {
@@ -96,17 +98,45 @@ const run = code => vm.runInContext(code, context);
 const click = (action, extra = {}) => events.click({
   target: { closest: () => ({ dataset: { action, ...extra } }) }, preventDefault() {},
 });
+async function startStory() {
+  await click('start-game');
+  assert.equal(run('state.page'), 'modes');
+  assert.equal((nodes.app.innerHTML.match(/data-action=/g) || []).length, 3);
+  assert.ok(nodes.app.innerHTML.includes('data-action="mode-free"'));
+  await click('mode-story');
+}
+async function enterMeeting(approach = 0) {
+  if (run('state.story.phase') === 'council') {
+    await click('story-council-review');
+    assert.equal(run('state.story.phase'), 'planning');
+  }
+  if (run('state.story.phase') === 'planning') await click('story-plan-apply');
+  if (run('state.story.phase') === 'briefing') {
+    const spent = run('state.story.evaluation.spent');
+    await click('story-inquiry', { id: String(approach) });
+    assert.equal(run('state.story.phase'), 'discovery');
+    assert.equal(run('state.story.evaluation.spent'), spent, 'An inquiry is not a purchase.');
+    await click('discovery-next');
+  }
+  assert.equal(run('state.story.phase'), 'meeting');
+}
 
 run('state.data=bootstrap; state.evaluation=bootstrap.baseline; state.loading=false; render();');
-assert.ok(nodes.app.innerHTML.includes('Начать игру'));
+assert.ok(nodes.app.innerHTML.includes('Начать</span>'));
 assert.equal((nodes.app.innerHTML.match(/data-action=/g) || []).length, 3);
 assert.ok(musicCalls.some(call => call[0] === 'setScene' && call[1] === 'ambient'));
 assert.ok(!musicCalls.some(call => call[0] === 'unlock'), 'Rendering alone never unlocks autoplay.');
+await click('start-game');
+assert.equal(run('state.page'), 'modes');
+await click('mode-free');
+assert.equal(run('state.page'), 'simulation', 'Free mode can start directly without any story scenes.');
+assert.equal(run('state.story.phase'), 'intro');
+await click('game-menu');
 await events.click({ isTrusted: false, target: { closest: () => null } });
 assert.ok(!musicCalls.some(call => call[0] === 'unlock'), 'Synthetic clicks cannot unlock music.');
 await events.click({ isTrusted: true, target: { closest: () => null } });
 assert.equal(musicCalls.filter(call => call[0] === 'unlock').length, 1);
-await click('start-game');
+await startStory();
 assert.equal(run('state.page'), 'story');
 assert.equal(run('state.story.phase'), 'intro');
 assert.equal(run('state.story.introStep'), 0);
@@ -121,8 +151,31 @@ for (let frame = 0; frame < 4; frame += 1) {
   assert.equal(run('state.story.evaluation.remaining'), 100);
   await click('intro-next');
 }
-assert.equal(run('state.story.phase'), 'meeting');
+assert.equal(run('state.story.phase'), 'planning');
+assert.equal(run('allocationSummary(state.story.budgetDraft,state.story.choices,state.data.initiatives).reserve'), 6);
+const adjustBudget = async (category, value) => events.change({ target: { dataset: { storyBudget: category }, value: String(value) } });
+await adjustBudget('green', 999);
+assert.equal(run('state.story.budgetDraft.green'), 26, 'A cap cannot consume more than the available reserve.');
+await adjustBudget('green', 20);
+await adjustBudget('social', -10);
+assert.equal(run('state.story.budgetDraft.social'), 10, 'Every future meeting keeps funding for a minimum valid measure.');
+await click('story-plan-reset');
+assert.equal(run('state.story.evaluation.spent'), 0);
+await enterMeeting();
 assert.equal(run('state.story.choices.length'), 0);
+assert.ok(!/data-action="story-back"[^>]*disabled/.test(nodes.app.innerHTML));
+await click('story-back');
+assert.equal(run('state.story.phase'), 'discovery');
+await run('restoreStory()');
+assert.equal(run('state.story.phase'), 'discovery');
+assert.equal(run('state.story.inquiries[0]'), 0);
+await click('story-back');
+assert.equal(run('state.story.phase'), 'briefing');
+await click('story-inquiry', { id: '1' });
+assert.equal(run('state.story.inquiries[0]'), 1);
+await click('story-back');
+await click('story-inquiry', { id: '0' });
+await click('discovery-next');
 assert.ok(nodes.app.innerHTML.includes('Айгуль Садыкова'));
 assert.ok(nodes.app.innerHTML.includes('/portraits/character-0.png'));
 await click('story-simulator');
@@ -209,9 +262,9 @@ assert.ok(nodes.app.innerHTML.includes('Settings'));
 assert.ok(nodes.app.innerHTML.includes('Background music'));
 assert.equal(context.document.documentElement.lang, 'en');
 await click('game-menu');
-assert.ok(nodes.app.innerHTML.includes('Start game'));
+assert.ok(nodes.app.innerHTML.includes('Start</span>'));
 assert.ok(nodes.app.innerHTML.includes('Exit game'));
-await click('start-game');
+await startStory();
 assert.ok(nodes.app.innerHTML.includes('Aigul'));
 await click('story-simulator');
 assert.ok(nodes.app.innerHTML.includes('Your city. Your decisions.'));
@@ -239,12 +292,29 @@ assert.deepEqual(musicCalls.at(-1), ['setScene', null]);
 assert.ok(nodes.app.innerHTML.includes('Игра завершена'));
 assert.equal(run('decisionKey(state.decisions)'), decisionsBeforeExit);
 await click('game-menu');
-await click('start-game');
+await startStory();
 assert.equal(run('state.page'), 'story');
 
 // A full story uses real server calculations and leaves the sandbox draft intact.
 context.fetch = async (path, options) => ({ ok: true, json: async () => path === '/api/analyze' ? example : await localApi(path, options?.body ? JSON.parse(options.body).decisions : undefined) });
 for (let step = 0; step < 5; step += 1) {
+  await enterMeeting(step % 2);
+  if (step === 1) {
+    await click('story-select', { id: '1' });
+    assert.equal(run('state.story.selected'), null, 'Clean fuel costs25 and cannot fit a20-unit green envelope.');
+    const spentBeforePlanning = run('state.story.evaluation.spent');
+    await click('story-plan-open');
+    await adjustBudget('green', 25);
+    await adjustBudget('social', 0);
+    assert.equal(run('state.story.budgetDraft.social'), 24, 'Confirmed spending cannot be reassigned.');
+    await click('story-plan-apply');
+    await click('story-select', { id: '1' });
+    assert.equal(run('state.story.selected'), 1, 'Reallocation unlocks the higher-cost project.');
+    assert.equal(run('state.story.evaluation.spent'), spentBeforePlanning, 'Reallocation alone does not buy a project.');
+    await click('story-plan-open');
+    await adjustBudget('green', 20);
+    await click('story-plan-apply');
+  }
   assert.equal(run('state.story.step'), step);
   assert.equal(run('state.story.selected'), null);
   assert.ok(nodes.app.innerHTML.includes(`/portraits/character-${step}.png`));
@@ -286,9 +356,12 @@ assert.equal(run('state.story.step'), 5);
 assert.equal(run('state.story.choices.length'), 5);
 assert.equal(run('state.story.evaluation.score'), storyScore);
 assert.equal(JSON.parse(storySave).datasetVersion, bootstrap.version);
-assert.equal(JSON.parse(storySave).version, 2);
+assert.equal(JSON.parse(storySave).version, 3);
 assert.deepEqual(JSON.parse(storySave).decisionIds, ['M7', 'M4', 'M1', 'M10', 'M12']);
 assert.equal(JSON.parse(storySave).choices, undefined, 'New saves use stable initiative IDs.');
+assert.deepEqual(JSON.parse(storySave).inquiries, [0, 1, 0, 1, 0]);
+assert.equal(JSON.parse(storySave).council, 'review');
+assert.equal(JSON.parse(storySave).allocations.green, 20);
 
 // All five endings must be reachable with real validated server calculations.
 const endingExamples = {
@@ -334,8 +407,18 @@ await run('restoreStory()');
 assert.equal(run('state.story.sceneEvaluation.spent'), 24, 'Restoring an early scene reevaluates its own prefix.');
 assert.equal(run('state.story.evaluation.spent'), 83);
 await click('story-back');
-await click('story-select', { id: '2' });
+await click('story-replan');
 assert.equal(run('state.story.choices.length'), 5);
+await click('story-replan-cancel');
+assert.equal(run('state.story.choices.length'), 5, 'Cancelling a replan preserves the full route.');
+await click('story-replan');
+await click('story-replan-confirm');
+assert.equal(run('state.story.phase'), 'planning');
+assert.equal(run('state.story.choices.length'), 0);
+assert.equal(run('state.story.evaluation.spent'), 0, 'An approved replan reevaluates the retained prefix on the server.');
+await click('story-plan-apply');
+await click('story-select', { id: '2' });
+assert.equal(run('state.story.choices.length'), 0);
 await click('story-confirm');
 assert.equal(run('state.story.choices.length'), 1);
 assert.equal(run('state.story.evaluation.spent'), 10);
@@ -349,14 +432,18 @@ assert.equal(run('state.story.choices.length'), 0);
 assert.equal(run('state.story.evaluation.remaining'), 100);
 assert.equal(run('state.story.phase'), 'intro');
 for (let frame = 0; frame < 4; frame += 1) await click('intro-next');
+await adjustBudget('green', 25);
+await enterMeeting();
 
 // Expensive choices are blocked before they make the final meetings impossible.
 for (const id of ['0', '1']) {
+  await enterMeeting();
   await click('story-select', { id });
   await click('story-confirm');
   await click('story-next');
   await click('transition-next');
 }
+await enterMeeting();
 await click('story-select', { id: '2' }); // 24 + 25 + 30 + minimum 10 + 14 = 103.
 assert.equal(run('state.story.selected'), null);
 assert.ok(nodes.app.innerHTML.includes('story-choice-reason'));
@@ -418,7 +505,7 @@ assert.equal(storage.get('akim-story-v1'), preservedStory);
 assert.equal(storage.get('akim-simulator-v1'), preservedDraft);
 context.fetch = async (path, options) => ({ ok: true, json: async () => await localApi(path, options?.body ? JSON.parse(options.body).decisions : undefined) });
 await click('game-menu');
-await click('start-game');
+await startStory();
 assert.equal(run('state.page'), 'story');
 assert.equal(run('state.storyRestorePending'), false);
 assert.equal(run('state.story.choices.length'), 5);

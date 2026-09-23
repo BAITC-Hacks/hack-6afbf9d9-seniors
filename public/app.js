@@ -3,7 +3,9 @@ import { DEFAULT_SETTINGS, loadSettings, saveSettings, normalizeSettings, bright
 import { storyText, storyDecisions, storyOptionAvailability } from './story.js';
 import { renderStory } from './story-view.js';
 import { createMusicPlayer } from './music.js';
-import { createStoryProgress, normalizeStoryProgress, serializeStoryProgress, nextStoryProgress, commitStoryChoice } from './story-flow.js';
+import { createStoryProgress, normalizeStoryProgress, serializeStoryProgress, nextStoryProgress, commitStoryChoice, chooseStoryInquiry, setStoryAllocations } from './story-flow.js';
+import { STORY_CATEGORIES, defaultAllocations, allocationSummary, plannedOptionAvailability } from './story-budget.js';
+import { campaignText } from './campaign.js';
 
 const app = document.querySelector('#app');
 const toastElement = document.querySelector('#toast');
@@ -119,7 +121,7 @@ function captureRenderFocus() {
   const element = document.activeElement;
   if (!element || !app.contains(element)) return null;
   const attributes = {};
-  for (const key of ['action', 'id', 'page', 'category', 'district', 'mode', 'target']) {
+  for (const key of ['action', 'id', 'page', 'category', 'district', 'mode', 'target', 'storyBudget']) {
     if (element.dataset?.[key] !== undefined) attributes[key] = element.dataset[key];
   }
   if (!element.id && !element.name && !Object.keys(attributes).length) return null;
@@ -220,8 +222,8 @@ function render() {
     restoreRenderFocus(focus);
     return;
   }
-  if (['menu', 'settings', 'exited'].includes(state.page)) {
-    app.innerHTML = localize(state.page === 'menu' ? menuView() : state.page === 'settings' ? settingsView() : exitView());
+  if (['menu', 'modes', 'settings', 'exited'].includes(state.page)) {
+    app.innerHTML = localize(state.page === 'menu' ? menuView() : state.page === 'modes' ? modeView() : state.page === 'settings' ? settingsView() : exitView());
     restoreRenderFocus(focus);
     return;
   }
@@ -265,13 +267,27 @@ function menuView() {
     <div class="game-brand"><img src="/favicon.svg" alt=""/><div>Аким на 5 часов<small>ASTANA CITY LAB</small></div></div>
     <div class="menu-copy"><div class="eyebrow">Астана · Симулятор городских решений</div><h1 data-i18n-skip>${esc(storyText('title', preferences.language))}</h1><p data-i18n-skip>${esc(storyText('subtitle', preferences.language))}</p></div>
     <nav class="menu-actions" aria-label="Главное меню">
-      <button class="menu-button primary" data-action="start-game" ${state.loading ? 'disabled' : ''}>${icon('play')}<span>Начать игру</span><span class="menu-button-number" aria-hidden="true">01</span></button>
+      <button class="menu-button primary" data-action="start-game" ${state.loading ? 'disabled' : ''}>${icon('play')}<span data-i18n-skip>${esc(campaignText('start', preferences.language))}</span><span class="menu-button-number" aria-hidden="true">01</span></button>
       <button class="menu-button" data-action="open-settings">${icon('settings')}<span>Настройки</span><span class="menu-button-number" aria-hidden="true">02</span></button>
       <button class="menu-button exit" data-action="exit-game">${icon('exit')}<span>Выйти из игры</span><span class="menu-button-number" aria-hidden="true">03</span></button>
     </nav>
     <p class="menu-session-note ${state.loadError ? 'error' : ''}" role="status">${state.loading ? 'Загружаем районы и инициативы…' : state.loadError ? esc(state.loadError) : state.story.choices.length || state.decisions.length ? 'Ваш сценарий сохранён.' : 'Ваши решения сохраняются при выходе.'}</p>
     <footer class="menu-footer">${icon('shield')}<span>Учебная модель · Данные условные · Seniors, 2026</span></footer>
   </div><aside class="menu-scene" aria-hidden="true"><img src="/city-map.svg" alt=""/><div class="menu-scene-note"><span>ASTANA · CITY OF TOMORROW</span><h2>Большие перемены начинаются с малого.</h2><div class="menu-facts"><div><strong>5</strong><span>районов</span></div><div><strong>100</strong><span>единиц бюджета</span></div><div><strong>∞</strong><span>возможностей</span></div></div></div></aside></main>`;
+}
+
+function modeView() {
+  const c = key => esc(campaignText(key, preferences.language));
+  return `<main class="game-screen mode-screen" id="main" tabindex="-1"><div class="menu-content">
+    <div class="game-brand"><img src="/favicon.svg" alt=""/><div>Аким на 5 часов<small>ASTANA CITY LAB</small></div></div>
+    <div class="menu-copy" data-i18n-skip><div class="eyebrow">ASTANA CITY LAB</div><h1>${c('modeTitle')}</h1><p>${c('modeHint')}</p></div>
+    <nav class="menu-actions mode-actions" aria-label="${c('modeTitle')}" data-i18n-skip>
+      <button class="menu-button primary" data-action="mode-story">${icon('book')}<span><strong>${c('storyMode')}</strong><small>${c('storyModeHint')}</small></span><span class="menu-button-number" aria-hidden="true">01</span></button>
+      <button class="menu-button" data-action="mode-free">${icon('grid')}<span><strong>${c('freeMode')}</strong><small>${c('freeModeHint')}</small></span><span class="menu-button-number" aria-hidden="true">02</span></button>
+      <button class="menu-button exit" data-action="game-menu">${icon('arrow')}<span>${c('backMenu')}</span><span class="menu-button-number" aria-hidden="true">03</span></button>
+    </nav><p class="menu-session-note">${state.loadError ? esc(state.loadError) : 'Ваши решения сохраняются при выходе.'}</p>
+    <footer class="menu-footer">${icon('shield')}<span>Учебная модель · Данные условные · Seniors, 2026</span></footer>
+    </div><aside class="menu-scene" aria-hidden="true"><img src="/city-map.svg" alt=""/><div class="menu-scene-note"><span>ASTANA · CITY OF TOMORROW</span><h2 data-i18n-skip>${c('modeHint')}</h2></div></aside></main>`;
 }
 
 function settingsView() {
@@ -326,25 +342,57 @@ async function evaluateStoryScene(progress, evaluation) {
 async function moveStory(action) {
   if (state.storyBusy || state.busy || state.analyzing) return;
   const progress = nextStoryProgress(state.story, action);
+  await applyStoryProgress(progress);
+}
+
+async function applyStoryProgress(progress) {
+  if (state.storyBusy || state.busy || state.analyzing) return;
   if (!progress) return;
   const page = state.page;
   state.storyBusy = true;
   render();
   try {
     // Revisit the city's state at this point without deleting later decisions.
-    const sceneEvaluation = await evaluateStoryScene(progress, state.story.evaluation);
-    Object.assign(state.story, progress, { sceneEvaluation, selected: progress.choices[progress.step] ?? null, confirmRestart: false });
+    const changesDecisions = JSON.stringify(progress.choices) !== JSON.stringify(state.story.choices);
+    const evaluation = changesDecisions ? await api('/api/evaluate', storyDecisions(progress.choices)) : state.story.evaluation;
+    const sceneEvaluation = await evaluateStoryScene(progress, evaluation);
+    Object.assign(state.story, progress, { evaluation, sceneEvaluation, selected: progress.choices[progress.step] ?? null, confirmRestart: false, confirmReplan: false });
+    state.story.budgetDraft = progress.phase === 'planning'
+      ? { ...(progress.allocations || defaultAllocations(state.data.initiatives, state.data.budget, progress.choices)) } : null;
     persistStory();
     if (state.page === page) openScreen('story');
   } catch (error) { toast(error.message, true); }
   finally { state.storyBusy = false; render(); }
 }
 
+function updateStoryBudget(target, commit = true) {
+  if (state.page !== 'story' || state.story.phase !== 'planning' || state.storyBusy || state.busy || state.analyzing) return;
+  const categoryId = target.dataset.storyBudget;
+  const requested = Number(target.value);
+  if (!STORY_CATEGORIES.includes(categoryId) || !Number.isFinite(requested)) return;
+  const draft = state.story.budgetDraft || state.story.allocations || defaultAllocations(state.data.initiatives, state.data.budget, state.story.choices);
+  const summary = allocationSummary(draft, state.story.choices, state.data.initiatives, state.data.budget);
+  const maximum = state.data.budget - summary.allocated + draft[categoryId];
+  const amount = Math.min(maximum, Math.max(summary.minimumByCategory[categoryId], Math.round(requested)));
+  state.story.budgetDraft = { ...draft, [categoryId]: amount };
+  target.value = String(amount);
+  if (commit) render();
+  else {
+    // Keep the dragged slider in the DOM until pointer/keyboard interaction ends.
+    const updated = allocationSummary(state.story.budgetDraft, state.story.choices, state.data.initiatives, state.data.budget);
+    for (const [id, value] of [[`story-budget-value-${categoryId}`, amount], [`story-budget-remaining-${categoryId}`, amount - updated.spentByCategory[categoryId]], ['story-plan-allocated', updated.allocated], ['story-plan-reserve', updated.reserve]]) {
+      const output = document.querySelector(`#${id}`);
+      if (output) output.textContent = String(value);
+    }
+    target.setAttribute?.('aria-valuetext', String(amount));
+  }
+}
+
 async function confirmStoryChoice() {
   if (state.storyBusy || state.story.phase !== 'meeting' || state.story.step >= 5) return;
   const { choices, step, selected } = state.story;
-  const availability = storyOptionAvailability(choices, step, selected, state.data.initiatives, state.data.budget);
-  if (!availability.allowed) { toast(storyText(availability.reason === 'budget' ? 'locked' : availability.reason, preferences.language), true); return; }
+  const availability = plannedOptionAvailability(choices, step, selected, state.data.initiatives, state.data.budget, state.story.allocations);
+  if (!availability.allowed) { toast(availability.reason === 'allocation' ? campaignText('allocationLocked', preferences.language) : storyText(availability.reason === 'budget' ? 'locked' : availability.reason, preferences.language), true); return; }
   if (choices[step] === selected) return;
   const progress = commitStoryChoice(state.story, selected);
   if (!progress) return;
@@ -386,6 +434,7 @@ async function restoreStory() {
     restored = saved?.datasetVersion === state.data.version ? normalizeStoryProgress(saved) : null;
   } catch { return; /* Malformed or unavailable storage starts a fresh session. */ }
   if (!restored) return;
+  if (restored.allocations && !allocationSummary(restored.allocations, restored.choices, state.data.initiatives, state.data.budget).valid) restored.allocations = null;
   const { choices, step } = restored;
   if (choices.length && !storyOptionAvailability(choices, choices.length - 1, choices.at(-1), state.data.initiatives, state.data.budget).allowed) return;
   // A valid save is never replaced until its server evaluation succeeds.
@@ -394,6 +443,7 @@ async function restoreStory() {
   const evaluation = choices.length ? await api('/api/evaluate', storyDecisions(choices)) : state.data.baseline;
   const sceneEvaluation = await evaluateStoryScene(restored, evaluation);
   state.story = { ...restored, selected: choices[step] ?? null, evaluation, sceneEvaluation, confirmRestart: false };
+  if (restored.phase === 'planning') state.story.budgetDraft = { ...(restored.allocations || defaultAllocations(state.data.initiatives, state.data.budget, restored.choices)) };
   state.storyRestorePending = false;
 }
 
@@ -595,19 +645,33 @@ document.addEventListener('click', async event => {
     return;
   }
   if (!['exit-game', 'test-sound', 'toggle-sound'].includes(action)) void sound.play();
-  if (action === 'start-game') {
+  if (['start-game', 'mode-story', 'mode-free'].includes(action)) {
     if (!state.data || state.loadError || state.storyRestorePending) { await boot(); if (!state.data || state.loadError) return; }
-    openScreen('story');
+    openScreen(action === 'start-game' ? 'modes' : action === 'mode-story' ? 'story' : 'simulation');
     return;
   }
   if (action === 'story-simulator') { openScreen('simulation'); return; }
   if (action === 'story-resume') { openScreen('story'); return; }
-  if (['intro-next', 'intro-back', 'transition-next'].includes(action)) { await moveStory(action); return; }
+  if (['intro-next', 'intro-back', 'transition-next', 'discovery-next'].includes(action)) { await moveStory(action); return; }
   if (action.startsWith('story-')) {
     if (state.storyBusy || state.busy || state.analyzing) return;
+    if (action === 'story-plan-open') await moveStory('planning-open');
+    if (action === 'story-plan-cancel') await moveStory('planning-cancel');
+    if (action === 'story-plan-reset' && state.story.phase === 'planning') { state.story.budgetDraft = defaultAllocations(state.data.initiatives, state.data.budget, state.story.choices); render(); }
+    if (action === 'story-plan-apply' && state.story.phase === 'planning') {
+      const allocations = state.story.budgetDraft || state.story.allocations || defaultAllocations(state.data.initiatives, state.data.budget, state.story.choices);
+      if (!allocationSummary(allocations, state.story.choices, state.data.initiatives, state.data.budget).valid) { toast(campaignText('planInvalid', preferences.language), true); return; }
+      await applyStoryProgress(setStoryAllocations(state.story, allocations));
+    }
+    if (action === 'story-inquiry' && state.story.phase === 'briefing') await applyStoryProgress(chooseStoryInquiry(state.story, Number(button.dataset.id)));
+    if (action === 'story-council-hold') await moveStory('council-hold');
+    if (action === 'story-council-review') await moveStory('council-review');
+    if (action === 'story-replan' && state.story.phase === 'meeting' && state.story.choices.length > state.story.step) { state.story.confirmReplan = true; render(); document.querySelector('[data-action="story-replan-confirm"]')?.focus(); }
+    if (action === 'story-replan-cancel') { state.story.confirmReplan = false; render(); }
+    if (action === 'story-replan-confirm' && state.story.confirmReplan) await moveStory('replan');
     if (action === 'story-select') {
       const selected = Number(button.dataset.id);
-      if (state.story.phase === 'meeting' && storyOptionAvailability(state.story.choices, state.story.step, selected, state.data.initiatives, state.data.budget).allowed) { state.story.selected = selected; render(); }
+      if (state.story.phase === 'meeting' && plannedOptionAvailability(state.story.choices, state.story.step, selected, state.data.initiatives, state.data.budget, state.story.allocations).allowed) { state.story.selected = selected; render(); }
     }
     if (action === 'story-confirm') await confirmStoryChoice();
     if (action === 'story-next' && state.story.choices[state.story.step] === state.story.selected) await moveStory('meeting-next');
@@ -690,6 +754,7 @@ document.addEventListener('click', async event => {
 
 document.addEventListener('change', async event => {
   const target = event.target;
+  if (target.dataset?.storyBudget) { updateStoryBudget(target); return; }
   if (target.dataset?.setting === 'language') {
     updatePreference('language', target.value); render();
     return;
@@ -703,6 +768,7 @@ document.addEventListener('change', async event => {
   }
 });
 document.addEventListener('input', event => {
+  if (event.target.dataset?.storyBudget) { updateStoryBudget(event.target, false); return; }
   const key = event.target.dataset?.setting;
   if (['volume', 'musicVolume', 'brightness'].includes(key)) {
     updatePreference(key, Number(event.target.value));
@@ -722,7 +788,7 @@ window.addEventListener('pagehide', () => { sound.stop(); music.stop(); });
 window.addEventListener('pageshow', () => { void music.sync(); });
 document.addEventListener('keydown', event => {
   if (event.isTrusted && !event.repeat && ['Enter', ' '].includes(event.key) && event.target.dataset?.action !== 'exit-game') void music.unlock();
-  if (event.key === 'Escape' && state.page === 'settings') { event.preventDefault(); openScreen('menu'); return; }
+  if (event.key === 'Escape' && ['settings', 'modes'].includes(state.page)) { event.preventDefault(); openScreen('menu'); return; }
   if (event.target.matches('[role="tab"]') && ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
     event.preventDefault();
     const ids = state.data.categories.map(c => c.id); const current = ids.indexOf(state.category);

@@ -1,34 +1,49 @@
 import { STORY_VERSION, normalizeStory, storyDecisions, getStory } from './story.js';
+import { normalizeAllocations } from './story-budget.js';
 
-export const FLOW_VERSION = 2;
+export const FLOW_VERSION = 3;
 const INTRO_SCREENS = 4;
 const meetingIds = getStory().map(meeting => meeting.choices.map(choice => choice.initiativeId));
 const MEETING_COUNT = meetingIds.length;
 
 export function createStoryProgress() {
-  return { choices: [], step: 0, phase: 'intro', introStep: 0 };
+  return { choices: [], step: 0, phase: 'intro', introStep: 0, allocations: null, inquiries: Array(MEETING_COUNT).fill(null), council: null, planReturn: null };
 }
 
 function normalizeFields(value) {
   const legacy = normalizeStory({ version: STORY_VERSION, choices: value?.choices, step: value?.step });
   if (!legacy) return null;
   const { choices, step } = legacy;
+  const inquiries = Array.from({ length: MEETING_COUNT }, (_, index) => index <= choices.length && Array.isArray(value.inquiries)
+    && (value.inquiries[index] === 0 || value.inquiries[index] === 1) ? value.inquiries[index] : null);
+  const allocations = normalizeAllocations(value.allocations, null);
+  const council = choices.length >= 3 && ['hold', 'review'].includes(value.council) ? value.council : null;
   const fallback = step === MEETING_COUNT ? 'ending' : 'meeting';
   let phase = value.phase;
-  const validPhase = (phase === 'intro' && choices.length === 0 && step === 0)
-    || (phase === 'meeting' && step < MEETING_COUNT)
-    || (phase === 'transition' && step < MEETING_COUNT && choices[step] !== undefined)
-    || (phase === 'ending' && choices.length === MEETING_COUNT && step === MEETING_COUNT);
-  if (!validPhase) phase = fallback;
+  const validPhase = candidate => (candidate === 'intro' && choices.length === 0 && step === 0)
+    || (['briefing', 'meeting'].includes(candidate) && step < MEETING_COUNT)
+    || (candidate === 'discovery' && step < MEETING_COUNT && inquiries[step] !== null)
+    || (candidate === 'council' && step === 3 && choices.length >= 3)
+    || (candidate === 'transition' && step < MEETING_COUNT && choices[step] !== undefined)
+    || (candidate === 'ending' && choices.length === MEETING_COUNT && step === MEETING_COUNT);
+  if (phase === 'planning' ? step >= MEETING_COUNT : !validPhase(phase)) phase = fallback;
+  const returnValue = value.planReturn;
+  const planReturn = phase === 'planning' && returnValue && typeof returnValue === 'object' && !Array.isArray(returnValue)
+    && returnValue.step === step && returnValue.phase !== 'intro' && validPhase(returnValue.phase)
+    ? { phase: returnValue.phase, step } : null;
+  // Only the very first planning chapter has no return scene. Broken return
+  // flags must not create an unreachable briefing or an empty sixth chapter.
+  if (phase === 'planning' && !planReturn && (returnValue != null || step !== 0 || choices.length !== 0)) phase = fallback;
   const introStep = phase === 'intro'
     ? Number.isInteger(value.introStep) && value.introStep >= 0 && value.introStep < INTRO_SCREENS ? value.introStep : 0
     : INTRO_SCREENS - 1;
-  return { choices, step, phase, introStep };
+  return { choices, step, phase, introStep, allocations, inquiries, council, planReturn };
 }
 
-/** Migrate v1 indexed saves; v2 uses durable initiative IDs in meeting order.
+/** Migrate indexed v1 and durable-ID v2 saves. Existing decisions resume without
+ * forcing the new planning/inquiry chapters; only new games must take that path.
  * Dataset compatibility and authoritative reevaluation remain the app's job.
- * Saved scores, text, flags and unknown extra fields are deliberately ignored.
+ * Saved scores, text and unknown flags are deliberately ignored.
  */
 export function normalizeStoryProgress(saved) {
   if (!saved || typeof saved !== 'object' || Array.isArray(saved)) return null;
@@ -40,7 +55,7 @@ export function normalizeStoryProgress(saved) {
       ...normalizeFields({ ...legacy, phase: legacy.choices.length ? legacy.step === MEETING_COUNT ? 'ending' : 'meeting' : 'intro', introStep: 0 }),
     };
   }
-  if (saved.version !== FLOW_VERSION || !Array.isArray(saved.decisionIds) || saved.decisionIds.length > MEETING_COUNT) return null;
+  if (![2, FLOW_VERSION].includes(saved.version) || !Array.isArray(saved.decisionIds) || saved.decisionIds.length > MEETING_COUNT) return null;
   const choices = [];
   for (let step = 0; step < saved.decisionIds.length; step += 1) {
     const id = saved.decisionIds[step];
@@ -49,7 +64,10 @@ export function normalizeStoryProgress(saved) {
     if (index < 0) return null;
     choices.push(index);
   }
-  const progress = normalizeFields({ choices, step: saved.step, phase: saved.phase, introStep: saved.introStep });
+  const fields = saved.version === 2
+    ? { choices, step: saved.step, phase: choices.length ? ['intro', 'meeting', 'transition', 'ending'].includes(saved.phase) ? saved.phase : undefined : 'intro', introStep: saved.introStep }
+    : { choices, step: saved.step, phase: saved.phase, introStep: saved.introStep, allocations: saved.allocations, inquiries: saved.inquiries, council: saved.council, planReturn: saved.planReturn };
+  const progress = normalizeFields(fields);
   return progress ? { version: FLOW_VERSION, ...progress } : null;
 }
 
@@ -63,6 +81,10 @@ export function serializeStoryProgress(state, datasetVersion) {
     step: progress.step,
     phase: progress.phase,
     introStep: progress.introStep,
+    allocations: progress.allocations,
+    inquiries: progress.inquiries,
+    council: progress.council,
+    planReturn: progress.planReturn,
   };
 }
 
@@ -73,21 +95,54 @@ export function nextStoryProgress(state, action) {
   if (action === 'intro-next' && progress.phase === 'intro') {
     return progress.introStep < INTRO_SCREENS - 1
       ? { ...progress, introStep: progress.introStep + 1 }
-      : { ...progress, phase: 'meeting', step: 0 };
+      : { ...progress, phase: 'planning', step: 0 };
   }
   if (action === 'intro-back' && progress.phase === 'intro') return { ...progress, introStep: Math.max(0, progress.introStep - 1) };
+  if (action === 'planning-open' && progress.step < MEETING_COUNT && !['intro', 'planning'].includes(progress.phase)) return { ...progress, phase: 'planning', planReturn: { phase: progress.phase, step: progress.step } };
+  if (action === 'planning-cancel' && progress.phase === 'planning' && progress.planReturn) return { ...progress, ...progress.planReturn, planReturn: null };
+  if (action === 'replan' && progress.phase === 'meeting' && progress.choices.length > progress.step) {
+    const inquiries = [...progress.inquiries];
+    inquiries.fill(null, progress.step + 1);
+    return { ...progress, choices: progress.choices.slice(0, progress.step), inquiries, council: progress.step < 3 ? null : progress.council,
+      phase: 'planning', planReturn: { phase: 'meeting', step: progress.step } };
+  }
+  if (action === 'discovery-next' && progress.phase === 'discovery') return { ...progress, phase: 'meeting' };
   if (action === 'meeting-next' && progress.phase === 'meeting' && progress.choices[progress.step] !== undefined) return { ...progress, phase: 'transition' };
   if (action === 'transition-next' && progress.phase === 'transition') {
     const step = progress.step + 1;
-    return { ...progress, step, phase: step === MEETING_COUNT ? 'ending' : 'meeting' };
+    return { ...progress, step, phase: step === MEETING_COUNT ? 'ending' : step === 3 ? 'council' : 'briefing' };
   }
+  if (action === 'council-hold' && progress.phase === 'council') return { ...progress, council: 'hold', phase: 'briefing' };
+  if (action === 'council-review' && progress.phase === 'council') return { ...progress, council: 'review', phase: 'planning', planReturn: { phase: 'briefing', step: 3 } };
   if (action === 'back') {
     if (progress.phase === 'transition') return { ...progress, phase: 'meeting' };
-    if (progress.phase === 'meeting' && progress.step > 0) return { ...progress, step: progress.step - 1 };
+    if (progress.phase === 'discovery') return { ...progress, phase: 'briefing' };
+    if (progress.phase === 'meeting' && progress.inquiries[progress.step] !== null) return { ...progress, phase: 'discovery' };
+    if (['meeting', 'briefing', 'council'].includes(progress.phase) && progress.step > 0) return { ...progress, phase: 'meeting', step: progress.step - 1 };
     if (progress.phase === 'ending') return { ...progress, phase: 'meeting', step: MEETING_COUNT - 1 };
   }
   if (action === 'edit') return { ...progress, phase: 'meeting', step: 0, introStep: INTRO_SCREENS - 1 };
   return progress;
+}
+
+/** Planning must be validated against the catalogue by the app before this
+ * transition. This guard additionally rejects malformed caps from any caller.
+ */
+export function setStoryAllocations(state, allocations) {
+  const progress = normalizeFields(state) || createStoryProgress();
+  const normalized = normalizeAllocations(allocations, null);
+  if (progress.phase !== 'planning' || !normalized) return progress;
+  return { ...progress, allocations: normalized, ...(progress.planReturn || { phase: 'briefing' }), planReturn: null };
+}
+
+/** An inquiry changes what the player learns, not a server-side decision. */
+export function chooseStoryInquiry(state, index) {
+  const progress = normalizeFields(state) || createStoryProgress();
+  if (progress.phase !== 'briefing' || (index !== 0 && index !== 1)) return progress;
+  const inquiries = [...progress.inquiries];
+  if (inquiries[progress.step] !== index) inquiries.fill(null, progress.step + 1);
+  inquiries[progress.step] = index;
+  return { ...progress, inquiries, phase: 'discovery' };
 }
 
 /** Apply only after the app has validated availability and received /api/evaluate.
@@ -96,7 +151,9 @@ export function nextStoryProgress(state, action) {
 export function commitStoryChoice(state, index) {
   const progress = normalizeFields(state) || createStoryProgress();
   if (progress.phase !== 'meeting' || !Number.isInteger(index) || index < 0 || index >= meetingIds[progress.step]?.length) return progress;
-  return { choices: [...progress.choices.slice(0, progress.step), index], step: progress.step, phase: 'meeting', introStep: INTRO_SCREENS - 1 };
+  const inquiries = [...progress.inquiries];
+  inquiries.fill(null, progress.step + 1);
+  return { ...progress, choices: [...progress.choices.slice(0, progress.step), index], inquiries, council: progress.step < 3 ? null : progress.council, phase: 'meeting', introStep: INTRO_SCREENS - 1 };
 }
 
 const endingCopy = {

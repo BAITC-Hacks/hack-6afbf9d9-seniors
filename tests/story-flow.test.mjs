@@ -2,23 +2,24 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { getStory, storyDecisions } from '../public/story.js';
-import { FLOW_VERSION, createStoryProgress, normalizeStoryProgress, serializeStoryProgress, nextStoryProgress, commitStoryChoice, classifyEnding } from '../public/story-flow.js';
+import { FLOW_VERSION, createStoryProgress, normalizeStoryProgress, serializeStoryProgress, nextStoryProgress, commitStoryChoice, chooseStoryInquiry, setStoryAllocations, classifyEnding } from '../public/story-flow.js';
+import { defaultAllocations } from '../public/story-budget.js';
 
 const data = JSON.parse(await readFile(new URL('../data/city.json', import.meta.url), 'utf8'));
-// All tested payloads are JSON. Keep snapshots in the module's own realm so
-// strict comparisons also work in Node REPL hosts with a host structuredClone.
 const jsonClone = value => JSON.parse(JSON.stringify(value));
 const story = getStory();
-const fresh = { choices: [], step: 0, phase: 'intro', introStep: 0 };
-assert.equal(FLOW_VERSION, 2);
+const fresh = { choices: [], step: 0, phase: 'intro', introStep: 0, allocations: null, inquiries: [null, null, null, null, null], council: null, planReturn: null };
+assert.equal(FLOW_VERSION, 3);
 assert.deepEqual(createStoryProgress(), fresh);
 const independent = createStoryProgress();
 independent.choices.push(2);
+independent.inquiries[0] = 1;
 assert.deepEqual(createStoryProgress(), fresh);
 
 let progress = createStoryProgress();
 assert.deepEqual(nextStoryProgress(progress, 'meeting-next'), progress);
 assert.deepEqual(nextStoryProgress(progress, 'intro-back'), progress);
+assert.deepEqual(nextStoryProgress(progress, 'planning-open'), progress);
 for (let screen = 1; screen <= 3; screen += 1) {
   progress = nextStoryProgress(progress, 'intro-next');
   assert.equal(progress.phase, 'intro');
@@ -26,27 +27,62 @@ for (let screen = 1; screen <= 3; screen += 1) {
 }
 assert.equal(nextStoryProgress(progress, 'intro-back').introStep, 2);
 progress = nextStoryProgress(progress, 'intro-next');
-assert.deepEqual(progress, { choices: [], step: 0, phase: 'meeting', introStep: 3 });
-assert.deepEqual(nextStoryProgress(progress, 'meeting-next'), progress, 'A meeting cannot advance without an accepted choice.');
+assert.deepEqual(progress, { ...fresh, phase: 'planning', introStep: 3 });
+assert.deepEqual(nextStoryProgress(progress, 'planning-cancel'), progress, 'Opening planning is a required chapter.');
+assert.deepEqual(setStoryAllocations(progress, { social: -1 }), progress);
+const allocations = defaultAllocations(data.initiatives, data.budget);
+progress = setStoryAllocations(progress, allocations);
+assert.equal(progress.phase, 'briefing');
+assert.deepEqual(progress.allocations, allocations);
+assert.deepEqual(nextStoryProgress(progress, 'meeting-next'), progress);
 
 for (let step = 0; step < 5; step += 1) {
   const before = jsonClone(progress);
-  assert.deepEqual(commitStoryChoice(progress, 99), before);
+  assert.equal(progress.phase, 'briefing');
+  assert.deepEqual(chooseStoryInquiry(progress, 99), before);
+  progress = chooseStoryInquiry(progress, step % 2);
+  assert.equal(progress.phase, 'discovery');
+  assert.equal(progress.inquiries[step], step % 2);
+  assert.equal(nextStoryProgress(progress, 'back').phase, 'briefing');
+  assert.deepEqual(commitStoryChoice(progress, 0), progress, 'Inquiry screens cannot buy a project.');
+  progress = nextStoryProgress(progress, 'discovery-next');
+  assert.equal(progress.phase, 'meeting');
+  assert.equal(nextStoryProgress(progress, 'back').phase, 'discovery');
+  assert.deepEqual(nextStoryProgress(progress, 'meeting-next'), progress, 'A meeting cannot advance without an accepted choice.');
+  assert.deepEqual(commitStoryChoice(progress, 99), progress);
   progress = commitStoryChoice(progress, 0);
   assert.equal(progress.step, step);
-  assert.equal(progress.phase, 'meeting');
   assert.equal(progress.choices.length, step + 1);
+  const planning = nextStoryProgress(progress, 'planning-open');
+  assert.equal(planning.phase, 'planning');
+  assert.deepEqual(planning.planReturn, { phase: 'meeting', step });
+  assert.deepEqual(nextStoryProgress(planning, 'planning-cancel'), progress);
+  assert.deepEqual(setStoryAllocations(planning, allocations), progress);
   progress = nextStoryProgress(progress, 'meeting-next');
   assert.equal(progress.phase, 'transition');
   assert.equal(progress.step, step);
-  assert.equal(nextStoryProgress(progress, 'back').step, step, 'Back from a transition returns to its own meeting.');
+  assert.equal(nextStoryProgress(progress, 'back').step, step);
   assert.equal(nextStoryProgress(progress, 'back').phase, 'meeting');
-  assert.deepEqual(commitStoryChoice(progress, 1), progress, 'Transitions cannot confirm new decisions.');
+  assert.deepEqual(commitStoryChoice(progress, 1), progress);
   const encoded = serializeStoryProgress(progress, data.version);
   assert.deepEqual(normalizeStoryProgress(encoded), { version: FLOW_VERSION, ...progress });
   progress = nextStoryProgress(progress, 'transition-next');
   assert.equal(progress.step, step + 1);
-  assert.equal(progress.phase, step === 4 ? 'ending' : 'meeting');
+  assert.equal(progress.phase, step === 4 ? 'ending' : step === 2 ? 'council' : 'briefing');
+  if (progress.phase === 'council') {
+    const held = nextStoryProgress(progress, 'council-hold');
+    assert.equal(held.phase, 'briefing');
+    assert.equal(held.council, 'hold');
+    assert.equal(nextStoryProgress(progress, 'back').step, 2);
+    progress = nextStoryProgress(progress, 'council-review');
+    assert.equal(progress.phase, 'planning');
+    assert.equal(progress.council, 'review');
+    assert.deepEqual(progress.planReturn, { phase: 'briefing', step: 3 });
+    assert.deepEqual(normalizeStoryProgress(serializeStoryProgress(progress, data.version)), { version: 3, ...progress });
+    progress = setStoryAllocations(progress, allocations);
+    assert.equal(progress.phase, 'briefing');
+    assert.equal(progress.council, 'review');
+  }
 }
 const completed = jsonClone(progress);
 assert.equal(nextStoryProgress(completed, 'back').step, 4);
@@ -56,41 +92,86 @@ const revisited = nextStoryProgress(completed, 'edit');
 assert.equal(revisited.step, 0);
 assert.deepEqual(revisited.choices, completed.choices);
 const changed = commitStoryChoice(revisited, 2);
-assert.deepEqual(changed.choices, [2], 'A changed answer discards only the later branch.');
+assert.deepEqual(changed.choices, [2]);
+assert.deepEqual(changed.inquiries, [0, null, null, null, null]);
+assert.equal(changed.council, null);
+assert.deepEqual(changed.allocations, allocations);
 assert.deepEqual(completed.choices, [0, 0, 0, 0, 0]);
+const replanned = nextStoryProgress({ ...completed, step: 2, phase: 'meeting' }, 'replan');
+assert.deepEqual(replanned.choices, [0, 0]);
+assert.deepEqual(replanned.inquiries, [0, 1, 0, null, null]);
+assert.equal(replanned.council, null);
+assert.equal(replanned.phase, 'planning');
+assert.deepEqual(replanned.planReturn, { phase: 'meeting', step: 2 });
+assert.deepEqual(replanned.allocations, completed.allocations);
+assert.deepEqual(normalizeStoryProgress(serializeStoryProgress(replanned, data.version)), { version: 3, ...replanned });
+assert.deepEqual(nextStoryProgress(completed, 'replan'), completed);
+const inquiryOnly = chooseStoryInquiry({ ...completed, step: 0, phase: 'briefing' }, 1);
+assert.deepEqual(inquiryOnly.choices, completed.choices, 'Research never discards confirmed financial decisions.');
+assert.deepEqual(inquiryOnly.inquiries, [1, null, null, null, null]);
+assert.equal(inquiryOnly.council, 'review');
+assert.deepEqual(chooseStoryInquiry({ ...completed, step: 0, phase: 'briefing' }, 0).inquiries, completed.inquiries);
 assert.deepEqual(nextStoryProgress(completed, 'restart'), fresh);
-const frozen = Object.freeze({ ...completed, choices: Object.freeze([...completed.choices]) });
+const frozen = Object.freeze({ ...completed, choices: Object.freeze([...completed.choices]), inquiries: Object.freeze([...completed.inquiries]), allocations: Object.freeze({ ...allocations }) });
 assert.doesNotThrow(() => nextStoryProgress(frozen, 'edit'));
+assert.doesNotThrow(() => chooseStoryInquiry({ ...frozen, step: 0, phase: 'briefing' }, 1));
 
-// Version 1 progress migrates directly to meetings, so existing players do not
-// have to replay the intro; an untouched legacy save starts the new intro.
-assert.deepEqual(normalizeStoryProgress({ version: 1, choices: [], step: 0 }), { version: 2, ...fresh });
+// Legacy campaigns retain decisions and resume without imposing a new plan.
+const oldCompleted = { ...fresh, choices: [0, 0, 0, 0, 0], step: 5, phase: 'ending', introStep: 3 };
+assert.deepEqual(normalizeStoryProgress({ version: 1, choices: [], step: 0 }), { version: 3, ...fresh });
 assert.deepEqual(normalizeStoryProgress({ version: 1, choices: [1, 2], step: 1, evaluation: { score: 100 } }), {
-  version: 2, choices: [1, 2], step: 1, phase: 'meeting', introStep: 3,
+  version: 3, ...fresh, choices: [1, 2], step: 1, phase: 'meeting', introStep: 3,
 });
-assert.deepEqual(normalizeStoryProgress({ version: 1, choices: [0, 0, 0, 0, 0], step: 5 }), { version: 2, ...completed });
-assert.equal(normalizeStoryProgress({ version: 1, choices: [0, 0, 0, 0, 0], step: 2 }).phase, 'meeting');
+assert.deepEqual(normalizeStoryProgress({ version: 1, choices: [0, 0, 0, 0, 0], step: 5 }), { version: 3, ...oldCompleted });
+const oldSave = { version: 2, datasetVersion: data.version, decisionIds: ['M7', 'M4', 'M1', 'M10', 'M12'], step: 5, phase: 'ending', introStep: 3 };
+assert.deepEqual(normalizeStoryProgress(oldSave), { version: 3, ...oldCompleted });
+assert.equal(normalizeStoryProgress({ ...oldSave, step: 2, phase: 'meeting' }).phase, 'meeting');
+assert.equal(normalizeStoryProgress({ version: 2, decisionIds: [], phase: 'meeting', step: 0 }).phase, 'intro');
+assert.equal(normalizeStoryProgress({ ...oldSave, phase: 'transition', step: 4 }).phase, 'transition');
+assert.equal(nextStoryProgress({ ...oldCompleted, step: 2, phase: 'meeting' }, 'back').step, 1, 'Legacy meetings with no inquiry retain their old back path.');
 
 const serialized = serializeStoryProgress({ ...completed, evaluation: { score: 999 }, ending: 'forged' }, data.version);
-assert.deepEqual(serialized, { version: 2, datasetVersion: data.version, decisionIds: ['M7', 'M4', 'M1', 'M10', 'M12'], step: 5, phase: 'ending', introStep: 3 });
-assert.deepEqual(normalizeStoryProgress({ ...serialized, choices: [2], evaluation: { score: 999 } }), { version: 2, ...completed });
-assert.deepEqual(normalizeStoryProgress(serializeStoryProgress({ ...fresh, introStep: 2 }, data.version)), { version: 2, ...fresh, introStep: 2 });
-for (const invalid of [null, [], {}, { version: 0 }, { version: 3 }, { version: 1, choices: [99] },
-  { version: 2, decisionIds: null }, { version: 2, decisionIds: ['M99'] },
-  { version: 2, decisionIds: ['M4'] }, { version: 2, decisionIds: ['M7', 'M7'] },
-  { version: 2, decisionIds: [null] }, { version: 2, decisionIds: ['M7', 'M4', 'M1', 'M10', 'M12', 'M14'] }]) {
+assert.deepEqual(serialized, { version: 3, datasetVersion: data.version, decisionIds: ['M7', 'M4', 'M1', 'M10', 'M12'], step: 5, phase: 'ending', introStep: 3, allocations, inquiries: [0, 1, 0, 1, 0], council: 'review', planReturn: null });
+assert.deepEqual(normalizeStoryProgress({ ...serialized, choices: [2], evaluation: { score: 999 } }), { version: 3, ...completed });
+assert.deepEqual(normalizeStoryProgress(serializeStoryProgress({ ...fresh, introStep: 2 }, data.version)), { version: 3, ...fresh, introStep: 2 });
+for (const invalid of [null, [], {}, { version: 0 }, { version: 4 }, { version: 1, choices: [99] },
+  { version: 2, decisionIds: null }, { version: 3, decisionIds: ['M99'] },
+  { version: 3, decisionIds: ['M4'] }, { version: 3, decisionIds: ['M7', 'M7'] },
+  { version: 3, decisionIds: [null] }, { version: 3, decisionIds: ['M7', 'M4', 'M1', 'M10', 'M12', 'M14'] }]) {
   assert.equal(normalizeStoryProgress(invalid), null);
 }
 const sparse = new Array(1);
-assert.equal(normalizeStoryProgress({ version: 2, decisionIds: sparse }), null);
-assert.equal(normalizeStoryProgress({ version: 2, decisionIds: [], phase: 'transition', step: 0 }).phase, 'meeting');
-assert.equal(normalizeStoryProgress({ version: 2, decisionIds: ['M7'], phase: 'intro', step: 0 }).phase, 'meeting');
-assert.equal(normalizeStoryProgress({ version: 2, decisionIds: ['M7'], phase: 'ending', step: 1 }).phase, 'meeting');
+assert.equal(normalizeStoryProgress({ version: 3, decisionIds: sparse }), null);
+assert.equal(normalizeStoryProgress({ version: 3, decisionIds: [], phase: 'transition', step: 0 }).phase, 'meeting');
+assert.equal(normalizeStoryProgress({ version: 3, decisionIds: ['M7'], phase: 'intro', step: 0 }).phase, 'meeting');
+assert.equal(normalizeStoryProgress({ version: 3, decisionIds: ['M7'], phase: 'ending', step: 1 }).phase, 'meeting');
 assert.equal(normalizeStoryProgress({ ...serialized, phase: 'meeting' }).phase, 'ending');
-assert.equal(normalizeStoryProgress({ ...serialized, phase: 'transition', step: 4 }).phase, 'transition');
 assert.equal(normalizeStoryProgress({ ...serialized, step: -1, phase: 'unknown' }).phase, 'ending');
-assert.equal(normalizeStoryProgress({ version: 2, decisionIds: [], phase: 'intro', introStep: 8 }).introStep, 0);
+assert.equal(normalizeStoryProgress({ version: 3, decisionIds: [], phase: 'intro', introStep: 8 }).introStep, 0);
 assert.throws(() => serializeStoryProgress({ choices: [99] }, data.version), TypeError);
+const forged = normalizeStoryProgress({ ...serialized, allocations: { ...allocations, green: '20' }, inquiries: [true, -1, '0', 1, 6], council: 'magic', planReturn: { phase: 'ending', step: 5 }, extra: 99 });
+assert.equal(forged.allocations, null);
+assert.deepEqual(forged.inquiries, [null, null, null, 1, null]);
+assert.equal(forged.council, null);
+assert.equal(forged.planReturn, null);
+assert.equal(Object.hasOwn(forged, 'extra'), false);
+const forgedFuture = normalizeStoryProgress({ version: 3, decisionIds: [], phase: 'briefing', inquiries: [1, 1, 1, 1, 1], council: 'hold' });
+assert.deepEqual(forgedFuture.inquiries, [1, null, null, null, null]);
+assert.equal(forgedFuture.council, null);
+assert.equal(normalizeStoryProgress({ version: 3, decisionIds: [], phase: 'discovery', inquiries: [] }).phase, 'meeting');
+assert.equal(normalizeStoryProgress({ ...serialized, phase: 'planning', planReturn: { phase: 'meeting', step: 99 } }).planReturn, null);
+assert.deepEqual(nextStoryProgress(completed, 'planning-open'), completed, 'The ending cannot open planning at nonexistent meeting five.');
+for (const planReturn of [null, { phase: 'ending', step: 5 }, { phase: 'meeting', step: 5 }, { phase: 'unknown', step: 5 }]) {
+  const restored = normalizeStoryProgress({ ...serialized, phase: 'planning', planReturn });
+  assert.equal(restored.phase, 'ending');
+  assert.equal(restored.planReturn, null);
+  assert.equal(setStoryAllocations(restored, allocations).phase, 'ending');
+}
+for (const planReturn of [null, { phase: 'ending', step: 2 }, { phase: 'meeting', step: 99 }, { phase: 'unknown', step: 2 }]) {
+  const restored = normalizeStoryProgress({ ...serialized, step: 2, phase: 'planning', planReturn });
+  assert.equal(restored.phase, 'meeting', 'Broken return flags fall back to the existing meeting.');
+  assert.equal(restored.planReturn, null);
+}
 
 // Independent test-only oracle reads the supplied city data. It is not imported
 // by the game or its classifier. The same route counts were also checked against
@@ -180,4 +261,4 @@ assert.throws(() => classifyEnding({ ...green, score: NaN }, data.initiatives), 
 const changedResult = classifyEnding(green, data.initiatives);
 changedResult.reasons.length = 0;
 assert.equal(classifyEnding(green, data.initiatives).reasons.length, 3);
-console.log('PASS: four-screen intro, transitions, v1 migration, durable v2 saves and five localized endings across 127 affordable routes.');
+console.log('PASS: v3 planning, inquiries, council, explicit replan, immutable branches, v1/v2 migration, durable saves and five localized endings across 127 affordable routes.');

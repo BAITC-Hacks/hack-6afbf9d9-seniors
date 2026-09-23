@@ -8,6 +8,8 @@
     "test:story": "node tests/story.test.mjs",
     "test:story-flow": "node tests/story-flow.test.mjs",
     "test:narrative": "node tests/narrative.test.mjs",
+    "test:story-budget": "node tests/story-budget.test.mjs",
+    "test:campaign": "node tests/campaign.test.mjs",
     "test:music": "node tests/music.test.mjs"
   }
 }
