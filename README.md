@@ -31,13 +31,13 @@ Every participant starts with the same synthetic data and **100 budget units**. 
 | Area | Choice |
 |---|---|
 | Backend | **Python 3.10+**, standard library only — `http.server`, `json`, `urllib`. No framework, no database, no ORM. |
-| Frontend | **Vanilla JavaScript** (ES modules), HTML and CSS. No framework, no bundler, no build step, no external CDN. |
+| Frontend | **Vanilla JavaScript** (ES modules), HTML and CSS. No framework, no bundler or build step. The presentation uses the small `canvas-confetti` browser script from jsDelivr. |
 | AI | **OpenAI Responses API**, default model `gpt-4.1-mini`, with structured JSON output. Optional; the app is fully usable without it. |
 | Audio | **Web Audio API**. Both pieces are synthesised from note sequences in `public/music.js`; no audio files. |
 | Tests | Python `unittest`, plus Node scripts using `node:vm` for the frontend. No test framework dependency. |
 | Deployment | **Render** web service via `render.yaml`. |
 
-The only third-party runtime dependency is the OpenAI API, and only when a key is configured. `requirements.txt` is empty by design. `api.openai.com` is the single external host the application contacts; the frontend contacts none.
+The third-party runtime dependencies are optional OpenAI API access and the `canvas-confetti` browser script used by the presentation. `requirements.txt` is empty by design. The server contacts `api.openai.com` only when a key is configured; the presentation loads `cdn.jsdelivr.net` for its visual celebration effect.
 
 ## Data and integrations
 
