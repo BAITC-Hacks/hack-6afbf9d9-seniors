@@ -12,6 +12,7 @@ from urllib.parse import unquote, urlsplit
 from ai_analysis import ai_status, analyze, load_environment
 from analysis_locale import validate_language
 from city_model import evaluate, load_data
+from optimizer import advise as plan_advice
 from scenarios import listing as scenario_listing
 
 ROOT = Path(__file__).resolve().parent
@@ -155,14 +156,21 @@ class SimulatorHandler(BaseHTTPRequestHandler):
         path = urlsplit(self.path).path
         try:
             raw = self._read_body()
-            if path not in {"/api/evaluate", "/api/analyze"}:
+            if path not in {"/api/evaluate", "/api/analyze", "/api/advice"}:
                 raise RequestError(404, "API-маршрут не найден.")
             decisions, language = self._read_decisions(raw)
             try:
-                result = evaluate(decisions, require_complete=path == "/api/analyze")
+                result = evaluate(decisions, require_complete=path != "/api/evaluate")
             except ValueError as error:
                 raise RequestError(400, str(error)) from None
-            if path == "/api/evaluate":
+            if path == "/api/advice":
+                advice = plan_advice(decisions)
+                if advice is None:
+                    # The precomputed ranking has not been exported; say so
+                    # rather than blocking the request on a 60-second search.
+                    raise RequestError(503, "Рекомендации недоступны: не рассчитан оптимум.")
+                self._json(200, advice)
+            elif path == "/api/evaluate":
                 self._json(200, result)
             else:
                 self._json(200, {"evaluation": result, "analysis": analyze(result, load_data(), language=language)})
