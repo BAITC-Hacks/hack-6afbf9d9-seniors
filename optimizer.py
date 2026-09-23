@@ -10,7 +10,7 @@ initiatives and every district assignment for them is scored, so the result
 is a proven optimum for the supplied dataset rather than a good guess.
 
 `city_model.evaluate` is the authority on scoring, but at ~1.4 ms per call a
-full sweep of the 736,765 legal assignments would take about seventeen
+full sweep of the 694,395 legal assignments would take about sixteen
 minutes. This module therefore reimplements the scoring arithmetic over flat
 lists, which is roughly fifty times faster, and `verify_fast_scorer` proves
 the fast path agrees with the engine on every sampled case. The test suite
