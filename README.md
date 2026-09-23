@@ -18,9 +18,10 @@ Every player starts with the same synthetic data and **100 budget units**. Choos
 - **AI explanation** of strengths, risks and trade-offs in Russian, Kazakh or English. The model never calculates: Python produces the numbers and the LLM describes them. Without a key the app falls back to a clearly labelled deterministic report.
 - **A proven optimum.** `optimizer.py` enumerates every valid plan — 694 395 of them — so the app can show the gap between a player's plan and the best available one, as a lookup rather than a search.
 - **Demonstration scenarios** at `/demo.html`, including a controlled pair that isolates why the weakest district dominates the Score.
+- **Stress testing against city shocks.** Six deterministic events — a harsh winter, a burst heating main, a population surge and others — re-score a plan under pressure, so a plan can be judged on the bad year as well as the good one.
 - **Story mode:** a four-scene prologue, budget planning, five investigations with ten discoveries, connected meetings, a mid-day council and a branching epilogue built from the server's real calculation.
 - **Interface:** schematic map, current/forecast comparison, saved scenario ranking, JSON export, print and PDF output, three languages, and sound, music and brightness settings.
-- **86 Python tests and 9 Node suites**, covering the reference figures, every rule, API validation, private-file protection, provider failure, the optimizer's agreement with the engine, story investigations, budget allocation and the figures quoted in this file.
+- **101 Python tests and 10 Node suites**, covering the reference figures, every rule, API validation, private-file protection, provider failure, the optimizer's agreement with the engine, story investigations, budget allocation and the figures quoted in this file.
 
 ## Technologies
 
@@ -250,6 +251,29 @@ The plan with the **higher** city average loses by more than three points. That 
 
 **http://127.0.0.1:8080/demo.html** shows this comparison side by side, in Russian or English, with every figure fetched live from `/api/scenarios` rather than written into the page. Each scenario has an **Open in the simulator** button that hands the plan to the main app, so a demonstration takes one click instead of selecting five initiatives by hand.
 
+## City shocks
+
+A Score describes a good year. `events.py` asks what a plan is worth in a bad one.
+
+Six events re-score the city after the plan has been applied: a harsh winter, a burst heating main, a population surge, school overcrowding, a smog episode and a spike in road accidents. Each is a **fixed rule, never a random draw**, so every figure below is reproducible. Two of them are adaptive — the main bursts in the district whose utility reliability is already lowest, and overcrowding lands where social infrastructure is weakest. Real failures do not fall on the strongest neighbourhood.
+
+A shocked city is scored by `city_model._score_state`, the same function that scores an unshocked one. The module never re-implements the Score.
+
+| Plan | Score | Worst case | vs doing nothing |
+|---|---:|---:|---:|
+| Everything into Yesil | 54.01 | 48.93 | **−3.63** |
+| Everything into Nura | 57.21 | 52.13 | −0.43 |
+| Proven optimum | 57.24 | 52.26 | −0.30 |
+
+The Yesil plan spends the entire budget and still ends a harsh winter **below the 52.56 available for doing nothing at all**. The same money placed in the weakest district very nearly holds.
+
+Resilience is reported as the worst case a plan survives to, not the size of its drop: a stronger plan has more to lose and often falls further while still landing higher.
+
+```bash
+curl -X POST -H "Content-Type: application/json" \
+     -d '{"decisions": [...]}' http://127.0.0.1:8080/api/stress
+```
+
 ## Architecture
 
 ```text
@@ -272,6 +296,7 @@ ai_analysis.py ─────► OpenAI Responses API (when a key is set)
 | `city_model.py` | Server-side validation, lags, synergies, constraints, Score |
 | `optimizer.py`, `data/optimum.json` | Exhaustive search and cached ranking |
 | `scenarios.py` | Named demonstration scenarios, including the controlled pair |
+| `events.py` | Deterministic city shocks and the stress test |
 | `ai_analysis.py`, `analysis_locale.py` | Optional AI analysis and localized deterministic explanations |
 | `server.py` | JSON API and serving of public files only |
 | `public/app.js` | Interface state, map, catalogue, report, comparison |
@@ -290,6 +315,8 @@ ai_analysis.py ─────► OpenAI Responses API (when a key is set)
 - `GET /health` — server health.
 - `POST /api/evaluate` — validate and evaluate a draft.
 - `POST /api/analyze` — validate exactly five decisions and return the evaluation plus an explanation.
+- `GET /api/events` — the shock catalogue.
+- `POST /api/stress` — re-score a plan under every city shock.
 - `POST /api/optimize` — validate five decisions and return the gap to the proven optimum. `POST /api/advice` is an alias of the same operation.
 
 Example request body:

@@ -13,6 +13,7 @@ from urllib.parse import unquote, urlsplit
 from ai_analysis import ai_status, analyze, load_environment
 from analysis_locale import validate_language
 from city_model import evaluate, load_data
+from events import catalogue as event_catalogue, stress as stress_test
 from optimizer import advise
 from scenarios import listing as scenario_listing
 
@@ -22,7 +23,7 @@ MAX_BODY_BYTES = 65_536
 # /api/advice and /api/optimize are the same operation under two names:
 # the interface calls the latter, the test suite the former.
 OPTIMISE_PATHS = {"/api/advice", "/api/optimize"}
-POST_PATHS = {"/api/evaluate", "/api/analyze"} | OPTIMISE_PATHS
+POST_PATHS = {"/api/evaluate", "/api/analyze", "/api/stress"} | OPTIMISE_PATHS
 STATIC_TYPES = {
     ".html": "text/html; charset=utf-8",
     ".css": "text/css; charset=utf-8",
@@ -85,6 +86,9 @@ class SimulatorHandler(BaseHTTPRequestHandler):
                 return
             if path == "/api/scenarios":
                 self._json(200, scenario_listing())
+                return
+            if path == "/api/events":
+                self._json(200, event_catalogue())
                 return
             if path == "/health":
                 self._json(200, {"status": "ok"})
@@ -177,6 +181,8 @@ class SimulatorHandler(BaseHTTPRequestHandler):
                     # rather than blocking the request on a full search.
                     raise RequestError(503, "Результаты оптимизации пока недоступны.")
                 self._json(200, advice)
+            elif path == "/api/stress":
+                self._json(200, stress_test(decisions, language=language))
             elif path == "/api/evaluate":
                 self._json(200, result)
             else:
