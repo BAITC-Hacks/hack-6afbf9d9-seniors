@@ -1,0 +1,6006 @@
+{
+  "baseline": 52.56,
+  "plansExamined": 694395,
+  "plans": [
+    {
+      "score": 57.24,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 57.23,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 57.21,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 57.19,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 57.17,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 57.17,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 57.12,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M6",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 57.12,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 57.09,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 57.08,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 57.07,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 57.06,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 57.06,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 57.05,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 57.05,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 57.0,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M6",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 57.0,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.99,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.99,
+      "decisions": [
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.98,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.97,
+      "decisions": [
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.97,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M6",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.96,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "saryarka"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.96,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.96,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.96,
+      "decisions": [
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.95,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.95,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M6",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.94,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.94,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.94,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.93,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "almaty"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.92,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "baikonur"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.92,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.92,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.92,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "almaty"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.91,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.9,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.9,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "saryarka"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.9,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.89,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.89,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.89,
+      "decisions": [
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.89,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "almaty"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.89,
+      "decisions": [
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M13",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.89,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "saryarka"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.88,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.88,
+      "decisions": [
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M6",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.88,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.88,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.88,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.88,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.87,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M6",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.87,
+      "decisions": [
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.87,
+      "decisions": [
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.87,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.87,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.86,
+      "decisions": [
+        {
+          "categoryId": "green",
+          "initiativeId": "M6",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.86,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M13",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.86,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.86,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.86,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "saryarka"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.86,
+      "decisions": [
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.85,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.85,
+      "decisions": [
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.85,
+      "decisions": [
+        {
+          "categoryId": "green",
+          "initiativeId": "M6",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.85,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.85,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.84,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.84,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "baikonur"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.84,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.84,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "saryarka"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.84,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.84,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.84,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "esil"
+        }
+      ]
+    },
+    {
+      "score": 56.84,
+      "decisions": [
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.84,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.84,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.84,
+      "decisions": [
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.83,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "baikonur"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.83,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.83,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "esil"
+        }
+      ]
+    },
+    {
+      "score": 56.83,
+      "decisions": [
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.83,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "esil"
+        }
+      ]
+    },
+    {
+      "score": 56.83,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.83,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M6",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.82,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "almaty"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.82,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M13",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.82,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.82,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "almaty"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.82,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "esil"
+        }
+      ]
+    },
+    {
+      "score": 56.82,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M13",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.82,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.82,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "almaty"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.81,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.81,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "almaty"
+        }
+      ]
+    },
+    {
+      "score": 56.81,
+      "decisions": [
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M13",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.81,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "almaty"
+        }
+      ]
+    },
+    {
+      "score": 56.81,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.8,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "baikonur"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.8,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.8,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "saryarka"
+        }
+      ]
+    },
+    {
+      "score": 56.8,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.8,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.8,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.8,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "almaty"
+        }
+      ]
+    },
+    {
+      "score": 56.79,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M6",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.79,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "baikonur"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.79,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.79,
+      "decisions": [
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.79,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "saryarka"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.79,
+      "decisions": [
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M13",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.79,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.79,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "saryarka"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.79,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.78,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "saryarka"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.78,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.78,
+      "decisions": [
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M6",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.78,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.78,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "saryarka"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.78,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.78,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M13",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.78,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "almaty"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.78,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "saryarka"
+        }
+      ]
+    },
+    {
+      "score": 56.78,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "almaty"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.78,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "saryarka"
+        }
+      ]
+    },
+    {
+      "score": 56.78,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.78,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.77,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "almaty"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.77,
+      "decisions": [
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.77,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.77,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.77,
+      "decisions": [
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M13",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.77,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M6",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.77,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "esil"
+        }
+      ]
+    },
+    {
+      "score": 56.77,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "saryarka"
+        }
+      ]
+    },
+    {
+      "score": 56.77,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M13",
+          "districtId": "esil"
+        }
+      ]
+    },
+    {
+      "score": 56.77,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "esil"
+        }
+      ]
+    },
+    {
+      "score": 56.77,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.76,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "baikonur"
+        }
+      ]
+    },
+    {
+      "score": 56.76,
+      "decisions": [
+        {
+          "categoryId": "green",
+          "initiativeId": "M6",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.76,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "almaty"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.76,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "almaty"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.76,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "esil"
+        }
+      ]
+    },
+    {
+      "score": 56.76,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.76,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "almaty"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.76,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M6",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.76,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.75,
+      "decisions": [
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.75,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M6",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.75,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M13",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.75,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "almaty"
+        }
+      ]
+    },
+    {
+      "score": 56.75,
+      "decisions": [
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M13",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.75,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.75,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "baikonur"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.75,
+      "decisions": [
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.75,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M13",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.75,
+      "decisions": [
+        {
+          "categoryId": "green",
+          "initiativeId": "M6",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.75,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.75,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "saryarka"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.75,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M13",
+          "districtId": "almaty"
+        }
+      ]
+    },
+    {
+      "score": 56.75,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "almaty"
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.74,
+      "decisions": [
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.74,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.74,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "almaty"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.74,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "saryarka"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.74,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "almaty"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.74,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "saryarka"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.74,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.74,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.74,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M6",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.74,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M6",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.73,
+      "decisions": [
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.73,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M6",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.73,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "baikonur"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.73,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "almaty"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.73,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "saryarka"
+        }
+      ]
+    },
+    {
+      "score": 56.73,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.73,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "baikonur"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.73,
+      "decisions": [
+        {
+          "categoryId": "green",
+          "initiativeId": "M6",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.73,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "saryarka"
+        }
+      ]
+    },
+    {
+      "score": 56.73,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.73,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "saryarka"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.73,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M1",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M6",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.73,
+      "decisions": [
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.73,
+      "decisions": [
+        {
+          "categoryId": "green",
+          "initiativeId": "M6",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.73,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "saryarka"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.72,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "baikonur"
+        }
+      ]
+    },
+    {
+      "score": 56.72,
+      "decisions": [
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M6",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.72,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "saryarka"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.72,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "baikonur"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.72,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "almaty"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M13",
+          "districtId": "nura"
+        }
+      ]
+    },
+    {
+      "score": 56.72,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "almaty"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M7",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.72,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.72,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M5",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "baikonur"
+        }
+      ]
+    },
+    {
+      "score": 56.72,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "esil"
+        }
+      ]
+    },
+    {
+      "score": 56.72,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "esil"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M14",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.72,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M11",
+          "districtId": "saryarka"
+        }
+      ]
+    },
+    {
+      "score": 56.72,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M2",
+          "districtId": null
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M4",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "services",
+          "initiativeId": "M12",
+          "districtId": null
+        }
+      ]
+    },
+    {
+      "score": 56.72,
+      "decisions": [
+        {
+          "categoryId": "transport",
+          "initiativeId": "M3",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "green",
+          "initiativeId": "M6",
+          "districtId": null
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M8",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "social",
+          "initiativeId": "M9",
+          "districtId": "nura"
+        },
+        {
+          "categoryId": "safety",
+          "initiativeId": "M10",
+          "districtId": "esil"
+        }
+      ]
+    }
+  ]
+}
