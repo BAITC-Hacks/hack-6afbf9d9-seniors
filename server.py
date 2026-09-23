@@ -13,12 +13,16 @@ from urllib.parse import unquote, urlsplit
 from ai_analysis import ai_status, analyze, load_environment
 from analysis_locale import validate_language
 from city_model import evaluate, load_data
-from optimizer import advise, advise as plan_advice
+from optimizer import advise
 from scenarios import listing as scenario_listing
 
 ROOT = Path(__file__).resolve().parent
 PUBLIC_ROOT = ROOT / "public"
 MAX_BODY_BYTES = 65_536
+# /api/advice and /api/optimize are the same operation under two names:
+# the interface calls the latter, the test suite the former.
+OPTIMISE_PATHS = {"/api/advice", "/api/optimize"}
+POST_PATHS = {"/api/evaluate", "/api/analyze"} | OPTIMISE_PATHS
 STATIC_TYPES = {
     ".html": "text/html; charset=utf-8",
     ".css": "text/css; charset=utf-8",
@@ -157,27 +161,24 @@ class SimulatorHandler(BaseHTTPRequestHandler):
         path = urlsplit(self.path).path
         try:
             raw = self._read_body()
-            if path not in {"/api/evaluate", "/api/analyze", "/api/advice", "/api/optimize"}:
+            if path not in POST_PATHS:
                 raise RequestError(404, "API-маршрут не найден.")
             decisions, language = self._read_decisions(raw)
             try:
                 result = evaluate(decisions, require_complete=path != "/api/evaluate")
             except ValueError as error:
                 raise RequestError(400, str(error)) from None
-            if path == "/api/advice":
-                advice = plan_advice(decisions)
+            if path in OPTIMISE_PATHS:
+                # /api/advice and /api/optimize are the same operation; the
+                # interface calls the latter and the tests the former.
+                advice = advise(decisions)
                 if advice is None:
-                    # The precomputed ranking has not been exported; say so
-                    # rather than blocking the request on a 60-second search.
-                    raise RequestError(503, "Рекомендации недоступны: не рассчитан оптимум.")
+                    # The precomputed ranking has not been exported. Say so
+                    # rather than blocking the request on a full search.
+                    raise RequestError(503, "Результаты оптимизации пока недоступны.")
                 self._json(200, advice)
             elif path == "/api/evaluate":
                 self._json(200, result)
-            elif path == "/api/optimize":
-                advice = advise(decisions)
-                if advice is None:
-                    raise RequestError(503, "Результаты оптимизации пока недоступны.")
-                self._json(200, advice)
             else:
                 self._json(200, {"evaluation": result, "analysis": analyze(result, load_data(), language=language)})
         except RequestError as error:

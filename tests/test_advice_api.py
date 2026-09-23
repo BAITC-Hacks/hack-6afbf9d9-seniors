@@ -91,7 +91,7 @@ class AdviceApiTests(unittest.TestCase):
 
     def test_missing_ranking_returns_503_rather_than_hanging(self):
         """A missing cache must fail fast, not trigger a 60-second search."""
-        with mock.patch.object(server, "plan_advice", return_value=None):
+        with mock.patch.object(server, "advise", return_value=None):
             with self.assertRaises(urllib.error.HTTPError) as caught:
                 post(self.port, "/api/advice", {"decisions": REFERENCE})
         self.assertEqual(caught.exception.code, 503)

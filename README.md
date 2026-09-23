@@ -1,4 +1,4 @@
-﻿# Akim for 5 Hours
+# Akim for 5 Hours
 
 A city decision simulator for the Astana Innovations hackathon by **Seniors**. Every player starts with the same synthetic data and **100 budget units**. Choose exactly **five initiatives**, inspect the Astana Quality of Life Score, and explore the trade-offs. This is an educational model, not a forecast of actual conditions in Astana.
 
@@ -28,44 +28,42 @@ The default host is `127.0.0.1`. Override it with `--host`; set the port with `-
 
 Drafts and up to 12 distinct recent reports are stored in this browser's `localStorage`; there is no shared leaderboard. Settings include Russian, Kazakh and English, sound volume/mute, and game brightness. Language changes apply to the interface and new reports; saved report text and user names remain unchanged. Brightness affects the app, not the monitor or printout. Sounds start after user interaction. Exiting preserves the draft.
 
+## Story mode
+
+1. Open the app and press **Start game** to begin the story **"One day to save a district"**. Budget **100**, baseline Score **52.56**.
+2. Work through five meetings: read the dialogue, choose a reply on the right, and press **Confirm decision**. After the character responds, continue to the next meeting.
+3. After the fifth decision press **End the day**. The epilogue shows the Score, the improvements, the critical indicators and the initiatives left unfunded.
+4. Press **Get a breakdown** to open the AI or demo report. Download it as JSON or print it, including to PDF through your browser.
+5. For free choice of initiatives and districts, open **Free simulator** in the top bar. The map and indicators recalculate after each decision; the Now/Forecast toggle compares original and new district scores.
+6. Change decisions and analyse again. The **Comparison** tab ranks saved scenarios by Score. **Return to meetings** resumes the story.
+
+### Meetings and dialogue
+
+The character portrait, name and role sit on the left, their lines in the centre, and the replies with their cost and effects on the right. On a narrow screen the blocks stack vertically. All meetings are available in Russian, Kazakh and English, and share the sound and brightness settings.
+
+| Time | Character | Initiatives and area |
+| --- | --- | --- |
+| 09:00 | Aigul Sadykova, teacher | M7 / M8 / M9 in Nura: school, clinic or yard sports hubs |
+| 10:00 | Dana Omarova, engineer and environmental activist | M4 / M5 in Saryarka, or city-wide M6 |
+| 11:00 | Marat Ibraev, taxi driver | M1 / M3 in Almaty, or city-wide M2 |
+| 12:00 | Serik Akhmetov, pensioner | M10 / M11 in Nura |
+| 13:00 | Aliya Nurlanova, doctor and adviser | City-wide M12 / M14, or M13 in Nura |
+
+The clock marks five meetings rather than counting real time. Indicator changes are still calculated over the original horizon of **8 quarters**, not within a single day. The story draws only on initiatives from the shared catalogue and offers one per category; the free simulator keeps the original "at most two per category" rule.
+
+Choosing a reply highlights it first; confirming submits the decisions to `/api/evaluate`. No money is spent before confirmation. Unavailable replies explain why the remaining budget could not cover the rest of the day: the client enumerates possible completions and the server revalidates the accepted initiatives. Of 162 complete routes, 127 fit within the budget of 100; the cheapest costs 67.
+
+Meeting progress is stored separately from the simulator draft. Going back does not change decisions; confirming a different reply resets the later meetings. Restarting the day requires confirmation in-game and preserves existing reports. Final numbers are recalculated by the server on restore rather than read from the save. The epilogue buttons **Open decisions in the simulator** and **Get a breakdown** carry the story's decisions into the current draft.
+
+The five characters are fictional. Portraits were produced with the built-in image generator and are included in the repository: [files and exact prompts](docs/character-art.md).
+
 ## Optional AI
-
-## Сюжетный режим
-
-1. Откройте приложение и нажмите **«Начать игру»**: откроется сюжет **«Один день, чтобы спасти район»**. Бюджет — **100**, базовый Score — **52,56**.
-2. Пройдите пять встреч: прочитайте диалог, выберите ответ справа и нажмите **«Подтвердить решение»**. После реакции персонажа переходите к следующей встрече.
-3. После пятого решения нажмите **«Завершить день»**. Эпилог покажет Score, улучшения, критические показатели и инициативы, оставшиеся без финансирования.
-4. Нажмите **«Получить разбор решений»**, чтобы открыть AI/демоотчёт. Скачайте JSON или распечатайте его, в том числе в PDF средствами браузера.
-5. Для свободного выбора мер и районов откройте **«Свободный симулятор»** в верхней панели. Карта и показатели пересчитываются после каждого решения. Переключатель «Сейчас / Прогноз» сравнивает исходные и новые оценки районов.
-6. Измените решения и выполните анализ снова. Во вкладке **«Сравнение»** сохранённые сценарии ранжируются по Score. Кнопка **«Вернуться к встречам»** продолжает сюжет.
 
 Without a key, calculations and optimization work normally; explanations are explicitly labelled as a deterministic demo without an LLM.
 
 Copy `.env.example` to `.env`, configure `OPENAI_API_KEY`, and restart. `OPENAI_MODEL` overrides the model configured in `ai_analysis.py`. Process environment variables take precedence.
 
-The existing integration uses the Responses API with structured JSON output. The key stays on the server, `.env` is excluded from Git, and only public assets are served. Selected initiatives and calculated synthetic results are sent to the provider. Python calculates the Score; the LLM explains effects and trade-offs. Provider failures return a clearly labelled deterministic fallback.
-
-## Сюжет и диалоги
-
-Слева находится портрет с именем и ролью персонажа, в центре — реплики в тёмной рамке с плашкой имени, справа — ответы с ценой и эффектами. На узком экране блоки выстраиваются вертикально. Все встречи доступны на русском, казахском и английском; действуют общие настройки звука и яркости.
-
-| Время | Персонаж | Меры и территория |
-| --- | --- | --- |
-| 09:00 | Айгуль Садыкова, учитель | M7 / M8 / M9 в Нуре: школа, поликлиника или спортивные дворы |
-| 10:00 | Дана Омарова, инженер и экоактивист | M4 / M5 в Сарыарке или городская M6 |
-| 11:00 | Марат Ибраев, таксист | M1 / M3 в Алматы или городская M2 |
-| 12:00 | Серик Ахметов, пенсионер | M10 / M11 в Нуре |
-| 13:00 | Алия Нурланова, врач и советник | Городские M12 / M14 или M13 в Нуре |
-
-Игровые часы обозначают пять встреч, а не таймер реального времени. Изменения показателей рассчитываются на исходном горизонте **8 кварталов**, а не в течение одного дня. Сюжет использует только меры из общего каталога и выбирает по одной мере из каждого направления; свободный симулятор сохраняет исходное правило «не более двух мер из направления».
-
-Выбор ответа сначала показывает выделение, подтверждение отправляет решения в `/api/evaluate`. До подтверждения деньги не списываются. Недоступные ответы объясняют, почему бюджета не хватит на все оставшиеся встречи: клиент перебирает возможные завершения, сервер повторно проверяет принятые меры. Из 162 полных маршрутов 127 укладываются в бюджет 100; самый дешёвый стоит 67.
-
-Прогресс встреч сохраняется отдельно от черновика симулятора. Возврат назад не меняет решения; подтверждение другого ответа сбрасывает последующие встречи. Повторный запуск дня требует подтверждения внутри игры и сохраняет существующие отчёты. Итоговые числа при восстановлении пересчитываются сервером, а не берутся из сохранения. Кнопки эпилога **«Открыть решения в симуляторе»** и **«Получить разбор решений»** переносят сюжетные решения в текущий черновик.
-
-Пять персонажей вымышлены. Портреты созданы встроенным image_gen и включены в репозиторий: [файлы и точные промпты](docs/character-art.md).
-
-## Главное меню и настройки
+The integration uses the Responses API with structured JSON output. The key stays on the server, `.env` is excluded from Git, and only public assets are served. Selected initiatives and calculated synthetic results are sent to the provider. Python calculates the Score; the LLM explains effects and trade-offs. Provider failures return a clearly labelled deterministic fallback.
 
 ## Rules
 
@@ -108,112 +106,90 @@ District initiatives affect one district; city-wide initiatives affect all five.
 
 Population shares: Yesil 0.27, Almaty 0.24, Saryarka 0.20, Baikonur 0.13, Nura 0.16. Synergies are not reduced by lag: M1 + M2 adds T1 +2 in M1's district; M10 + M12 adds B1 +2 in M10's district; M5 + M6 adds E2 +2 in M5's district.
 
-Baseline: city average 56.8624, weakest district 49.18, two critical pairs, Score **52.55768**. Reference example: city average 58.0776, weakest district 52.9625, no critical pairs, Score **56.54307**. Category summaries normalize weights within each category; Score uses all ten original indicators.
+Baseline: city average 56.8624, weakest district 49.18, two critical pairs, Score **52.55768**. Reference example: city average 58.0776, weakest district 52.9625, no critical pairs, Score **56.54307**.
+
+In the interface, a category summary is the average of its two indicators with weights normalized inside the category. That is a supporting visualization; the Score is computed from all ten original indicators.
 
 ## Optimizer
 
-`optimizer.py` exhaustively enumerates valid initiative combinations and district assignments. Sampled tests compare its fast scorer with `city_model.evaluate`. The app reads `data/optimum.json` instead of repeating the search for every request.
-
-Regenerate the cache whenever model rules or data change:
-
-В интерфейсе сводка по направлению — среднее двух его показателей с нормировкой весов внутри направления. Это вспомогательная визуализация; Score считается по десяти исходным показателям.
-
-## Оптимум и сценарии
-
-`optimizer.py` перебирает **все 694 395 допустимых планов** — каждое сочетание пяти мероприятий и каждое распределение по районам, с учётом бюджета, лимита направлений и несовместимостей. Поэтому оптимум здесь доказан, а не подобран эвристикой.
+`optimizer.py` exhaustively enumerates **all 694 395 valid plans** — every combination of five initiatives and every district assignment, subject to the budget, the per-category limit and the incompatibilities. The optimum is therefore proven for this dataset rather than found by heuristic.
 
 | | Score |
 |---|---:|
-| Без решений | 52.56 |
-| Пример из задания | 56.54 |
-| **Доказанный оптимум** | **57.24** |
+| No decisions | 52.56 |
+| Reference example from the brief | 56.54 |
+| **Proven optimum** | **57.24** |
 
-`city_model.evaluate` остаётся источником истины, но при ~1.4 мс на вызов полный перебор занял бы около шестнадцати минут. Поэтому арифметика продублирована на плоских списках, а `verify_fast_scorer` сверяет быстрый путь с движком: расхождение роняет тесты, а не выдаёт уверенно неверный ответ.
+`city_model.evaluate` remains the authority on scoring, but at ~1.4 ms per call a full sweep would take about sixteen minutes. The arithmetic is therefore duplicated over flat lists, and `verify_fast_scorer` checks the fast path against the engine on sampled plans: a divergence fails the tests rather than returning a confidently wrong answer.
 
-Ранжирование выгружается в `data/optimum.json`, поэтому `POST /api/advice` — это поиск по индексу за ~76 мс, а не минутный перебор внутри запроса.
+The ranking is exported to `data/optimum.json`, so `POST /api/optimize` is an index lookup of roughly 76 ms rather than a full search inside a request.
 
 ```bash
-py optimizer.py --top 5        # лучшие планы
-py optimizer.py --verify 300   # сверить быстрый путь с движком
+py optimizer.py --top 5        # best plans
+py optimizer.py --verify 300   # check the fast path against the engine
 ```
 
-### Контрольная пара
+Regenerate the cache whenever the model rules or the data change:
 
-`GET /api/scenarios` отдаёт два плана с **одинаковыми пятью мероприятиями за одинаковые 100 единиц** — различается только район:
-
-| План | Средний балл города | Score |
-|---|---:|---:|
-| Всё в Есиль | 58.75 | 54.01 |
-| Всё в Нуру | 58.16 | **57.21** |
-
-План с **более высоким** средним баллом города проигрывает три с лишним балла. Так работает слагаемое `0.3 × худший район`: город силён настолько, насколько силён его слабейший район. Обе цифры зафиксированы тестами — если набор данных или формула изменятся, упадут тесты, а не демонстрация.
-
-## Архитектура
-
-```text
-Браузер: HTML + CSS + JavaScript
-    │  JSON / HTTP
-    ▼
-server.py ─────► city_model.py ─────► data/city.json
-    │               │
-    │          валидация + детерминированный расчёт
-    ▼
-ai_analysis.py ─────► OpenAI Responses API (если задан ключ)
-    └──────────────► объяснение по правилам (демо / отказ провайдера)
 ```bash
 python -c "from optimizer import export_cache; export_cache()"
 ```
 
-This may take several minutes. A missing cache returns HTTP 503 for optimization; evaluation and analysis remain available. The existing `bestSingleSwap` API field searches only cached top plans and can also change districts. The UI therefore shows the full optimal plan rather than claiming that field is a guaranteed best single edit.
+This takes about a minute. A missing cache returns HTTP 503 for optimization; evaluation and analysis remain available. The `bestSingleSwap` field searches only the cached top plans and may also change a district, so the interface shows the full optimal plan rather than presenting that field as a guaranteed best single edit.
 
-## Компоненты проекта
+### The controlled pair
 
-| Файл | Назначение |
-|---|---|
-| `data/city.json` | Пять районов, десять показателей, веса, 14 мероприятий |
-| `city_model.py` | Серверная валидация, лаги, синергии, ограничения, Score |
-| `ai_analysis.py` | Настоящий AI-анализ и прозрачный демонстрационный режим |
-| `server.py` | API и раздача только публичных файлов |
-| `public/app.js` | Состояние интерфейса, карта, каталог, отчёт, сравнение |
-| `public/preferences.js` | Сохранение громкости, яркости и языка; звуки интерфейса |
-| `public/i18n.js` | Переводы интерфейса и каталога на казахский и английский |
-| `public/menu.css` | Главное меню, настройки и экран выхода |
-| `public/story.js` | Встречи на трёх языках, сохранение прогресса и проверка оставшегося бюджета |
-| `public/story-view.js` | Диалоги и эпилог на основе серверного расчёта |
-| `public/story.css` | Игровая рамка диалогов, портреты, ответы и адаптивная вёрстка |
-| `public/portraits/` | Пять локальных портретов персонажей |
-| `analysis_locale.py` | Локализованные объяснения результатов |
-| `public/styles.css` | Адаптивный интерфейс, состояния и печатная версия |
-| `public/city-map.svg` | Схематическая иллюстрация города, без внешних картографических сервисов |
-| `tests/` | Проверки модели, API и интеграции AI с подставным провайдером |
+`GET /api/scenarios` returns two plans that buy **the same five initiatives for the same 100 units**, differing only in the target district:
 
-## Architecture and API
+| Plan | City average | Score |
+|---|---:|---:|
+| Everything into Yesil | 58.75 | 54.01 |
+| Everything into Nura | 58.16 | **57.21** |
+
+The plan with the **higher** city average loses by more than three points. That is the `0.3 × weakest district` term at work: a city is only as strong as its weakest district. Both figures are pinned by tests, so if the dataset or the formula changes the test suite fails rather than the demonstration.
+
+## Architecture
+
+```text
+Browser: HTML + CSS + JavaScript
+    │  JSON / HTTP
+    ▼
+server.py ─────► city_model.py ─────► data/city.json
+    │               │
+    │          validation + deterministic calculation
+    │               │
+    │               └──► optimizer.py ──► data/optimum.json
+    ▼
+ai_analysis.py ─────► OpenAI Responses API (when a key is set)
+    └──────────────► rule-based explanation (demo / provider failure)
+```
 
 | File | Purpose |
 |---|---|
-| `server.py` | Public assets, JSON API and health check |
-| `city_model.py`, `data/city.json` | Validation, calculation and synthetic dataset |
+| `data/city.json` | Five districts, ten indicators, weights, 14 initiatives |
+| `city_model.py` | Server-side validation, lags, synergies, constraints, Score |
 | `optimizer.py`, `data/optimum.json` | Exhaustive search and cached ranking |
-| `ai_analysis.py`, `analysis_locale.py` | Optional AI and localized deterministic explanations |
-| `public/` | HTML, CSS, JavaScript, SVG map; no external map service |
-| `tests/` | Model, optimizer, API and frontend checks |
-| `render.yaml` | Render web service configuration |
+| `scenarios.py` | Named demonstration scenarios, including the controlled pair |
+| `ai_analysis.py`, `analysis_locale.py` | Optional AI analysis and localized deterministic explanations |
+| `server.py` | JSON API and serving of public files only |
+| `public/app.js` | Interface state, map, catalogue, report, comparison |
+| `public/story.js`, `public/story-view.js`, `public/story.css` | Meetings, dialogue, epilogue and their layout |
+| `public/portraits/` | Five local character portraits |
+| `public/preferences.js`, `public/menu.css` | Volume, brightness, language, main menu |
+| `public/i18n.js` | Interface and catalogue translations |
+| `public/styles.css`, `public/city-map.svg` | Responsive interface and schematic map, no external map service |
+| `render.yaml`, `requirements.txt` | Render web service configuration |
+| `tests/` | Model, optimizer, API, story and frontend checks |
 
-- `GET /api/bootstrap`: catalog, baseline and AI availability.
-- `GET /health`: server health.
-- `POST /api/evaluate`: validate and evaluate a draft.
-- `POST /api/analyze`: validate five decisions and return evaluation plus explanation.
-- `POST /api/optimize`: validate five decisions and return the optimum comparison.
+## API
 
-`GET /api/bootstrap` — каталог, исходные данные, бюджет, базовый расчёт, доступность AI. `GET /health` — состояние сервера.
+- `GET /api/bootstrap` — catalogue, source data, budget, baseline calculation and AI availability.
+- `GET /api/scenarios` — the demonstration scenarios with freshly recalculated figures.
+- `GET /health` — server health.
+- `POST /api/evaluate` — validate and evaluate a draft.
+- `POST /api/analyze` — validate exactly five decisions and return the evaluation plus an explanation.
+- `POST /api/optimize` — validate five decisions and return the gap to the proven optimum. `POST /api/advice` is an alias of the same operation.
 
-`POST /api/evaluate` — валидация и промежуточный расчёт. `POST /api/analyze` — финальная проверка ровно пяти решений и объяснение.
-
-`GET /api/scenarios` — готовые сценарии демонстрации с пересчитанными значениями. `POST /api/advice` — разрыв до доказанного оптимума и одна замена, дающая наибольший прирост; тело запроса такое же, как у `/api/analyze`.
-
-Для языка анализа передайте дополнительное поле `"language": "ru"`, `"kk"` или `"en"`. По умолчанию — `ru`. Ответ содержит `analysis.language`; язык не влияет на числа модели.
-
-Пример тела запроса:
 Example request body:
 
 ```json
@@ -229,13 +205,13 @@ Example request body:
 }
 ```
 
-Optional `language`: `ru` (default), `kk`, or `en`. Analysis includes `analysis.language`; language does not affect calculations. Invalid plans return HTTP 400 without a Score. Client changes are committed only after server validation.
+Optional `language`: `ru` (default), `kk`, or `en`. The response includes `analysis.language`; language does not affect the model's numbers. An invalid plan returns HTTP 400 with an explanation and no Score. Client changes are committed only after successful server validation; if the connection drops, the last confirmed scenario is kept.
 
 ## Deployment
 
 Create a Render account, connect this repository, choose **New > Blueprint**, and select the branch containing `render.yaml`. Review the service configuration before creating it. The blueprint starts `python server.py --host 0.0.0.0`, reads the platform's `PORT`, and checks `/health`. The service starts in demo mode; an AI key can be configured through its environment settings.
 
-**No live deployment URL has been created yet.** After deployment, verify the reference example and optimizer, then add the working demo URL here. Follow [the Russian deployment guide](DEPLOY.ru.md). Configuration reference: [Render Blueprints](https://render.com/docs/blueprint-spec).
+**No live deployment URL has been created yet.** After deployment, verify the reference example and the optimizer, then add the working demo URL here. Follow [the Russian deployment guide](DEPLOY.ru.md). Configuration reference: [Render Blueprints](https://render.com/docs/blueprint-spec).
 
 ## Verification
 
@@ -243,9 +219,9 @@ Create a Render account, connect this repository, choose **New > Blueprint**, an
 python -m unittest discover -s tests -v
 ```
 
-Tests need no API key and make no paid requests. They cover reference calculations, constraints, synergies, API validation, private-file protection, provider failures and optimization. Some optimizer tests repeat the exhaustive search and take longer.
+Tests need no API key and make no paid requests. They cover the reference calculations, the constraints, synergies, API validation, private-file protection, provider failures, the optimizer and the documented figures in this file. Some optimizer tests repeat the exhaustive search and take longer.
 
-Optional frontend checks require Node.js 18+ and a running server on port 8080:
+Optional frontend checks require Node.js 18+; `frontend_smoke.mjs` also needs a server running on port 8080:
 
 ```bash
 node tests/frontend_smoke.mjs
@@ -253,8 +229,16 @@ node tests/preferences.test.mjs
 node tests/story.test.mjs
 ```
 
-These exercise JavaScript and simulated UI interactions, not browser layout or physical audio. Manually check the map, report, mobile layout, optimizer button, language switching and restored drafts.
-Эти необязательные тесты проверяют JavaScript, генерацию экранов, меню, настройки, полный сюжет, все ветки бюджета, возврат к встречам, повреждённые сохранения, переходы, язык, звуковые события, яркость, загрузку примера, экспорт, запоздавшие ответы и отказ сервера. Они не запускают браузер и не проверяют визуальную вёрстку или слышимость на физическом устройстве. Запросы к платному AI в тестах не выполняются. Сервер требуется только для `frontend_smoke.mjs`.
+These exercise JavaScript, screen generation, the menu, settings, the full story, every budget branch, returning to meetings, corrupted saves, transitions, language, sound events, brightness, loading the example, export, late responses and server failure. They do not launch a browser and do not check visual layout or audibility on a physical device. No paid AI requests are made.
+
+Reproduce the headline figures directly:
+
+| Check | Expected |
+|---|---|
+| Evaluate with no decisions | Score **52.56** |
+| The reference example, cost 95 | Score **56.54** |
+| `py optimizer.py --top 1` | Score **57.24** |
+| `py optimizer.py --verify 300` | 0 divergences from the engine |
 
 ## Limitations
 
