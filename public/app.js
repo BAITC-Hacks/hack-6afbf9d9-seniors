@@ -2,6 +2,7 @@ import { translate, localizeMarkup, SUPPORTED_LANGUAGES } from './i18n.js';
 import { DEFAULT_SETTINGS, loadSettings, saveSettings, normalizeSettings, brightnessAppearance, createSoundPlayer } from './preferences.js';
 import { STORY_VERSION, getStory, storyText, storyDecisions, normalizeStory, storyOptionAvailability } from './story.js';
 import { renderStory } from './story-view.js';
+import { createMusicPlayer } from './music.js';
 
 const app = document.querySelector('#app');
 const toastElement = document.querySelector('#toast');
@@ -13,6 +14,7 @@ state.story = { choices: [], step: 0, selected: null, evaluation: null, confirmR
 state.storyBusy = false;
 state.storyRestorePending = false;
 const sound = createSoundPlayer(() => preferences, window);
+const music = createMusicPlayer(() => preferences, window);
 const locale = () => ({ ru: 'ru-RU', kk: 'kk-KZ', en: 'en-US' })[preferences.language];
 const localize = html => localizeMarkup(html, preferences.language);
 let toastTimer;
@@ -24,6 +26,7 @@ const icons = {
   settings: '<path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3" fill="currentColor"/><circle cx="15" cy="17" r="3" fill="currentColor"/>',
   exit: '<path d="M9 3H4v18h5M13 12h9m-4-4 4 4-4 4M9 7v10"/>',
   volume: '<path d="m11 4-6 5H2v6h3l6 5V4ZM15 8a6 6 0 0 1 0 8M18 5a10 10 0 0 1 0 14"/>',
+  music: '<path d="M9 18V5l12-3v13M9 9l12-3"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="18" cy="15" rx="3" ry="2"/>',
   sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5"/>',
   language: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c-5 5-5 13 0 18 5-5 5-13 0-18Z"/>',
   menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
@@ -151,6 +154,7 @@ function render() {
   const focus = !pageChanged && document.activeElement?.id === 'main' && pendingFocus ? pendingFocus : captureRenderFocus();
   syncViewRevision();
   applyPreferences();
+  void music.setScene(state.page === 'exited' ? null : state.page === 'story' && state.story.step === 5 ? 'finale' : 'ambient');
   if (state.page === 'story') {
     app.innerHTML = renderStory({ data: state.data, story: state.story, language: preferences.language, busy: state.storyBusy || state.busy || state.analyzing, icon, num, signed });
     restoreRenderFocus(focus);
@@ -189,6 +193,7 @@ function updatePreference(key, value) {
   try { if (!saveSettings(localStorage, preferences)) throw new Error('Storage unavailable'); }
   catch { toast('Настройки действуют до закрытия вкладки: хранилище браузера недоступно.', true); }
   if (preferences.muted || preferences.volume === 0) sound.stop();
+  void music.sync();
 }
 
 function menuView() {
@@ -210,9 +215,13 @@ function settingsView() {
     <button class="settings-back" data-action="game-menu">${icon('arrow')}Назад</button>
     <header class="settings-header"><div class="eyebrow">ASTANA CITY LAB</div><h1 id="settings-title">Настройки</h1><p>Настройте игру под себя</p></header>
     <div class="settings-body"><section class="setting-row" aria-labelledby="volume-title">
-      <div class="setting-label">${icon('volume')}<div><strong id="volume-title">Звук</strong><span>Громкость звуков</span></div></div>
+      <div class="setting-label">${icon('volume')}<div><strong id="volume-title">Звуки интерфейса</strong><span>Громкость звуков</span></div></div>
       <div class="setting-range"><input id="volume" name="volume" type="range" min="0" max="100" step="1" value="${preferences.volume}" data-setting="volume" aria-label="Громкость звуков" aria-valuetext="${preferences.volume}%"/><output for="volume" id="volume-value">${preferences.volume}%</output></div>
       <div class="setting-control"><button class="setting-toggle" data-action="toggle-sound" aria-pressed="${!preferences.muted}" aria-label="Звуки интерфейса">${icon('volume')}<span>${preferences.muted ? 'Выключен' : 'Включён'}</span></button><button class="btn" data-action="test-sound" ${preferences.muted || !preferences.volume ? 'disabled' : ''}>${icon('play')}Проверить звук</button></div>
+    </section><section class="setting-row" aria-labelledby="music-title">
+      <div class="setting-label">${icon('music')}<div><strong id="music-title">Фоновая музыка</strong><span>Спокойная тема для встреч и отдельная мелодия финала.</span></div></div>
+      <div class="setting-range"><input id="musicVolume" name="musicVolume" type="range" min="0" max="100" step="1" value="${preferences.musicVolume}" data-setting="musicVolume" aria-label="Громкость музыки" aria-valuetext="${preferences.musicVolume}%"/><output for="musicVolume" id="musicVolume-value">${preferences.musicVolume}%</output></div>
+      <div class="setting-control"><button class="setting-toggle" data-action="toggle-music" aria-pressed="${preferences.musicEnabled}" aria-label="Фоновая музыка">${icon('music')}<span>${preferences.musicEnabled ? 'Включена' : 'Выключена'}</span></button><span class="music-control-note">Независимо от звуков интерфейса</span></div>
     </section><section class="setting-row" aria-labelledby="brightness-title">
       <div class="setting-label">${icon('sun')}<div><strong id="brightness-title">Яркость игры</strong><span>Стандартная яркость — 100%.</span></div></div>
       <div class="setting-range"><input id="brightness" name="brightness" type="range" min="50" max="120" step="1" value="${preferences.brightness}" data-setting="brightness" aria-label="Яркость игры" aria-valuetext="${preferences.brightness}%"/><output for="brightness" id="brightness-value">${preferences.brightness}%</output></div>
@@ -482,6 +491,8 @@ function exportReport() {
 
 document.addEventListener('click', async event => {
   const button = event.target.closest('[data-action]');
+  // Unlock synchronously in a real user gesture, including clicks on the menu background.
+  if (event.isTrusted && button?.dataset.action !== 'exit-game') void music.unlock();
   if (!button || button.disabled) return;
   event.preventDefault();
   const action = button.dataset.action;
@@ -539,6 +550,10 @@ document.addEventListener('click', async event => {
   if (action === 'toggle-sound') {
     updatePreference('muted', !preferences.muted); render();
     if (!preferences.muted) void sound.play();
+    return;
+  }
+  if (action === 'toggle-music') {
+    updatePreference('musicEnabled', !preferences.musicEnabled); render();
     return;
   }
   if (action === 'test-sound') {
@@ -604,7 +619,7 @@ document.addEventListener('change', async event => {
 });
 document.addEventListener('input', event => {
   const key = event.target.dataset?.setting;
-  if (['volume', 'brightness'].includes(key)) {
+  if (['volume', 'musicVolume', 'brightness'].includes(key)) {
     updatePreference(key, Number(event.target.value));
     document.querySelector(`#${key}-value`).textContent = `${preferences[key]}%`;
     event.target.setAttribute('aria-valuetext', `${preferences[key]}%`);
@@ -614,8 +629,14 @@ document.addEventListener('input', event => {
   }
   if (event.target.name === 'scenario-name') { state.name = event.target.value; persist(); }
 });
-document.addEventListener('visibilitychange', () => { if (document.hidden) sound.stop(); });
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) sound.stop();
+  void music.sync();
+});
+window.addEventListener('pagehide', () => { sound.stop(); music.stop(); });
+window.addEventListener('pageshow', () => { void music.sync(); });
 document.addEventListener('keydown', event => {
+  if (event.isTrusted && !event.repeat && ['Enter', ' '].includes(event.key) && event.target.dataset?.action !== 'exit-game') void music.unlock();
   if (event.key === 'Escape' && state.page === 'settings') { event.preventDefault(); openScreen('menu'); return; }
   if (event.target.matches('[role="tab"]') && ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
     event.preventDefault();

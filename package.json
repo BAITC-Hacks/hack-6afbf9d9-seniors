@@ -5,6 +5,7 @@
   "scripts": {
     "test:ui": "node tests/frontend_smoke.mjs",
     "test:settings": "node tests/preferences.test.mjs",
-    "test:story": "node tests/story.test.mjs"
+    "test:story": "node tests/story.test.mjs",
+    "test:music": "node tests/music.test.mjs"
   }
 }

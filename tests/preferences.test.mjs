@@ -3,7 +3,7 @@ import { DEFAULT_SETTINGS, SETTINGS_STORAGE, normalizeSettings, loadSettings, sa
 import { translate, localizeMarkup } from '../public/i18n.js';
 
 assert.deepEqual(normalizeSettings(null), { ...DEFAULT_SETTINGS });
-assert.deepEqual(normalizeSettings({ volume: 500, brightness: -10, muted: 'yes', language: 'invalid' }), { volume: 100, brightness: 50, muted: false, language: 'ru' });
+assert.deepEqual(normalizeSettings({ volume: 500, brightness: -10, muted: 'yes', language: 'invalid' }), { ...DEFAULT_SETTINGS, volume: 100, brightness: 50 });
 assert.equal(normalizeSettings({ volume: NaN, brightness: Infinity }).brightness, 100);
 assert.equal(normalizeSettings({ volume: '60' }).volume, DEFAULT_SETTINGS.volume);
 assert.deepEqual(loadSettings({ getItem: () => '{bad json' }), { ...DEFAULT_SETTINGS });
@@ -12,7 +12,16 @@ const stored = new Map();
 const storage = { getItem: key => stored.get(key), setItem: (key, value) => stored.set(key, value) };
 assert.equal(saveSettings(storage, { volume: 0, muted: true, brightness: 120, language: 'kk' }), true);
 assert.equal(JSON.parse(stored.get(SETTINGS_STORAGE)).language, 'kk');
-assert.deepEqual(loadSettings(storage), { volume: 0, muted: true, brightness: 120, language: 'kk' });
+assert.deepEqual(loadSettings(storage), { ...DEFAULT_SETTINGS, volume: 0, muted: true, brightness: 120, language: 'kk' });
+assert.equal(normalizeSettings({ musicVolume: -1 }).musicVolume, 0);
+assert.equal(normalizeSettings({ musicVolume: 101 }).musicVolume, 100);
+assert.equal(normalizeSettings({ musicVolume: 43.7 }).musicVolume, 44);
+assert.equal(normalizeSettings({ musicVolume: '90', musicEnabled: 'false' }).musicVolume, 30);
+assert.equal(normalizeSettings({ musicVolume: NaN, musicEnabled: null }).musicEnabled, true);
+assert.equal(saveSettings(storage, { ...DEFAULT_SETTINGS, muted: true, musicEnabled: false, musicVolume: 17 }), true);
+assert.equal(loadSettings(storage).musicEnabled, false);
+assert.equal(loadSettings(storage).musicVolume, 17);
+assert.equal(loadSettings(storage).muted, true);
 assert.equal(saveSettings({ setItem() { throw new Error('Quota'); } }, DEFAULT_SETTINGS), false);
 assert.deepEqual(brightnessAppearance(50), { color: '#000000', opacity: .5 });
 assert.deepEqual(brightnessAppearance(100), { color: '#000000', opacity: 0 });

@@ -48,6 +48,7 @@
 .setting-toggle { display: inline-flex; align-items: center; gap: 9px; border: 1px solid #dfe8d4; padding: 9px 13px; border-radius: 7px; font-size: 12px; min-height: 42px; background: #edf4e5; color: #53743b; }
 .setting-toggle[aria-pressed="false"] { background: #f3f4f0; color: #7a8272; border-color: #e8eae3; }
 .setting-control .btn { font-size: 11px; min-height: 42px; }
+.music-control-note { max-width: 220px; color: #7c8972; font-size: 11px; line-height: 1.7; text-align: right; }
 .setting-language { display: block; width: 100%; padding: 12px; min-height: 45px; background: #fafbf8; border: 1px solid #dce6d2; border-radius: 7px; color: #4e6a3c; font-size: 14px; }
 .brightness-preview { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 15px; padding: 16px; background: linear-gradient(90deg,#174e43,#89aa72,#f1f4de); border-radius: 7px; color: #fff; font-size: 11px; }
 .settings-actions { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding-top: 24px; }

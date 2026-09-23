@@ -65,6 +65,18 @@ Copy `.env.example` to `.env`, configure `OPENAI_API_KEY`, and restart. `OPENAI_
 
 The integration uses the Responses API with structured JSON output. The key stays on the server, `.env` is excluded from Git, and only public assets are served. Selected initiatives and calculated synthetic results are sent to the provider. Python calculates the Score; the LLM explains effects and trade-offs. Provider failures return a clearly labelled deterministic fallback.
 
+В главном меню доступны «Начать игру», «Настройки» и «Выйти из игры». Настройки звуков интерфейса, музыки, яркости и языка сохраняются в этом браузере.
+
+### Музыка
+
+- В меню, настройках, свободном симуляторе и во время встреч играет спокойная фоновая тема. На экране эпилога после пяти встреч включается отдельная мелодия финала.
+- В настройках есть переключатель **«Фоновая музыка»** и отдельная **громкость музыки 0–100%** (по умолчанию 30%). Отключение звуков интерфейса не отключает музыку и наоборот. Нулевая громкость также останавливает музыкальный проигрыватель.
+- До первого клика или нажатия Enter/пробела музыка не запускается. AudioContext создаётся/возобновляется внутри действия пользователя согласно [рекомендациям Web Audio](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Best_practices#autoplay_policy).
+- При скрытии вкладки, уходе со страницы и выходе из игры музыкальные голоса и таймер останавливаются. После возвращения во вкладку музыка возобновляется, если ранее была запущена и включена. На экране выхода она остаётся выключенной.
+- Обе композиции написаны для проекта как последовательности нот и синтезируются через Web Audio. Внешних аудиозаписей, сэмплов, скачиваний и библиотек нет; исходник музыки — `public/music.js`.
+
+Сброс настроек включает музыку и возвращает её громкость к 30%. Сохранения прежней версии получают эти значения автоматически, сохраняя прежние настройки звуков, яркости и языка. Браузер без Web Audio продолжает работать без звука.
+
 ## Rules
 
 - Budget: 100. Unused money gives no bonus.
@@ -140,6 +152,26 @@ This takes about a minute. A missing cache returns HTTP 503 for optimization; ev
 ### The controlled pair
 
 `GET /api/scenarios` returns two plans that buy **the same five initiatives for the same 100 units**, differing only in the target district:
+
+| File | Purpose |
+|---|---|
+| `data/city.json` | Five districts, ten indicators, weights and 14 initiatives |
+| `city_model.py` | Server validation, lags, synergies, constraints and Score |
+| `ai_analysis.py` | Real AI analysis and transparent deterministic fallback |
+| `server.py` | API and public-file serving |
+| `public/app.js` | Interface state, map, catalog, report and comparison |
+| `public/preferences.js` | Volume, brightness, language and interface sounds |
+| `public/music.js` | Procedural meeting and finale music with volume controls |
+| `public/i18n.js` | Russian, Kazakh and English translations |
+| `public/menu.css` | Main menu, settings and exit screen |
+| `public/story.js` | Three-language meetings, progress and budget checks |
+| `public/story-view.js` | Dialogue and epilogue rendering |
+| `public/story.css` | Dialogue frame, portraits, choices and responsive layout |
+| `public/portraits/` | Five local character portraits |
+| `analysis_locale.py` | Localized result explanations |
+| `public/styles.css` | Responsive interface, states and print layout |
+| `public/city-map.svg` | Schematic city illustration |
+| `tests/` | Model, API and frontend checks |
 
 | Plan | City average | Score |
 |---|---:|---:|
@@ -227,6 +259,7 @@ Optional frontend checks require Node.js 18+; `frontend_smoke.mjs` also needs a 
 node tests/frontend_smoke.mjs
 node tests/preferences.test.mjs
 node tests/story.test.mjs
+node tests/music.test.mjs
 ```
 
 These exercise JavaScript, screen generation, the menu, settings, the full story, every budget branch, returning to meetings, corrupted saves, transitions, language, sound events, brightness, loading the example, export, late responses and server failure. They do not launch a browser and do not check visual layout or audibility on a physical device. No paid AI requests are made.
@@ -239,6 +272,8 @@ Reproduce the headline figures directly:
 | The reference example, cost 95 | Score **56.54** |
 | `py optimizer.py --top 1` | Score **57.24** |
 | `py optimizer.py --verify 300` | 0 divergences from the engine |
+Music tests use a fake AudioContext and controlled clock: they check autoplay gating, scene changes, independent volume, muting, visibility, exit and delayed audio operations without playing sound. To listen manually, click the main menu, adjust music in Settings, finish five meetings, hide/restore the tab, then exit the game.
+Эти необязательные тесты проверяют JavaScript, генерацию экранов, меню, настройки, полный сюжет, все ветки бюджета, возврат к встречам, повреждённые сохранения, переходы, язык, звуковые события, яркость, загрузку примера, экспорт, запоздавшие ответы и отказ сервера. Они не запускают браузер и не проверяют визуальную вёрстку или слышимость на физическом устройстве. Запросы к платному AI в тестах не выполняются. Сервер требуется только для `frontend_smoke.mjs`.
 
 ## Limitations
 

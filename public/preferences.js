@@ -1,6 +1,6 @@
 /** Local game preferences and small, generated interface sounds. No media downloads. */
 export const SETTINGS_STORAGE = 'akim-preferences-v1';
-export const DEFAULT_SETTINGS = Object.freeze({ volume: 50, muted: false, brightness: 100, language: 'ru' });
+export const DEFAULT_SETTINGS = Object.freeze({ volume: 50, muted: false, musicVolume: 30, musicEnabled: true, brightness: 100, language: 'ru' });
 
 export function normalizeSettings(value) {
   const source = value && typeof value === 'object' ? value : {};
@@ -9,6 +9,8 @@ export function normalizeSettings(value) {
   return {
     volume: bounded('volume', 0, 100),
     muted: typeof source.muted === 'boolean' ? source.muted : DEFAULT_SETTINGS.muted,
+    musicVolume: bounded('musicVolume', 0, 100),
+    musicEnabled: typeof source.musicEnabled === 'boolean' ? source.musicEnabled : DEFAULT_SETTINGS.musicEnabled,
     brightness: bounded('brightness', 50, 120),
     language: ['ru', 'kk', 'en'].includes(source.language) ? source.language : DEFAULT_SETTINGS.language,
   };

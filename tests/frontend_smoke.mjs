@@ -12,6 +12,7 @@ import * as localization from '../public/i18n.js';
 import * as gamePreferences from '../public/preferences.js';
 import * as storyModel from '../public/story.js';
 import * as storyPresentation from '../public/story-view.js';
+import { createMusicPlayer } from '../public/music.js';
 
 function localApi(path, decisions) {
   return new Promise((resolve, reject) => {
@@ -59,10 +60,19 @@ const nodes = {
 };
 const storage = new Map();
 const events = {};
+const windowEvents = {};
+const musicCalls = [];
 let downloaded;
 let downloadClicks = 0;
 const context = vm.createContext({
   ...localization, ...gamePreferences, ...storyModel, ...storyPresentation,
+  createMusicPlayer(getPreferences, environment) {
+    const player = createMusicPlayer(getPreferences, environment);
+    return Object.fromEntries(['unlock', 'setScene', 'sync', 'stop'].map(method => [method, (...args) => {
+      musicCalls.push([method, ...args]);
+      return player[method](...args);
+    }]));
+  },
   bootstrap, example,
   document: {
     documentElement: { lang: 'ru', style: { setProperty() {} } },
@@ -77,7 +87,7 @@ const context = vm.createContext({
   AbortSignal: { timeout() {} }, structuredClone: value => JSON.parse(JSON.stringify(value)),
   crypto: { randomUUID: () => 'test-id' },
   localStorage: { getItem: key => storage.get(key) || null, setItem: (key, value) => storage.set(key, value) },
-  window: { scrollTo() {}, print() {} },
+  window: { scrollTo() {}, print() {}, addEventListener: (name, handler) => { windowEvents[name] = handler; } },
 });
 const source = await readFile(new URL('../public/app.js', import.meta.url), 'utf8');
 vm.runInContext(source.replace(/^import .*;\r?\n/gm, '').replace(/boot\(\);\s*$/, ''), context);
@@ -89,6 +99,12 @@ const click = (action, extra = {}) => events.click({
 run('state.data=bootstrap; state.evaluation=bootstrap.baseline; state.loading=false; render();');
 assert.ok(nodes.app.innerHTML.includes('Начать игру'));
 assert.equal((nodes.app.innerHTML.match(/data-action=/g) || []).length, 3);
+assert.ok(musicCalls.some(call => call[0] === 'setScene' && call[1] === 'ambient'));
+assert.ok(!musicCalls.some(call => call[0] === 'unlock'), 'Rendering alone never unlocks autoplay.');
+await events.click({ isTrusted: false, target: { closest: () => null } });
+assert.ok(!musicCalls.some(call => call[0] === 'unlock'), 'Synthetic clicks cannot unlock music.');
+await events.click({ isTrusted: true, target: { closest: () => null } });
+assert.equal(musicCalls.filter(call => call[0] === 'unlock').length, 1);
 await click('start-game');
 assert.equal(run('state.page'), 'story');
 assert.ok(nodes.app.innerHTML.includes('Айгуль Садыкова'));
@@ -158,12 +174,23 @@ assert.ok(nodes.app.innerHTML.includes('id="language"'));
 const input = (setting, value) => events.input({ target: { dataset: { setting }, value, setAttribute() {} } });
 input('volume', '23');
 input('brightness', '70');
+assert.ok(nodes.app.innerHTML.includes('id="musicVolume"'));
+assert.ok(nodes.app.innerHTML.includes('data-action="toggle-music"'));
+input('musicVolume', '17');
+assert.equal(run('preferences.musicVolume'), 17);
+assert.equal(run('preferences.musicEnabled'), true);
+await click('toggle-music');
+assert.equal(run('preferences.musicEnabled'), false);
+assert.equal(run('preferences.volume'), 23);
+await click('toggle-music');
 assert.equal(run('preferences.volume'), 23);
 assert.equal(run('preferences.brightness'), 70);
 await click('toggle-sound');
 assert.equal(run('preferences.muted'), true);
+assert.equal(run('preferences.musicEnabled'), true, 'Muting interface sounds does not mute music.');
 await events.change({ target: { dataset: { setting: 'language' }, value: 'en' } });
 assert.ok(nodes.app.innerHTML.includes('Settings'));
+assert.ok(nodes.app.innerHTML.includes('Background music'));
 assert.equal(context.document.documentElement.lang, 'en');
 await click('game-menu');
 assert.ok(nodes.app.innerHTML.includes('Start game'));
@@ -181,13 +208,18 @@ const savedPreferences = JSON.parse(storage.get(gamePreferences.SETTINGS_STORAGE
 assert.equal(savedPreferences.language, 'kk');
 assert.equal(savedPreferences.volume, 23);
 assert.equal(savedPreferences.brightness, 70);
+assert.equal(savedPreferences.musicVolume, 17);
+assert.equal(savedPreferences.musicEnabled, true);
 await click('reset-settings');
 assert.equal(run('preferences.language'), 'ru');
 assert.equal(run('preferences.brightness'), 100);
+assert.equal(run('preferences.musicVolume'), 30);
+assert.equal(run('preferences.musicEnabled'), true);
 await click('game-menu');
 const decisionsBeforeExit = run('decisionKey(state.decisions)');
 await click('exit-game');
 assert.equal(run('state.page'), 'exited');
+assert.deepEqual(musicCalls.at(-1), ['setScene', null]);
 assert.ok(nodes.app.innerHTML.includes('Игра завершена'));
 assert.equal(run('decisionKey(state.decisions)'), decisionsBeforeExit);
 await click('game-menu');
@@ -210,6 +242,7 @@ for (let step = 0; step < 5; step += 1) {
   await click('story-next');
 }
 assert.equal(run('state.story.step'), 5);
+assert.deepEqual(musicCalls.at(-1), ['setScene', 'finale']);
 assert.equal(run('state.story.evaluation.spent'), 83);
 assert.equal(run('state.story.evaluation.complete'), true);
 assert.equal(run('decisionKey(state.decisions)'), decisionsBeforeExit);
@@ -313,5 +346,16 @@ assert.equal(run('state.page'), 'story');
 assert.equal(run('state.storyRestorePending'), false);
 assert.equal(run('state.story.choices.length'), 5);
 assert.equal(run('state.loadError'), '');
+
+context.document.hidden = true;
+events.visibilitychange();
+assert.deepEqual(musicCalls.at(-1), ['sync']);
+context.document.hidden = false;
+events.visibilitychange();
+assert.deepEqual(musicCalls.at(-1), ['sync']);
+windowEvents.pagehide();
+assert.deepEqual(musicCalls.at(-1), ['stop']);
+windowEvents.pageshow();
+assert.deepEqual(musicCalls.at(-1), ['sync']);
 
 console.log('PASS: frontend workflows, reports, history, menu, settings, story, budget, language, storage and exit.');
