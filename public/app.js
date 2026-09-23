@@ -114,6 +114,14 @@ async function api(path, decisions, language, extra = {}) {
   return result;
 }
 
+function decisionPayload(decisions) {
+  return decisions.map(decision => ({
+    categoryId: decision.categoryId,
+    initiativeId: decision.initiativeId,
+    ...(decision.districtId ? { districtId: decision.districtId } : {}),
+  }));
+}
+
 function toast(message, isError = false, undo = false) {
   clearTimeout(toastTimer);
   toastElement.innerHTML = localize(`${esc(message)}${undo ? '<button data-action="undo">Вернуть</button>' : ''}`);
@@ -797,7 +805,7 @@ document.addEventListener('click', async event => {
     report.optimizing = true;
     render();
     try {
-      report.optimizer = await api('/api/optimize', report.evaluation.decisions);
+      report.optimizer = await api('/api/optimize', decisionPayload(report.evaluation.decisions));
     } catch (error) { toast(error.message, true); }
     finally {
       report.optimizing = false;
