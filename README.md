@@ -1,8 +1,49 @@
 # Akim for 5 Hours
 
-A city decision simulator for the Astana Innovations hackathon by **Seniors**. Every player starts with the same synthetic data and **100 budget units**. Choose exactly **five initiatives**, inspect the Astana Quality of Life Score, and explore the trade-offs. This is an educational model, not a forecast of actual conditions in Astana.
+A city decision simulator for the Astana Innovations hackathon by **Seniors**.
+
+**The problem.** Developing a city means moving five things at once — transport, green space, social infrastructure, safety and city services — out of one limited budget. It is hard to see in advance what a given allocation does to quality of life, and harder still to see what it costs elsewhere.
+
+**Who it is for.** City managers and analysts, and anyone learning how budget trade-offs behave.
+
+Every player starts with the same synthetic data and **100 budget units**. Choose exactly **five initiatives**, inspect the Astana Quality of Life Score, and explore the trade-offs. This is an educational model, not a forecast of actual conditions in Astana.
 
 [Russian project description](README.ru.md) | [Deployment guide in Russian](DEPLOY.ru.md)
+
+## What has been implemented
+
+- **The full decision model.** All 14 initiatives across five categories and five districts, with implementation lags, synergy bonuses, incompatibilities and clipping. The server owns every cost, effect and score; the client cannot alter them.
+- **Automatic budget control.** A plan that exceeds 100 units, repeats an initiative, breaks the per-category limit or violates an incompatibility is rejected with a reason and receives no Score at all.
+- **The Astana Quality of Life Score**, reproducing the brief's published figures exactly: 52.56 with no decisions, 56.54 for the reference example.
+- **AI explanation** of strengths, risks and trade-offs in Russian, Kazakh or English. The model never calculates: Python produces the numbers and the LLM describes them. Without a key the app falls back to a clearly labelled deterministic report.
+- **A proven optimum.** `optimizer.py` enumerates every valid plan — 694 395 of them — so the app can show the gap between a player's plan and the best available one, as a lookup rather than a search.
+- **Demonstration scenarios** at `/demo.html`, including a controlled pair that isolates why the weakest district dominates the Score.
+- **Story mode:** scripted meetings with city residents, each offering initiatives from the same catalogue, with an epilogue built from the server's real calculation.
+- **Interface:** schematic map, current/forecast comparison, saved scenario ranking, JSON export, print and PDF output, three languages, and sound, music and brightness settings.
+- **86 Python tests and 7 Node suites**, covering the reference figures, every rule, API validation, private-file protection, provider failure, the optimizer's agreement with the engine, and the figures quoted in this file.
+
+## Technologies
+
+| Area | Choice |
+|---|---|
+| Backend | **Python 3.10+**, standard library only — `http.server`, `json`, `urllib`. No framework, no database, no ORM. |
+| Frontend | **Vanilla JavaScript** (ES modules), HTML and CSS. No framework, no bundler, no build step, no external CDN. |
+| AI | **OpenAI Responses API**, default model `gpt-4.1-mini`, with structured JSON output. Optional; the app is fully usable without it. |
+| Audio | **Web Audio API**. Both pieces are synthesised from note sequences in `public/music.js`; no audio files. |
+| Tests | Python `unittest`, plus Node scripts using `node:vm` for the frontend. No test framework dependency. |
+| Deployment | **Render** web service via `render.yaml`. |
+
+The only third-party runtime dependency is the OpenAI API, and only when a key is configured. `requirements.txt` is empty by design. `api.openai.com` is the single external host the application contacts; the frontend contacts none.
+
+## Data and integrations
+
+**Source data** is a synthetic dataset in `data/city.json`: five conditional districts with population shares, ten indicators each on a 0–100 scale where higher is better, ten indicator weights, and 14 initiatives with their costs, implementation lags and effects. It contains **no personal, real or restricted data**, as the brief requires, and is not calibrated against real Astana statistics.
+
+**Computed data** lives in `data/optimum.json`: the ranked output of the exhaustive search, regenerated with `export_cache()` whenever the rules or the dataset change.
+
+**Integrations.** The OpenAI Responses API is the only external service, and only for explanation — never for calculation. The key is read solely on the server, `.env` is excluded from Git and never served over HTTP, and only the selected initiatives and already-computed synthetic results are sent. A provider failure or timeout returns a labelled deterministic report and leaves every number unchanged.
+
+**No external service is used for anything else**: the map is a local SVG, the character portraits are local files, the fonts are the system stack, and there is no analytics, telemetry or shared storage.
 
 ## Quick start
 
