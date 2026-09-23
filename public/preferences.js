@@ -1,4 +1,4 @@
-/** Local game preferences and small, generated interface sounds. No media downloads. */
+/** Local simulator preferences and small, generated interface sounds. No media downloads. */
 export const SETTINGS_STORAGE = 'akim-preferences-v1';
 export const DEFAULT_SETTINGS = Object.freeze({ volume: 50, muted: false, musicVolume: 30, musicEnabled: true, brightness: 100, language: 'ru' });
 

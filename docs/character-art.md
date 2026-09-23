@@ -14,13 +14,15 @@
 | `public/portraits/character-3.png` | Серик | `C:\Users\Slayer\.codex\generated_images\01a0cd4d-db9d-7272-a6a3-589f297d7678\exec-959af6d6-4515-4e1b-8b82-5e3ba52a1ecb.png` |
 | `public/portraits/character-4.png` | Алия | `C:\Users\Slayer\.codex\generated_images\01a0cd4d-db9d-7272-a6a3-589f297d7678\exec-887ddf83-0c47-4309-95bb-b6ece4aea2ac.png` |
 
-## Точные финальные запросы
+## Запросы с актуальной терминологией
+
+Ниже приведены отредактированные версии запросов: в строках `Asset type` терминология продукта обновлена до `simulator`. Остальные параметры сохранены; этот раздел не является дословным архивом исходных промптов генерации.
 
 ### 0. Айгуль
 
 ```text
 Use case: photorealistic-natural
-Asset type: character portrait for a narrative city management game dialogue panel.
+Asset type: character portrait for a narrative city management simulator dialogue panel.
 Primary request: A fictional Kazakh woman aged about 45, teacher Aigul, wearing a cream knitted cardigan, holding a closed plain book naturally against her waist. Dark brown hair, thoughtful kind expression.
 Scene/backdrop: modern Astana, suggested only through a softly out-of-focus contemporary setting; muted teal and charcoal background without identifiable buildings.
 Style/medium: cinematic realistic editorial photography; natural skin texture and believable clothing, no beauty retouching.
@@ -34,7 +36,7 @@ Constraints: photographic raster portrait only; no text, no letters, no logos, n
 
 ```text
 Use case: photorealistic-natural
-Asset type: character portrait for a narrative city management game dialogue panel.
+Asset type: character portrait for a narrative city management simulator dialogue panel.
 Primary request: A fictional Kazakh woman aged about 30, environmental engineer Dana, wearing a dark forest green practical jacket and holding a plain notebook. Distinct from the teacher: short dark hair, attentive purposeful expression.
 Scene/backdrop: modern Astana, suggested only through a softly out-of-focus contemporary setting; muted teal and charcoal background without identifiable buildings.
 Style/medium: cinematic realistic editorial photography; natural skin texture and believable clothing, no beauty retouching.
@@ -48,7 +50,7 @@ Constraints: photographic raster portrait only; no text, no letters, no logos, n
 
 ```text
 Use case: photorealistic-natural
-Asset type: character portrait for a narrative city management game dialogue panel.
+Asset type: character portrait for a narrative city management simulator dialogue panel.
 Primary request: A fictional Kazakh man aged about 45, taxi driver Marat, wearing a casual navy jacket over a simple shirt. Short dark hair, understated weathered features, friendly but serious expression.
 Scene/backdrop: modern Astana, suggested only through a softly out-of-focus contemporary setting; muted teal and charcoal background without identifiable buildings.
 Style/medium: cinematic realistic editorial photography; natural skin texture and believable clothing, no beauty retouching.
@@ -62,7 +64,7 @@ Constraints: photographic raster portrait only; no text, no letters, no logos, n
 
 ```text
 Use case: photorealistic-natural
-Asset type: character portrait for a narrative city management game dialogue panel.
+Asset type: character portrait for a narrative city management simulator dialogue panel.
 Primary request: A fictional Kazakh man aged about 70, pensioner Serik, with grey hair, a traditional plain flat cap, and a warm brown cardigan. Natural age lines, dignified gentle expression.
 Scene/backdrop: modern Astana, suggested only through a softly out-of-focus contemporary setting; muted teal and charcoal background without identifiable buildings.
 Style/medium: cinematic realistic editorial photography; natural skin texture and believable clothing, no beauty retouching.
@@ -76,7 +78,7 @@ Constraints: photographic raster portrait only; no text, no letters, no logos, n
 
 ```text
 Use case: photorealistic-natural
-Asset type: character portrait for a narrative city management game dialogue panel.
+Asset type: character portrait for a narrative city management simulator dialogue panel.
 Primary request: A fictional Kazakh woman aged about 38, doctor Aliya, wearing a white medical coat over a plain muted blouse and a stethoscope around her neck. Dark hair neatly tied back, calm engaged expression.
 Scene/backdrop: modern Astana, suggested only through a softly out-of-focus contemporary setting; muted teal and charcoal background without identifiable buildings.
 Style/medium: cinematic realistic editorial photography; natural skin texture and believable clothing, no beauty retouching.

@@ -57,7 +57,7 @@ export function campaignText(key, language = 'ru', vars = {}) {
 }
 
 // Every dossier contains two different sources, not a right and a wrong answer.
-// The player chooses which source becomes part of their public explanation.
+// The participant chooses which source becomes part of their public explanation.
 const dossiers = [
   {
     title: ['За дверью кабинета', 'Кабинет есігінің ар жағында', 'Outside the office door'],
@@ -328,7 +328,7 @@ export function getCouncil(story = {}, language = 'ru') {
     '11:50. Aliya asks for a few quiet minutes. “We have heard families, Saryarka residents and transport staff. Safety and city services are still ahead. Does our plan still fit what we have learned?”',
   ], language)];
   // The council occurs after transport. Safety/service inquiry data in a later
-  // save must never leak into this scene when the player returns here.
+  // save must never leak into this scene when the participant returns here.
   for (let step = 0; step < 3; step += 1) {
     const option = sourceAt(story, step);
     if (option) lines.push(local(option.callback, language));

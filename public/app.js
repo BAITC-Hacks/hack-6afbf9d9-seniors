@@ -241,7 +241,7 @@ function render() {
     <a class="brand" href="#simulation" data-action="nav" data-page="simulation"><img src="/favicon.svg" alt=""/><span>Аким на 5 часов<small>ASTANA CITY LAB</small></span></a>
     <div class="nav-label">ВАШ ГОРОД</div><nav class="nav" aria-label="Основная навигация">${nav.map(([page, name, label]) => `<button class="nav-btn ${state.page === page ? 'active' : ''}" data-action="nav" data-page="${page}" ${state.page === page ? 'aria-current="page"' : ''}>${icon(name)}<span>${label}</span>${page === 'compare' && state.saved.length ? `<span class="nav-count">${state.saved.length}</span>` : ''}</button>`).join('')}</nav>
     <div class="sidebar-bottom"><div class="side-note"><span class="note-icon">${icon('green')}</span><strong>Город начинается с вас</strong><p>Пять решений сегодня.<br/>Качество жизни — на годы вперёд.</p></div><div class="team"><span class="avatar">S</span><div><strong>Команда Seniors</strong><small>Городская лаборатория</small></div>${icon('chevron')}</div></div>
-  </aside><div class="workspace"><header class="topbar"><div class="breadcrumbs">Городская лаборатория ${icon('chevron')} <b>${pageName}</b></div><div class="mobile-brand"><img src="/favicon.svg" alt=""/>Аким на 5 часов</div><div class="top-actions"><span class="status-label"><i class="live-dot"></i>Синтетический город</span><button class="game-menu-shortcut" data-action="game-menu" aria-label="Главное меню">${icon('menu')}<span>Главное меню</span></button><button class="game-menu-shortcut" data-action="story-resume" aria-label="${esc(storyText('backToStory', preferences.language))}">${icon('book')}<span data-i18n-skip>${esc(storyText('backToStory', preferences.language))}</span></button><button class="help-btn" data-action="nav" data-page="method">${icon('help')}Правила игры</button></div></header>
+  </aside><div class="workspace"><header class="topbar"><div class="breadcrumbs">Городская лаборатория ${icon('chevron')} <b>${pageName}</b></div><div class="mobile-brand"><img src="/favicon.svg" alt=""/>Аким на 5 часов</div><div class="top-actions"><span class="status-label"><i class="live-dot"></i>Синтетический город</span><button class="game-menu-shortcut" data-action="game-menu" aria-label="Главное меню">${icon('menu')}<span>Главное меню</span></button><button class="game-menu-shortcut" data-action="story-resume" aria-label="${esc(storyText('backToStory', preferences.language))}">${icon('book')}<span data-i18n-skip>${esc(storyText('backToStory', preferences.language))}</span></button><button class="help-btn" data-action="nav" data-page="method">${icon('help')}Правила симулятора</button></div></header>
   <main class="main" id="main" tabindex="-1">${state.page === 'simulation' ? simulationView() : state.page === 'report' ? reportView() : state.page === 'compare' ? comparisonView() : methodologyView()}<footer class="bottom-bar"><span>${icon('city')}ASTANA CITY LAB <strong>· Сделаем город лучше вместе</strong></span><span>Учебная модель · Данные условные · Seniors, 2026</span></footer></main></div>`;
   app.innerHTML = localize(app.innerHTML);
   updateMapColors(state.mapMode === 'before'
@@ -277,7 +277,7 @@ function menuView() {
     <nav class="menu-actions" aria-label="Главное меню">
       <button class="menu-button primary" data-action="start-game" ${state.loading ? 'disabled' : ''}>${icon('play')}<span data-i18n-skip>${esc(campaignText('start', preferences.language))}</span><span class="menu-button-number" aria-hidden="true">01</span></button>
       <button class="menu-button" data-action="open-settings">${icon('settings')}<span>Настройки</span><span class="menu-button-number" aria-hidden="true">02</span></button>
-      <button class="menu-button exit" data-action="exit-game">${icon('exit')}<span>Выйти из игры</span><span class="menu-button-number" aria-hidden="true">03</span></button>
+      <button class="menu-button exit" data-action="exit-game">${icon('exit')}<span>Выйти из симулятора</span><span class="menu-button-number" aria-hidden="true">03</span></button>
     </nav>
     <p class="menu-session-note ${state.loadError ? 'error' : ''}" role="status">${state.loading ? 'Загружаем районы и инициативы…' : state.loadError ? esc(state.loadError) : state.story.choices.length || state.decisions.length ? 'Ваш сценарий сохранён.' : 'Ваши решения сохраняются при выходе.'}</p>
     <footer class="menu-footer">${icon('shield')}<span>Учебная модель · Данные условные · Seniors, 2026</span></footer>
@@ -301,7 +301,7 @@ function modeView() {
 function settingsView() {
   return `<main class="settings-screen" id="main" tabindex="-1"><section class="settings-card" aria-labelledby="settings-title">
     <button class="settings-back" data-action="game-menu">${icon('arrow')}Назад</button>
-    <header class="settings-header"><div class="eyebrow">ASTANA CITY LAB</div><h1 id="settings-title">Настройки</h1><p>Настройте игру под себя</p></header>
+    <header class="settings-header"><div class="eyebrow">ASTANA CITY LAB</div><h1 id="settings-title">Настройки</h1><p>Настройте симулятор под себя</p></header>
     <div class="settings-body"><section class="setting-row" aria-labelledby="volume-title">
       <div class="setting-label">${icon('volume')}<div><strong id="volume-title">Звуки интерфейса</strong><span>Громкость звуков</span></div></div>
       <div class="setting-range"><input id="volume" name="volume" type="range" min="0" max="100" step="1" value="${preferences.volume}" data-setting="volume" aria-label="Громкость звуков" aria-valuetext="${preferences.volume}%"/><output for="volume" id="volume-value">${preferences.volume}%</output></div>
@@ -311,8 +311,8 @@ function settingsView() {
       <div class="setting-range"><input id="musicVolume" name="musicVolume" type="range" min="0" max="100" step="1" value="${preferences.musicVolume}" data-setting="musicVolume" aria-label="Громкость музыки" aria-valuetext="${preferences.musicVolume}%"/><output for="musicVolume" id="musicVolume-value">${preferences.musicVolume}%</output></div>
       <div class="setting-control"><button class="setting-toggle" data-action="toggle-music" aria-pressed="${preferences.musicEnabled}" aria-label="Фоновая музыка">${icon('music')}<span>${preferences.musicEnabled ? 'Включена' : 'Выключена'}</span></button><span class="music-control-note">Независимо от звуков интерфейса</span></div>
     </section><section class="setting-row" aria-labelledby="brightness-title">
-      <div class="setting-label">${icon('sun')}<div><strong id="brightness-title">Яркость игры</strong><span>Стандартная яркость — 100%.</span></div></div>
-      <div class="setting-range"><input id="brightness" name="brightness" type="range" min="50" max="120" step="1" value="${preferences.brightness}" data-setting="brightness" aria-label="Яркость игры" aria-valuetext="${preferences.brightness}%"/><output for="brightness" id="brightness-value">${preferences.brightness}%</output></div>
+      <div class="setting-label">${icon('sun')}<div><strong id="brightness-title">Яркость симулятора</strong><span>Стандартная яркость — 100%.</span></div></div>
+      <div class="setting-range"><input id="brightness" name="brightness" type="range" min="50" max="120" step="1" value="${preferences.brightness}" data-setting="brightness" aria-label="Яркость симулятора" aria-valuetext="${preferences.brightness}%"/><output for="brightness" id="brightness-value">${preferences.brightness}%</output></div>
       <div class="brightness-preview">${icon('sun')}<span>Город начинается с вас</span></div>
     </section><section class="setting-row" aria-labelledby="language-title">
       <div class="setting-label">${icon('language')}<div><strong id="language-title">Язык</strong><span>Язык интерфейса и новых отчётов</span></div></div>
@@ -322,7 +322,7 @@ function settingsView() {
 }
 
 function exitView() {
-  return `<main class="exit-screen" id="main" tabindex="-1"><section class="exit-card">${icon('check')}<h1>Игра завершена</h1><p>Ваш сценарий сохранён.<br/>Теперь можно закрыть эту вкладку.</p><button class="btn primary" data-action="game-menu">${icon('arrow')}Снова в меню</button></section></main>`;
+  return `<main class="exit-screen" id="main" tabindex="-1"><section class="exit-card">${icon('check')}<h1>Работа с симулятором завершена</h1><p>Ваш сценарий сохранён.<br/>Теперь можно закрыть эту вкладку.</p><button class="btn primary" data-action="game-menu">${icon('arrow')}Снова в меню</button></section></main>`;
 }
 
 function openScreen(page) {

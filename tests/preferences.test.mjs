@@ -74,15 +74,15 @@ const waitingAudio = createSoundPlayer(() => prefs, { AudioContext: WaitingAudio
 const pending = waitingAudio.play();
 waitingAudio.setActive(false);
 resumeLater();
-assert.equal(await pending, false, 'Leaving the game cancels sounds waiting for audio permission.');
+assert.equal(await pending, false, 'Leaving the simulator cancels sounds waiting for audio permission.');
 
-assert.equal(translate('Начать игру', 'en'), 'Start game');
+assert.equal(translate('Запустить симулятор', 'en'), 'Start simulator');
 assert.equal(translate('Настройки', 'kk'), 'Баптаулар');
-const html = '<button aria-label="Начать игру" data-action="start-game">Начать игру</button><input value="Начать игру"><span data-i18n-skip>Начать игру</span>';
+const html = '<button aria-label="Запустить симулятор" data-action="start-game">Запустить симулятор</button><input value="Запустить симулятор"><span data-i18n-skip>Запустить симулятор</span>';
 const localized = localizeMarkup(html, 'en');
-assert.ok(localized.includes('aria-label="Start game"'));
+assert.ok(localized.includes('aria-label="Start simulator"'));
 assert.ok(localized.includes('data-action="start-game"'));
-assert.ok(localized.includes('value="Начать игру"'));
-assert.ok(localized.includes('<span data-i18n-skip>Начать игру</span>'));
+assert.ok(localized.includes('value="Запустить симулятор"'));
+assert.ok(localized.includes('<span data-i18n-skip>Запустить симулятор</span>'));
 assert.equal(localizeMarkup(html, 'ru'), html);
 console.log('PASS: preferences validation/storage, brightness, audio gain/mute/exit, localization boundaries.');

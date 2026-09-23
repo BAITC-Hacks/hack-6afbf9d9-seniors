@@ -174,7 +174,7 @@ for (const planReturn of [null, { phase: 'ending', step: 2 }, { phase: 'meeting'
 }
 
 // Independent test-only oracle reads the supplied city data. It is not imported
-// by the game or its classifier. The same route counts were also checked against
+// by the simulator or its classifier. The same route counts were also checked against
 // Python city_model.evaluate: 127 affordable routes reach all five ending styles.
 const catalogue = new Map(data.initiatives.map(item => [item.id, item]));
 const baseline = Object.fromEntries(data.districts.map(district => [district.id, { ...district.metrics }]));

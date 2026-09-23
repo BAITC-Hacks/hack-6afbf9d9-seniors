@@ -270,7 +270,7 @@ assert.ok(nodes.app.innerHTML.includes('Background music'));
 assert.equal(context.document.documentElement.lang, 'en');
 await click('game-menu');
 assert.ok(nodes.app.innerHTML.includes('Start</span>'));
-assert.ok(nodes.app.innerHTML.includes('Exit game'));
+assert.ok(nodes.app.innerHTML.includes('Exit simulator'));
 await startStory();
 assert.ok(nodes.app.innerHTML.includes('Aigul'));
 await click('story-simulator');
@@ -296,7 +296,7 @@ const decisionsBeforeExit = run('decisionKey(state.decisions)');
 await click('exit-game');
 assert.equal(run('state.page'), 'exited');
 assert.deepEqual(musicCalls.at(-1), ['setScene', null]);
-assert.ok(nodes.app.innerHTML.includes('Игра завершена'));
+assert.ok(nodes.app.innerHTML.includes('Работа с симулятором завершена'));
 assert.equal(run('decisionKey(state.decisions)'), decisionsBeforeExit);
 await click('game-menu');
 await startStory();
@@ -516,7 +516,7 @@ assert.equal(run('state.page'), 'report');
 assert.equal(run('state.report.evaluation.score'), storyScore);
 assert.equal(run('state.report.evaluation.spent'), 83);
 
-// A response cannot reopen the game after the player has left it.
+// A response cannot reopen the simulator after the participant has left it.
 await click('story-resume');
 let resolveStoryTransfer;
 context.fetch = () => new Promise(resolve => { resolveStoryTransfer = resolve; });

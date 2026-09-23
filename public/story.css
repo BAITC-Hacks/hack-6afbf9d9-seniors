@@ -378,7 +378,7 @@
   .story-ending-card p, .story-ending-card li, .story-stat-row, .story-stat-row strong, .story-stat-row b { color: #263d31; }
 }
 
-/* Campaign enquiries and player-defined spending envelopes. */
+/* Campaign enquiries and participant-defined spending envelopes. */
 .story-status-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
 .story-replan-warning { margin-bottom: 30px; }
 .story-replan-button { width: 100%; grid-column: 1 / -1; margin-top: 3px; }

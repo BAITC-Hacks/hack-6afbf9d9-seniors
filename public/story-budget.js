@@ -1,6 +1,6 @@
 import { getStory, storyDecisions, storyOptionAvailability } from './story.js';
 
-/** Envelopes are player-defined spending ceilings, not new project prices.
+/** Envelopes are participant-defined spending ceilings, not new project prices.
  * Every project still uses the catalogue and is evaluated by the server.
  */
 export const STORY_CATEGORIES = Object.freeze(['social', 'green', 'transport', 'safety', 'services']);
@@ -85,7 +85,7 @@ export function defaultAllocations(initiatives, budget = 100, choices = []) {
   return allocations;
 }
 
-/** Keep the existing completion/compatibility guard, then enforce the player's
+/** Keep the existing completion/compatibility guard, then enforce the participant's
  * envelopes on the candidate prefix. Revisited later answers are not charged.
  */
 export function plannedOptionAvailability(choices, step, index, initiatives, budget = 100, allocations = null) {

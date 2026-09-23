@@ -6,7 +6,7 @@ A city decision simulator for the Astana Innovations hackathon by **Seniors**.
 
 **Who it is for.** City managers and analysts, and anyone learning how budget trade-offs behave.
 
-Every player starts with the same synthetic data and **100 budget units**. Choose exactly **five initiatives**, inspect the Astana Quality of Life Score, and explore the trade-offs. This is an educational model, not a forecast of actual conditions in Astana.
+Every participant starts with the same synthetic data and **100 budget units**. Choose exactly **five initiatives**, inspect the Astana Quality of Life Score, and explore the trade-offs. This is an educational model, not a forecast of actual conditions in Astana.
 
 [Russian project description](README.ru.md) | [Deployment guide in Russian](DEPLOY.ru.md)
 
@@ -16,7 +16,7 @@ Every player starts with the same synthetic data and **100 budget units**. Choos
 - **Automatic budget control.** A plan that exceeds 100 units, repeats an initiative, breaks the per-category limit or violates an incompatibility is rejected with a reason and receives no Score at all.
 - **The Astana Quality of Life Score**, reproducing the brief's published figures exactly: 52.56 with no decisions, 56.54 for the reference example.
 - **AI explanation** of strengths, risks and trade-offs in Russian, Kazakh or English. The model never calculates: Python produces the numbers and the LLM describes them. Without a key the app falls back to a clearly labelled deterministic report.
-- **A proven optimum.** `optimizer.py` enumerates every valid plan — 694 395 of them — so the app can show the gap between a player's plan and the best available one, as a lookup rather than a search.
+- **A proven optimum.** `optimizer.py` enumerates every valid plan — 694 395 of them — so the app can show the gap between a participant's plan and the best available one, as a lookup rather than a search.
 - **Demonstration scenarios** at `/demo.html`, including a controlled pair that isolates why the weakest district dominates the Score.
 - **Stress testing against city shocks.** Six deterministic events — a harsh winter, a burst heating main, a population surge and others — re-score a plan under pressure, so a plan can be judged on the bad year as well as the good one.
 - **Story mode:** a four-scene prologue, budget planning, five investigations with ten discoveries, connected meetings, a mid-day council and a branching epilogue built from the server's real calculation.
@@ -69,7 +69,7 @@ The default host is `127.0.0.1`. Override it with `--host`; set the port with `-
 6. In the report, click **Show the best plan** to see the optimal five decisions, their districts and the gap between your Score and the optimum.
 7. Export JSON or print the report, including to PDF through your browser. Change decisions and compare saved scenarios.
 
-Drafts and up to 12 distinct recent reports are stored in this browser's `localStorage`; there is no shared leaderboard. Settings include Russian, Kazakh and English, sound volume/mute, and game brightness. Language changes apply to the interface and new reports; saved report text and user names remain unchanged. Brightness affects the app, not the monitor or printout. Sounds start after user interaction. Exiting preserves the draft.
+Drafts and up to 12 distinct recent reports are stored in this browser's `localStorage`; there is no shared leaderboard. Settings include Russian, Kazakh and English, sound volume/mute, and simulator brightness. Language changes apply to the interface and new reports; saved report text and user names remain unchanged. Brightness affects the app, not the monitor or printout. Sounds start after user interaction. Exiting preserves the draft.
 
 ## Story mode
 
@@ -100,7 +100,7 @@ The clock marks five meetings rather than counting real time. Indicator changes 
 
 Choosing a reply highlights it first; confirming submits the decisions to `/api/evaluate`. No money is spent before confirmation. Unavailable replies explain why the remaining budget could not cover the rest of the day: the client enumerates possible completions and the server revalidates the accepted initiatives. Of 162 complete routes, 127 fit within the budget of 100; the cheapest costs 67.
 
-Meeting progress is stored separately from the simulator draft. Version 3 saves store initiative IDs, scene phase, prologue frame, approved allocations, investigations and council choice; versions 1 and 2 migrate automatically. Existing saves continue their scene with unrestricted envelopes until the player opens planning. Going back does not change decisions; confirming a different reply resets later meetings. Revisited scenes use only their decision prefix, including a fresh server evaluation for their map and budget. Restarting the day requires confirmation in-game and preserves existing reports. Final numbers are recalculated by the server on restore rather than read from the save. The epilogue buttons **Play in free mode** and **Get a breakdown** carry the story's decisions into the current draft.
+Meeting progress is stored separately from the simulator draft. Version 3 saves store initiative IDs, scene phase, prologue frame, approved allocations, investigations and council choice; versions 1 and 2 migrate automatically. Existing saves continue their scene with unrestricted envelopes until the participant opens planning. Going back does not change decisions; confirming a different reply resets later meetings. Revisited scenes use only their decision prefix, including a fresh server evaluation for their map and budget. Restarting the day requires confirmation in the simulator and preserves existing reports. Final numbers are recalculated by the server on restore rather than read from the save. The epilogue buttons **Open free mode** and **Get a breakdown** carry the story's decisions into the current draft.
 
 ### Allocate and reconsider
 
@@ -124,7 +124,7 @@ Ending styles are deterministic narrative interpretations, not extra Score bonus
 
 All five endings are reachable among the 127 affordable story routes. Spending beyond 100 is still rejected; a stretched-budget ending means unresolved needs with little reserve, not permitted overspending. Story text, save handling and the ending classifier never calculate or modify the Score.
 
-The five characters are fictional. Portraits were produced with the built-in image generator and are included in the repository: [files and exact prompts](docs/character-art.md).
+The five characters are fictional. Portraits were produced with the built-in image generator and are included in the repository: [files and prompt descriptions](docs/character-art.md).
 
 ## Optional AI
 
@@ -136,12 +136,12 @@ The integration uses the Responses API with structured JSON output. The key stay
 
 ## Menu, settings and music
 
-The main menu offers **Start**, **Settings** and **Exit**. Start opens exactly three choices: **Story**, **Free mode** and **Back to menu**. Interface sound, music, brightness and language settings are stored in this browser.
+The main menu offers **Start**, **Settings** and **Exit simulator**. Start opens exactly three choices: **Story**, **Free mode** and **Back to menu**. Interface sound, music, brightness and language settings are stored in this browser.
 
 - A calm background theme plays in the menu, the settings, the free simulator and during meetings. A separate finale melody plays on the epilogue screen after the fifth decision.
 - Settings carry a **Background music** toggle and a separate **music volume, 0–100%** (30% by default). Muting the interface sounds does not mute the music, and the reverse is also true. A volume of zero stops the music player entirely.
 - Nothing plays before the first click or Enter/Space press: the AudioContext is created or resumed inside a user gesture, following the [Web Audio guidance](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Best_practices#autoplay_policy).
-- Hiding the tab, leaving the page and exiting the game stop the music voices and their timer. Returning to the tab resumes the music if it was playing and enabled; it stays off on the exit screen.
+- Hiding the tab, leaving the page and exiting the simulator stop the music voices and their timer. Returning to the tab resumes the music if it was playing and enabled; it stays off on the exit screen.
 - Both pieces were written for this project as note sequences and are synthesised through Web Audio. There are no external recordings, samples, downloads or libraries; the source is `public/music.js`.
 
 Resetting the settings re-enables music at 30% volume. Saves from an earlier version pick those values up automatically while keeping their existing sound, brightness and language settings. A browser without Web Audio continues to work without sound.
@@ -383,7 +383,7 @@ Reproduce the headline figures directly:
 | `py optimizer.py --verify 300` | 0 divergences from the engine |
 | `TEST_PORT=8080 node tests/demo_page.test.mjs` | controlled pair intact, handover verified |
 
-Music tests use a fake AudioContext and a controlled clock: they check autoplay gating, scene changes, independent volume, muting, visibility, exit and delayed audio operations without playing sound. To listen manually, open the main menu, adjust music in Settings, finish five meetings, hide and restore the tab, then exit the game.
+Music tests use a fake AudioContext and a controlled clock: they check autoplay gating, scene changes, independent volume, muting, visibility, exit and delayed audio operations without playing sound. To listen manually, open the main menu, adjust music in Settings, finish five meetings, hide and restore the tab, then exit the simulator.
 
 ## Limitations
 

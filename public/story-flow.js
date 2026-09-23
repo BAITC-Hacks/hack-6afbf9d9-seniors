@@ -41,7 +41,7 @@ function normalizeFields(value) {
 }
 
 /** Migrate indexed v1 and durable-ID v2 saves. Existing decisions resume without
- * forcing the new planning/inquiry chapters; only new games must take that path.
+ * forcing the new planning/inquiry chapters; only new sessions must take that path.
  * Dataset compatibility and authoritative reevaluation remain the app's job.
  * Saved scores, text and unknown flags are deliberately ignored.
  */
@@ -135,7 +135,7 @@ export function setStoryAllocations(state, allocations) {
   return { ...progress, allocations: normalized, ...(progress.planReturn || { phase: 'briefing' }), planReturn: null };
 }
 
-/** An inquiry changes what the player learns, not a server-side decision. */
+/** An inquiry changes what the participant learns, not a server-side decision. */
 export function chooseStoryInquiry(state, index) {
   const progress = normalizeFields(state) || createStoryProgress();
   if (progress.phase !== 'briefing' || (index !== 0 && index !== 1)) return progress;
