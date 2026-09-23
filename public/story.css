@@ -470,6 +470,12 @@
 .story-ending-strained { --ending-accent: #ddb29f; --ending-tint: #945b4138; }
 .story-ending .story-ending-hero { border-color: var(--ending-accent, #acd2ba); background: radial-gradient(ellipse at 50% 0, var(--ending-tint, #5375653d), transparent 75%), var(--story-panel); }
 .story-ending .story-ending-score { color: var(--ending-accent, var(--story-gold)); }
+.story-freeplay { display: flex; flex-wrap: wrap; align-items: center; gap: 20px 30px; margin-top: 20px; padding: 25px; border: 1px solid var(--ending-accent, #acd2ba); background: linear-gradient(110deg, #34594b50, #172a2a); }
+.story-freeplay > div:first-child { flex: 1 1 320px; min-width: 0; }
+.story-freeplay h2 { color: #eee8d5; font-size: 22px; font-weight: 550; line-height: 1.4; margin: 0 0 10px; }
+.story-freeplay p { max-width: 65ch; color: #c2d2c6; font-size: 14px; line-height: 1.8; }
+.story-freeplay .story-button-row { flex: 1 1 280px; margin: 0; }
+.story-freeplay .story-button-row > button { flex: 1 1 220px; }
 .story-evening { display: grid; grid-template-columns: minmax(0, .75fr) minmax(0, 1.7fr); gap: 27px; margin-top: 25px; background: #14222bbd; border: 1px solid #8b9f9142; padding: 25px; }
 .story-evening > * { min-width: 0; }
 .story-evening-art { position: relative; min-height: 215px; overflow: hidden; background: #1c292a; }
@@ -549,7 +555,7 @@
   .story-screen *, .story-screen *::before, .story-screen *::after { animation: none !important; transition: none !important; }
 }
 @media print {
-  .cinematic-art, .cinematic-progress, .cinematic-controls, .story-evening-art { display: none !important; }
+  .cinematic-art, .cinematic-progress, .cinematic-controls, .story-evening-art, .story-freeplay { display: none !important; }
   .cinematic-scene, .story-evening { display: block; border-color: #9aa99e; background: #fff; box-shadow: none; }
   .cinematic-narration, .story-evening, .story-ending-reasons { background: #fff; color: #20372b; }
   .cinematic-narration h1, .cinematic-lines, .cinematic-lines p:first-child, .story-evening h2, .story-evening p, .story-ending-reasons h2, .story-ending-reasons li { color: #20372b; }
