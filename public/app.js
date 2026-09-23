@@ -357,6 +357,7 @@ async function applyStoryProgress(progress) {
   if (state.storyBusy || state.busy || state.analyzing) return;
   if (!progress) return;
   const page = state.page;
+  const enteringEnding = progress.phase === 'ending' && state.story.phase !== 'ending';
   state.storyBusy = true;
   render();
   try {
@@ -368,7 +369,10 @@ async function applyStoryProgress(progress) {
     state.story.budgetDraft = progress.phase === 'planning'
       ? { ...(progress.allocations || defaultAllocations(state.data.initiatives, state.data.budget, progress.choices)) } : null;
     persistStory();
-    if (state.page === page) openScreen('story');
+    if (state.page === page) {
+      openScreen('story');
+      if (enteringEnding) celebrateResult(evaluation?.score);
+    }
   } catch (error) { toast(error.message, true); }
   finally { state.storyBusy = false; render(); }
 }
@@ -549,6 +553,14 @@ function optimizerView() {
     </section>`;
 }
 
+function celebrateResult(final_score) {
+  if (typeof final_score !== 'number' || !Number.isFinite(final_score) || final_score <= 52.56) return;
+  if (typeof window.confetti !== 'function') return;
+  try {
+    window.confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+  } catch { /* Optional animation must never interrupt the result screen. */ }
+}
+
 function shareToTelegram(final_score = state.report?.evaluation?.score) {
   if (typeof final_score !== 'number' || !Number.isFinite(final_score)) return;
   const text = `Я набрал ${final_score} баллов в симуляторе Акима! А сможешь ли ты спасти город?`;
@@ -641,6 +653,7 @@ async function analyze() {
       updateMapColors(evaluationDeltas(result));
       state.report = saved;
       state.page = 'report';
+      celebrateResult(result.evaluation.score);
       window.scrollTo({ top: 0, behavior: 'instant' });
       void sound.play('success');
     }
