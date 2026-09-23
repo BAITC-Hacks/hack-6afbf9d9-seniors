@@ -65,17 +65,17 @@ Copy `.env.example` to `.env`, configure `OPENAI_API_KEY`, and restart. `OPENAI_
 
 The integration uses the Responses API with structured JSON output. The key stays on the server, `.env` is excluded from Git, and only public assets are served. Selected initiatives and calculated synthetic results are sent to the provider. Python calculates the Score; the LLM explains effects and trade-offs. Provider failures return a clearly labelled deterministic fallback.
 
-В главном меню доступны «Начать игру», «Настройки» и «Выйти из игры». Настройки звуков интерфейса, музыки, яркости и языка сохраняются в этом браузере.
+## Menu, settings and music
 
-### Музыка
+The main menu offers **Start game**, **Settings** and **Exit**. Interface sound, music, brightness and language settings are stored in this browser.
 
-- В меню, настройках, свободном симуляторе и во время встреч играет спокойная фоновая тема. На экране эпилога после пяти встреч включается отдельная мелодия финала.
-- В настройках есть переключатель **«Фоновая музыка»** и отдельная **громкость музыки 0–100%** (по умолчанию 30%). Отключение звуков интерфейса не отключает музыку и наоборот. Нулевая громкость также останавливает музыкальный проигрыватель.
-- До первого клика или нажатия Enter/пробела музыка не запускается. AudioContext создаётся/возобновляется внутри действия пользователя согласно [рекомендациям Web Audio](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Best_practices#autoplay_policy).
-- При скрытии вкладки, уходе со страницы и выходе из игры музыкальные голоса и таймер останавливаются. После возвращения во вкладку музыка возобновляется, если ранее была запущена и включена. На экране выхода она остаётся выключенной.
-- Обе композиции написаны для проекта как последовательности нот и синтезируются через Web Audio. Внешних аудиозаписей, сэмплов, скачиваний и библиотек нет; исходник музыки — `public/music.js`.
+- A calm background theme plays in the menu, the settings, the free simulator and during meetings. A separate finale melody plays on the epilogue screen after the fifth decision.
+- Settings carry a **Background music** toggle and a separate **music volume, 0–100%** (30% by default). Muting the interface sounds does not mute the music, and the reverse is also true. A volume of zero stops the music player entirely.
+- Nothing plays before the first click or Enter/Space press: the AudioContext is created or resumed inside a user gesture, following the [Web Audio guidance](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Best_practices#autoplay_policy).
+- Hiding the tab, leaving the page and exiting the game stop the music voices and their timer. Returning to the tab resumes the music if it was playing and enabled; it stays off on the exit screen.
+- Both pieces were written for this project as note sequences and are synthesised through Web Audio. There are no external recordings, samples, downloads or libraries; the source is `public/music.js`.
 
-Сброс настроек включает музыку и возвращает её громкость к 30%. Сохранения прежней версии получают эти значения автоматически, сохраняя прежние настройки звуков, яркости и языка. Браузер без Web Audio продолжает работать без звука.
+Resetting the settings re-enables music at 30% volume. Saves from an earlier version pick those values up automatically while keeping their existing sound, brightness and language settings. A browser without Web Audio continues to work without sound.
 
 ## Rules
 
@@ -153,32 +153,16 @@ This takes about a minute. A missing cache returns HTTP 503 for optimization; ev
 
 `GET /api/scenarios` returns two plans that buy **the same five initiatives for the same 100 units**, differing only in the target district:
 
-| File | Purpose |
-|---|---|
-| `data/city.json` | Five districts, ten indicators, weights and 14 initiatives |
-| `city_model.py` | Server validation, lags, synergies, constraints and Score |
-| `ai_analysis.py` | Real AI analysis and transparent deterministic fallback |
-| `server.py` | API and public-file serving |
-| `public/app.js` | Interface state, map, catalog, report and comparison |
-| `public/preferences.js` | Volume, brightness, language and interface sounds |
-| `public/music.js` | Procedural meeting and finale music with volume controls |
-| `public/i18n.js` | Russian, Kazakh and English translations |
-| `public/menu.css` | Main menu, settings and exit screen |
-| `public/story.js` | Three-language meetings, progress and budget checks |
-| `public/story-view.js` | Dialogue and epilogue rendering |
-| `public/story.css` | Dialogue frame, portraits, choices and responsive layout |
-| `public/portraits/` | Five local character portraits |
-| `analysis_locale.py` | Localized result explanations |
-| `public/styles.css` | Responsive interface, states and print layout |
-| `public/city-map.svg` | Schematic city illustration |
-| `tests/` | Model, API and frontend checks |
-
 | Plan | City average | Score |
 |---|---:|---:|
 | Everything into Yesil | 58.75 | 54.01 |
 | Everything into Nura | 58.16 | **57.21** |
 
 The plan with the **higher** city average loses by more than three points. That is the `0.3 × weakest district` term at work: a city is only as strong as its weakest district. Both figures are pinned by tests, so if the dataset or the formula changes the test suite fails rather than the demonstration.
+
+### Presentation page
+
+**http://127.0.0.1:8080/demo.html** shows this comparison side by side, in Russian or English, with every figure fetched live from `/api/scenarios` rather than written into the page. Each scenario has an **Open in the simulator** button that hands the plan to the main app, so a demonstration takes one click instead of selecting five initiatives by hand.
 
 ## Architecture
 
@@ -259,6 +243,7 @@ Optional frontend checks require Node.js 18+; `frontend_smoke.mjs` also needs a 
 node tests/frontend_smoke.mjs
 node tests/preferences.test.mjs
 node tests/story.test.mjs
+node tests/demo_page.test.mjs
 node tests/music.test.mjs
 ```
 
@@ -272,8 +257,9 @@ Reproduce the headline figures directly:
 | The reference example, cost 95 | Score **56.54** |
 | `py optimizer.py --top 1` | Score **57.24** |
 | `py optimizer.py --verify 300` | 0 divergences from the engine |
-Music tests use a fake AudioContext and controlled clock: they check autoplay gating, scene changes, independent volume, muting, visibility, exit and delayed audio operations without playing sound. To listen manually, click the main menu, adjust music in Settings, finish five meetings, hide/restore the tab, then exit the game.
-Эти необязательные тесты проверяют JavaScript, генерацию экранов, меню, настройки, полный сюжет, все ветки бюджета, возврат к встречам, повреждённые сохранения, переходы, язык, звуковые события, яркость, загрузку примера, экспорт, запоздавшие ответы и отказ сервера. Они не запускают браузер и не проверяют визуальную вёрстку или слышимость на физическом устройстве. Запросы к платному AI в тестах не выполняются. Сервер требуется только для `frontend_smoke.mjs`.
+| `TEST_PORT=8080 node tests/demo_page.test.mjs` | controlled pair intact, handover verified |
+
+Music tests use a fake AudioContext and a controlled clock: they check autoplay gating, scene changes, independent volume, muting, visibility, exit and delayed audio operations without playing sound. To listen manually, open the main menu, adjust music in Settings, finish five meetings, hide and restore the tab, then exit the game.
 
 ## Limitations
 
