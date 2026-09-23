@@ -5,6 +5,7 @@ export const SUPPORTED_LANGUAGES = Object.freeze([
 ]);
 
 const entries = [
+  ['Поделиться в Telegram', 'Share on Telegram', 'Telegram-да бөлісу'],
   ['Как улучшить мой план?', 'How can I improve my plan?', 'Жоспарымды қалай жақсартамын?'],
   ['Сравните результат с лучшим допустимым планом для этой модели города.', 'Compare your result with the best valid plan for this city model.', 'Нәтижені осы қала моделінің ең жақсы жарамды жоспарымен салыстырыңыз.'],
   ['Ваш Score', 'Your Score', 'Сіздің Score'],

@@ -549,12 +549,19 @@ function optimizerView() {
     </section>`;
 }
 
+function shareToTelegram(final_score = state.report?.evaluation?.score) {
+  if (typeof final_score !== 'number' || !Number.isFinite(final_score)) return;
+  const text = `Я набрал ${final_score} баллов в симуляторе Акима! А сможешь ли ты спасти город?`;
+  const url = `https://t.me/share/url?url=${encodeURIComponent('https://hackalem.ai')}&text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
+
 function reportView() {
   if (!state.report) return `${pageHeader('От решений к результатам', 'Будущее города в цифрах', 'Сначала соберите сценарий — здесь появится его подробный разбор.')}<section class="panel empty-page">${icon('chart')}<h2>Каким станет ваш город?</h2><p>Выберите ровно 5 мероприятий и нажмите «Оценить мой сценарий». Сравним показатели, найдём сильные стороны и объясним компромиссы.</p><button class="btn primary" data-action="nav" data-page="simulation">Перейти к решениям ${icon('arrow')}</button></section>`;
   const { evaluation: e, analysis: a } = state.report;
   const same = decisionKey(state.decisions) === decisionKey(e.decisions);
   const metricRows = e.metrics.map(m => `<div class="metric-compare-row"><span>${esc(category(m.id)?.shortName || m.name)}</span><div class="metric-compare-track"><span class="before" style="width:${m.before}%"></span><span class="after" style="width:${m.after}%"></span></div><b>${signed(m.delta)}</b></div>`).join('');
-  return `${pageHeader('Анализ городского сценария', `<span data-i18n-skip>${esc(state.report.name || 'Ваш сценарий')}</span>`, 'Измеримый результат. Понятные последствия. Следующий шаг.', `<button class="btn" data-action="export">${icon('download')}Скачать JSON</button><button class="btn primary" data-action="print">${icon('print')}Печать отчёта</button>`)}
+  return `${pageHeader('Анализ городского сценария', `<span data-i18n-skip>${esc(state.report.name || 'Ваш сценарий')}</span>`, 'Измеримый результат. Понятные последствия. Следующий шаг.', `<button class="btn" data-action="export">${icon('download')}Скачать JSON</button><button class="btn primary" data-action="print">${icon('print')}Печать отчёта</button><button type="button" class="btn telegram-share" data-action="share-telegram">Поделиться в Telegram</button>`)}
     ${!same ? '<div class="draft-warning">Это сохранённый результат. Текущие решения изменились — выполните анализ заново, чтобы обновить отчёт.</div>' : ''}
     ${optimizerView()}
   <section class="report-hero"><div class="score-ring" style="--score:${Math.max(0, Math.min(100, e.score))}"><div><b>${num(e.score)}</b><span>QUALITY OF LIFE SCORE</span></div></div><div><div class="eyebrow">Астана через 8 кварталов</div><h2>${e.delta > 0 ? 'У города есть изменения к лучшему' : 'У каждого решения есть последствия'}</h2><p data-i18n-skip>${esc(a.summary)}</p><div class="report-tags"><span class="tag ${e.delta < 0 ? 'negative' : 'positive'}">${signed(e.delta)} к исходным ${num(e.baselineScore)}</span><span class="tag">${e.spent} из ${e.budget} ед.</span><span class="tag">5 решений · ${directionCount(e.decisions)}</span></div></div></section>
@@ -659,6 +666,7 @@ document.addEventListener('click', async event => {
   event.preventDefault();
   const action = button.dataset.action;
   if (state.page === 'story') state.story.dialogueExpanded = true;
+  if (action === 'share-telegram') { shareToTelegram(); return; }
   if (action === 'optimize') {
     const report = state.report;
     if (!report || report.optimizing) return;

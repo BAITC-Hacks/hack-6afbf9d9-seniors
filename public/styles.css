@@ -16,3 +16,8 @@
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition:none!important;scroll-behavior:auto!important}}
 @page{size:A4;margin:14mm}
 @media print{.sidebar,.topbar,.head-buttons,.bottom-bar,.toast,.skip-link,.no-print{display:none!important}.workspace{margin:0}.main{max-width:none;padding:0}.page-head{margin-bottom:15px}.page-head h1{font-size:24px}.report-hero{break-inside:avoid}.report-grid{display:block}.report-grid .panel{margin-bottom:15px;break-inside:avoid}.panel{box-shadow:none;overflow:visible}.content-panel{break-inside:avoid;padding:15px}.analysis-notice{font-size:10px}.table-scroll{overflow:visible}table{white-space:normal;table-layout:fixed;font-size:8px}th,td{padding:6px 3px;overflow-wrap:anywhere}th{font-size:8px}tr{break-inside:avoid}.formula-box{overflow:visible;white-space:normal}body{background:#fff;color:#222}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+
+.btn.telegram-share{background:#087eae;color:#fff;border-color:#087eae}
+.btn.telegram-share:hover{background:#06678f;border-color:#06678f}
+.btn.telegram-share:focus-visible{outline:3px solid #38bdf8;outline-offset:3px}
+@media print{.telegram-share{display:none!important}}
