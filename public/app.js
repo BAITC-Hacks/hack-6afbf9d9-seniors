@@ -1,8 +1,9 @@
 import { translate, localizeMarkup, SUPPORTED_LANGUAGES } from './i18n.js';
 import { DEFAULT_SETTINGS, loadSettings, saveSettings, normalizeSettings, brightnessAppearance, createSoundPlayer } from './preferences.js';
-import { STORY_VERSION, getStory, storyText, storyDecisions, normalizeStory, storyOptionAvailability } from './story.js';
+import { storyText, storyDecisions, storyOptionAvailability } from './story.js';
 import { renderStory } from './story-view.js';
 import { createMusicPlayer } from './music.js';
+import { createStoryProgress, normalizeStoryProgress, serializeStoryProgress, nextStoryProgress, commitStoryChoice } from './story-flow.js';
 
 const app = document.querySelector('#app');
 const toastElement = document.querySelector('#toast');
@@ -10,7 +11,7 @@ const STORAGE = 'akim-simulator-v1';
 const STORY_STORAGE = 'akim-story-v1';
 const preferences = (() => { try { return loadSettings(localStorage); } catch { return { ...DEFAULT_SETTINGS }; } })();
 const state = { data: null, evaluation: null, decisions: [], category: 'transport', district: 'nura', mapMode: 'after', page: 'menu', name: translate('Мой городской сценарий', preferences.language), report: null, saved: [], busy: false, analyzing: false, targets: {}, undo: null, loading: true, loadError: '' };
-state.story = { choices: [], step: 0, selected: null, evaluation: null, confirmRestart: false };
+state.story = { ...createStoryProgress(), selected: null, evaluation: null, sceneEvaluation: null, confirmRestart: false };
 state.storyBusy = false;
 state.storyRestorePending = false;
 const sound = createSoundPlayer(() => preferences, window);
@@ -81,7 +82,7 @@ async function api(path, decisions, language) {
     throw new Error(error.name === 'TimeoutError' ? 'Сервер не успел ответить. Попробуйте ещё раз.' : 'Нет связи с сервером. Проверьте, запущено ли приложение.');
   }
   const result = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(typeof result.error === 'string' ? result.error : result.error?.message || result.message || 'Не удалось выполнить запрос.');
+  if (!response.ok) throw Object.assign(new Error(typeof result.error === 'string' ? result.error : result.error?.message || result.message || 'Не удалось выполнить запрос.'), { status: response.status });
   return result;
 }
 
@@ -154,7 +155,7 @@ function render() {
   const focus = !pageChanged && document.activeElement?.id === 'main' && pendingFocus ? pendingFocus : captureRenderFocus();
   syncViewRevision();
   applyPreferences();
-  void music.setScene(state.page === 'exited' ? null : state.page === 'story' && state.story.step === 5 ? 'finale' : 'ambient');
+  void music.setScene(state.page === 'exited' ? null : state.page === 'story' && state.story.phase === 'ending' ? 'finale' : 'ambient');
   if (state.page === 'story') {
     app.innerHTML = renderStory({ data: state.data, story: state.story, language: preferences.language, busy: state.storyBusy || state.busy || state.analyzing, icon, num, signed });
     restoreRenderFocus(focus);
@@ -248,32 +249,49 @@ function openScreen(page) {
 function persistStory() {
   if (!state.data || state.loading || state.loadError || state.storyRestorePending) return;
   try {
-    localStorage.setItem(STORY_STORAGE, JSON.stringify({ version: STORY_VERSION, datasetVersion: state.data.version, choices: state.story.choices, step: state.story.step }));
+    // Keep the storage key so version-one saves can be migrated in place.
+    localStorage.setItem(STORY_STORAGE, JSON.stringify(serializeStoryProgress(state.story, state.data.version)));
   } catch { toast('Хранилище браузера недоступно. Экспортируйте отчёт, чтобы сохранить результат.', true); }
 }
 
-function moveStory(step) {
-  if (state.storyBusy || !Number.isInteger(step) || step < 0 || step > state.story.choices.length || step > 5) return;
-  state.story.step = step;
-  state.story.selected = state.story.choices[step] ?? null;
-  state.story.confirmRestart = false;
-  persistStory();
-  openScreen('story');
+async function evaluateStoryScene(progress, evaluation) {
+  const count = Math.min(progress.choices.length, progress.step + 1);
+  return count === progress.choices.length ? evaluation
+    : count ? api('/api/evaluate', storyDecisions(progress.choices.slice(0, count))) : state.data.baseline;
+}
+
+async function moveStory(action) {
+  if (state.storyBusy || state.busy || state.analyzing) return;
+  const progress = nextStoryProgress(state.story, action);
+  if (!progress) return;
+  const page = state.page;
+  state.storyBusy = true;
+  render();
+  try {
+    // Revisit the city's state at this point without deleting later decisions.
+    const sceneEvaluation = await evaluateStoryScene(progress, state.story.evaluation);
+    Object.assign(state.story, progress, { sceneEvaluation, selected: progress.choices[progress.step] ?? null, confirmRestart: false });
+    persistStory();
+    if (state.page === page) openScreen('story');
+  } catch (error) { toast(error.message, true); }
+  finally { state.storyBusy = false; render(); }
 }
 
 async function confirmStoryChoice() {
-  if (state.storyBusy || state.story.step >= 5) return;
+  if (state.storyBusy || state.story.phase !== 'meeting' || state.story.step >= 5) return;
   const { choices, step, selected } = state.story;
   const availability = storyOptionAvailability(choices, step, selected, state.data.initiatives, state.data.budget);
   if (!availability.allowed) { toast(storyText(availability.reason === 'budget' ? 'locked' : availability.reason, preferences.language), true); return; }
   if (choices[step] === selected) return;
-  const next = [...choices.slice(0, step), selected];
+  const progress = commitStoryChoice(state.story, selected);
+  if (!progress) return;
   state.storyBusy = true;
   render();
   try {
-    const evaluation = await api('/api/evaluate', storyDecisions(next));
-    state.story.choices = next;
+    const evaluation = await api('/api/evaluate', storyDecisions(progress.choices));
+    Object.assign(state.story, progress);
     state.story.evaluation = evaluation;
+    state.story.sceneEvaluation = evaluation;
     persistStory();
     void sound.play('success');
   } catch (error) { toast(error.message, true); }
@@ -297,12 +315,12 @@ async function openStoryScenario(withAnalysis = false) {
 }
 
 async function restoreStory() {
-  state.story = { choices: [], step: 0, selected: null, evaluation: state.data.baseline, confirmRestart: false };
+  state.story = { ...createStoryProgress(), selected: null, evaluation: state.data.baseline, sceneEvaluation: state.data.baseline, confirmRestart: false };
   state.storyRestorePending = false;
   let restored;
   try {
     const saved = JSON.parse(localStorage.getItem(STORY_STORAGE) || 'null');
-    restored = saved?.datasetVersion === state.data.version ? normalizeStory(saved) : null;
+    restored = saved?.datasetVersion === state.data.version ? normalizeStoryProgress(saved) : null;
   } catch { return; /* Malformed or unavailable storage starts a fresh session. */ }
   if (!restored) return;
   const { choices, step } = restored;
@@ -311,7 +329,8 @@ async function restoreStory() {
   // Network errors reach boot's retry UI; exit cannot overwrite this save.
   state.storyRestorePending = true;
   const evaluation = choices.length ? await api('/api/evaluate', storyDecisions(choices)) : state.data.baseline;
-  state.story = { choices, step, selected: choices[step] ?? null, evaluation, confirmRestart: false };
+  const sceneEvaluation = await evaluateStoryScene(restored, evaluation);
+  state.story = { ...restored, selected: choices[step] ?? null, evaluation, sceneEvaluation, confirmRestart: false };
   state.storyRestorePending = false;
 }
 
@@ -518,20 +537,21 @@ document.addEventListener('click', async event => {
   }
   if (action === 'story-simulator') { openScreen('simulation'); return; }
   if (action === 'story-resume') { openScreen('story'); return; }
+  if (['intro-next', 'intro-back', 'transition-next'].includes(action)) { await moveStory(action); return; }
   if (action.startsWith('story-')) {
     if (state.storyBusy || state.busy || state.analyzing) return;
     if (action === 'story-select') {
       const selected = Number(button.dataset.id);
-      if (storyOptionAvailability(state.story.choices, state.story.step, selected, state.data.initiatives, state.data.budget).allowed) { state.story.selected = selected; render(); }
+      if (state.story.phase === 'meeting' && storyOptionAvailability(state.story.choices, state.story.step, selected, state.data.initiatives, state.data.budget).allowed) { state.story.selected = selected; render(); }
     }
     if (action === 'story-confirm') await confirmStoryChoice();
-    if (action === 'story-next' && state.story.choices[state.story.step] === state.story.selected) moveStory(state.story.step + 1);
-    if (action === 'story-back') moveStory(state.story.step - 1);
-    if (action === 'story-edit') moveStory(0);
+    if (action === 'story-next' && state.story.choices[state.story.step] === state.story.selected) await moveStory('meeting-next');
+    if (action === 'story-back') await moveStory('back');
+    if (action === 'story-edit') await moveStory('edit');
     if (action === 'story-restart') { state.story.confirmRestart = true; render(); document.querySelector('[data-action="story-restart-confirm"]')?.focus(); }
     if (action === 'story-restart-cancel') { state.story.confirmRestart = false; render(); document.querySelector('[data-action="story-restart"]')?.focus(); }
     if (action === 'story-restart-confirm' && state.story.confirmRestart) {
-      state.story = { choices: [], step: 0, selected: null, evaluation: state.data.baseline, confirmRestart: false };
+      state.story = { ...createStoryProgress(), selected: null, evaluation: state.data.baseline, sceneEvaluation: state.data.baseline, confirmRestart: false };
       persistStory(); openScreen('story');
     }
     if (action === 'story-analyze') await openStoryScenario(true);
@@ -666,7 +686,12 @@ async function restoreSavedReport(report, version) {
       id: report.id, name: report.name, savedAt: report.savedAt, evaluation,
       analysis: { mode: analysis.mode, language: ['ru', 'kk', 'en'].includes(analysis.language) ? analysis.language : 'ru', summary: analysis.summary, strengths: [...analysis.strengths], risks: [...analysis.risks], recommendations: [...analysis.recommendations], ...(analysis.notice === undefined ? {} : { notice: analysis.notice }) },
     };
-  } catch { return null; }
+  } catch (error) {
+    // Invalid saved decisions can be discarded; an unreachable server cannot
+    // establish that a saved report is corrupt. Let boot preserve storage.
+    if (error.status === 400) return null;
+    throw error;
+  }
 }
 
 async function boot() {
@@ -683,11 +708,17 @@ async function boot() {
       const restoredReports = Array.isArray(stored.saved)
         ? Promise.all(stored.saved.slice(0, 12).map(report => restoreSavedReport(report, stored.version)))
         : Promise.resolve([]);
-      if (Array.isArray(stored.decisions) && stored.decisions.length) {
-        try { state.evaluation = await api('/api/evaluate', stored.decisions); state.decisions = stored.decisions; }
-        catch { state.decisions = []; toast('Сохранённый черновик не прошёл проверку. Открыт новый сценарий.', true); }
-      }
-      state.saved = (await restoredReports).filter(Boolean);
+      const restoredDraft = Array.isArray(stored.decisions) && stored.decisions.length
+        ? api('/api/evaluate', stored.decisions).then(evaluation => ({ evaluation, decisions: stored.decisions })).catch(error => {
+          if (error.status !== 400) throw error;
+          toast('Сохранённый черновик не прошёл проверку. Открыт новый сценарий.', true);
+          return { evaluation: state.data.baseline, decisions: [] };
+        })
+        : Promise.resolve({ evaluation: state.data.baseline, decisions: [] });
+      const [reports, draft] = await Promise.all([restoredReports, restoredDraft]);
+      state.evaluation = draft.evaluation;
+      state.decisions = draft.decisions;
+      state.saved = reports.filter(Boolean);
       state.report = state.saved.find(r => decisionKey(r.evaluation.decisions) === decisionKey(state.decisions)) || null;
     }
   } catch (error) {

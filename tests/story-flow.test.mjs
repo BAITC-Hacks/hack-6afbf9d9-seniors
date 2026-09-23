@@ -1,0 +1,183 @@
+/** Pure navigation, save migration and grounded ending checks; no server required. */
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { getStory, storyDecisions } from '../public/story.js';
+import { FLOW_VERSION, createStoryProgress, normalizeStoryProgress, serializeStoryProgress, nextStoryProgress, commitStoryChoice, classifyEnding } from '../public/story-flow.js';
+
+const data = JSON.parse(await readFile(new URL('../data/city.json', import.meta.url), 'utf8'));
+// All tested payloads are JSON. Keep snapshots in the module's own realm so
+// strict comparisons also work in Node REPL hosts with a host structuredClone.
+const jsonClone = value => JSON.parse(JSON.stringify(value));
+const story = getStory();
+const fresh = { choices: [], step: 0, phase: 'intro', introStep: 0 };
+assert.equal(FLOW_VERSION, 2);
+assert.deepEqual(createStoryProgress(), fresh);
+const independent = createStoryProgress();
+independent.choices.push(2);
+assert.deepEqual(createStoryProgress(), fresh);
+
+let progress = createStoryProgress();
+assert.deepEqual(nextStoryProgress(progress, 'meeting-next'), progress);
+assert.deepEqual(nextStoryProgress(progress, 'intro-back'), progress);
+for (let screen = 1; screen <= 3; screen += 1) {
+  progress = nextStoryProgress(progress, 'intro-next');
+  assert.equal(progress.phase, 'intro');
+  assert.equal(progress.introStep, screen);
+}
+assert.equal(nextStoryProgress(progress, 'intro-back').introStep, 2);
+progress = nextStoryProgress(progress, 'intro-next');
+assert.deepEqual(progress, { choices: [], step: 0, phase: 'meeting', introStep: 3 });
+assert.deepEqual(nextStoryProgress(progress, 'meeting-next'), progress, 'A meeting cannot advance without an accepted choice.');
+
+for (let step = 0; step < 5; step += 1) {
+  const before = jsonClone(progress);
+  assert.deepEqual(commitStoryChoice(progress, 99), before);
+  progress = commitStoryChoice(progress, 0);
+  assert.equal(progress.step, step);
+  assert.equal(progress.phase, 'meeting');
+  assert.equal(progress.choices.length, step + 1);
+  progress = nextStoryProgress(progress, 'meeting-next');
+  assert.equal(progress.phase, 'transition');
+  assert.equal(progress.step, step);
+  assert.equal(nextStoryProgress(progress, 'back').step, step, 'Back from a transition returns to its own meeting.');
+  assert.equal(nextStoryProgress(progress, 'back').phase, 'meeting');
+  assert.deepEqual(commitStoryChoice(progress, 1), progress, 'Transitions cannot confirm new decisions.');
+  const encoded = serializeStoryProgress(progress, data.version);
+  assert.deepEqual(normalizeStoryProgress(encoded), { version: FLOW_VERSION, ...progress });
+  progress = nextStoryProgress(progress, 'transition-next');
+  assert.equal(progress.step, step + 1);
+  assert.equal(progress.phase, step === 4 ? 'ending' : 'meeting');
+}
+const completed = jsonClone(progress);
+assert.equal(nextStoryProgress(completed, 'back').step, 4);
+assert.equal(nextStoryProgress(completed, 'back').phase, 'meeting');
+assert.deepEqual(nextStoryProgress(completed, 'meeting-next'), completed);
+const revisited = nextStoryProgress(completed, 'edit');
+assert.equal(revisited.step, 0);
+assert.deepEqual(revisited.choices, completed.choices);
+const changed = commitStoryChoice(revisited, 2);
+assert.deepEqual(changed.choices, [2], 'A changed answer discards only the later branch.');
+assert.deepEqual(completed.choices, [0, 0, 0, 0, 0]);
+assert.deepEqual(nextStoryProgress(completed, 'restart'), fresh);
+const frozen = Object.freeze({ ...completed, choices: Object.freeze([...completed.choices]) });
+assert.doesNotThrow(() => nextStoryProgress(frozen, 'edit'));
+
+// Version 1 progress migrates directly to meetings, so existing players do not
+// have to replay the intro; an untouched legacy save starts the new intro.
+assert.deepEqual(normalizeStoryProgress({ version: 1, choices: [], step: 0 }), { version: 2, ...fresh });
+assert.deepEqual(normalizeStoryProgress({ version: 1, choices: [1, 2], step: 1, evaluation: { score: 100 } }), {
+  version: 2, choices: [1, 2], step: 1, phase: 'meeting', introStep: 3,
+});
+assert.deepEqual(normalizeStoryProgress({ version: 1, choices: [0, 0, 0, 0, 0], step: 5 }), { version: 2, ...completed });
+assert.equal(normalizeStoryProgress({ version: 1, choices: [0, 0, 0, 0, 0], step: 2 }).phase, 'meeting');
+
+const serialized = serializeStoryProgress({ ...completed, evaluation: { score: 999 }, ending: 'forged' }, data.version);
+assert.deepEqual(serialized, { version: 2, datasetVersion: data.version, decisionIds: ['M7', 'M4', 'M1', 'M10', 'M12'], step: 5, phase: 'ending', introStep: 3 });
+assert.deepEqual(normalizeStoryProgress({ ...serialized, choices: [2], evaluation: { score: 999 } }), { version: 2, ...completed });
+assert.deepEqual(normalizeStoryProgress(serializeStoryProgress({ ...fresh, introStep: 2 }, data.version)), { version: 2, ...fresh, introStep: 2 });
+for (const invalid of [null, [], {}, { version: 0 }, { version: 3 }, { version: 1, choices: [99] },
+  { version: 2, decisionIds: null }, { version: 2, decisionIds: ['M99'] },
+  { version: 2, decisionIds: ['M4'] }, { version: 2, decisionIds: ['M7', 'M7'] },
+  { version: 2, decisionIds: [null] }, { version: 2, decisionIds: ['M7', 'M4', 'M1', 'M10', 'M12', 'M14'] }]) {
+  assert.equal(normalizeStoryProgress(invalid), null);
+}
+const sparse = new Array(1);
+assert.equal(normalizeStoryProgress({ version: 2, decisionIds: sparse }), null);
+assert.equal(normalizeStoryProgress({ version: 2, decisionIds: [], phase: 'transition', step: 0 }).phase, 'meeting');
+assert.equal(normalizeStoryProgress({ version: 2, decisionIds: ['M7'], phase: 'intro', step: 0 }).phase, 'meeting');
+assert.equal(normalizeStoryProgress({ version: 2, decisionIds: ['M7'], phase: 'ending', step: 1 }).phase, 'meeting');
+assert.equal(normalizeStoryProgress({ ...serialized, phase: 'meeting' }).phase, 'ending');
+assert.equal(normalizeStoryProgress({ ...serialized, phase: 'transition', step: 4 }).phase, 'transition');
+assert.equal(normalizeStoryProgress({ ...serialized, step: -1, phase: 'unknown' }).phase, 'ending');
+assert.equal(normalizeStoryProgress({ version: 2, decisionIds: [], phase: 'intro', introStep: 8 }).introStep, 0);
+assert.throws(() => serializeStoryProgress({ choices: [99] }, data.version), TypeError);
+
+// Independent test-only oracle reads the supplied city data. It is not imported
+// by the game or its classifier. The same route counts were also checked against
+// Python city_model.evaluate: 127 affordable routes reach all five ending styles.
+const catalogue = new Map(data.initiatives.map(item => [item.id, item]));
+const baseline = Object.fromEntries(data.districts.map(district => [district.id, { ...district.metrics }]));
+const round = value => Math.round((value + Number.EPSILON) * 100) / 100;
+const assess = state => {
+  const districts = data.districts.map(district => ({ id: district.id, score: data.indicators.reduce((sum, indicator) => sum + indicator.weight * state[district.id][indicator.id], 0), population: district.population }));
+  const minimum = Math.min(...districts.map(district => district.score));
+  const average = districts.reduce((sum, district) => sum + district.score * district.population, 0);
+  const critical = Object.values(state).flatMap(metrics => Object.values(metrics)).filter(value => value < 40).length;
+  return { score: 0.7 * average + 0.3 * minimum - critical, critical };
+};
+const before = assess(baseline);
+assert.equal(round(before.score), 52.56);
+function evaluatePath(path) {
+  const decisions = storyDecisions(path).map(decision => ({ ...decision, cost: catalogue.get(decision.initiativeId).cost, lag: catalogue.get(decision.initiativeId).lag }));
+  const spent = decisions.reduce((sum, decision) => sum + decision.cost, 0);
+  if (spent > data.budget) return null;
+  const state = jsonClone(baseline);
+  for (const decision of decisions) {
+    const measure = catalogue.get(decision.initiativeId);
+    const targets = measure.scope === 'city' ? Object.keys(state) : [decision.districtId];
+    for (const district of targets) for (const [code, effect] of Object.entries(measure.effects)) state[district][code] += effect * (data.horizon - measure.lag) / data.horizon;
+  }
+  for (const synergy of data.rules.synergies) {
+    if (synergy.initiativeIds.every(id => decisions.some(decision => decision.initiativeId === id))) {
+      const target = decisions.find(decision => decision.initiativeId === synergy.targetInitiativeId).districtId;
+      for (const [code, effect] of Object.entries(synergy.effects)) state[target][code] += effect;
+    }
+  }
+  for (const metrics of Object.values(state)) for (const code of Object.keys(metrics)) metrics[code] = Math.max(0, Math.min(100, metrics[code]));
+  const after = assess(state);
+  const metrics = data.categories.map(category => {
+    const indicators = data.indicators.filter(indicator => indicator.categoryId === category.id);
+    const weight = indicators.reduce((sum, indicator) => sum + indicator.weight, 0);
+    const mean = source => data.districts.reduce((sum, district) => sum + district.population * indicators.reduce((subtotal, indicator) => subtotal + indicator.weight * source[district.id][indicator.id], 0) / weight, 0);
+    return { id: category.id, delta: round(mean(state) - mean(baseline)) };
+  });
+  return { decisions: decisions.sort((a, b) => Number(a.initiativeId.slice(1)) - Number(b.initiativeId.slice(1))), metrics, spent, budget: data.budget, remaining: data.budget - spent, criticalCount: after.critical, score: round(after.score), delta: round(after.score - before.score) };
+}
+const paths = story.reduce((prefixes, meeting) => prefixes.flatMap(prefix => meeting.choices.map((_, index) => [...prefix, index])), [[]]);
+const counts = {};
+for (const path of paths) {
+  const evaluation = evaluatePath(path);
+  if (!evaluation) continue;
+  const snapshot = jsonClone(evaluation);
+  const result = classifyEnding(evaluation, data.initiatives);
+  counts[result.id] = (counts[result.id] || 0) + 1;
+  assert.deepEqual(evaluation, snapshot, 'Classification cannot change model results.');
+  assert.equal(classifyEnding({ ...evaluation, decisions: [...evaluation.decisions].reverse() }, data.initiatives).id, result.id, 'Canonical server ordering cannot change the narrative style.');
+  for (const language of ['ru', 'kk', 'en']) {
+    const localized = classifyEnding(evaluation, data.initiatives, language);
+    assert.equal(localized.id, result.id);
+    assert.equal(localized.reasons.length, 3);
+    for (const text of [localized.title, localized.body, ...localized.reasons]) {
+      assert.ok(text.length > 10);
+      assert.doesNotMatch(text, /undefined|NaN|\{\w+\}/);
+      if (language === 'en') assert.doesNotMatch(text, /[А-Яа-яЁёӘІҢҒҮҰҚӨҺәіңғүұқөһ]/u);
+    }
+  }
+}
+assert.deepEqual(counts, { social: 24, strained: 30, balanced: 16, green: 21, quick: 36 });
+assert.equal(Object.values(counts).reduce((sum, count) => sum + count, 0), 127);
+const examples = {
+  social: [[0, 0, 0, 0, 0], [0, 0, 0, 0, 2]],
+  strained: [[0, 0, 0, 0, 1], [0, 0, 0, 1, 1]],
+  balanced: [[0, 0, 2, 1, 0], [1, 0, 0, 0, 1]],
+  green: [[0, 1, 0, 0, 0], [0, 1, 0, 1, 0]],
+  quick: [[2, 0, 0, 0, 0], [2, 0, 0, 0, 2]],
+};
+for (const [id, routes] of Object.entries(examples)) for (const route of routes) assert.equal(classifyEnding(evaluatePath(route), data.initiatives).id, id);
+const green = evaluatePath(examples.green[0]);
+const belowThreshold = jsonClone(green);
+belowThreshold.metrics.find(metric => metric.id === 'green').delta = 0.89;
+assert.equal(classifyEnding(belowThreshold, data.initiatives).id, 'balanced');
+belowThreshold.metrics.find(metric => metric.id === 'green').delta = 0.9;
+assert.equal(classifyEnding(belowThreshold, data.initiatives).id, 'green');
+const atBudgetLimit = evaluatePath(examples.strained[1]);
+assert.equal(atBudgetLimit.remaining, 5);
+assert.equal(classifyEnding({ ...atBudgetLimit, criticalCount: 0 }, data.initiatives).id, 'balanced');
+assert.equal(classifyEnding(evaluatePath([1, 2, 0, 0, 0]), data.initiatives).id, 'social', 'Tied largest category spending counts as a social priority.');
+assert.equal(classifyEnding(green, data.initiatives, 'unknown').title, classifyEnding(green, data.initiatives, 'ru').title);
+assert.throws(() => classifyEnding({ ...green, decisions: [] }, data.initiatives), TypeError);
+assert.throws(() => classifyEnding({ ...green, score: NaN }, data.initiatives), TypeError);
+const changedResult = classifyEnding(green, data.initiatives);
+changedResult.reasons.length = 0;
+assert.equal(classifyEnding(green, data.initiatives).reasons.length, 3);
+console.log('PASS: four-screen intro, transitions, v1 migration, durable v2 saves and five localized endings across 127 affordable routes.');

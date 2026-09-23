@@ -12,6 +12,7 @@ import * as localization from '../public/i18n.js';
 import * as gamePreferences from '../public/preferences.js';
 import * as storyModel from '../public/story.js';
 import * as storyPresentation from '../public/story-view.js';
+import * as storyFlow from '../public/story-flow.js';
 import { createMusicPlayer } from '../public/music.js';
 
 function localApi(path, decisions) {
@@ -65,7 +66,7 @@ const musicCalls = [];
 let downloaded;
 let downloadClicks = 0;
 const context = vm.createContext({
-  ...localization, ...gamePreferences, ...storyModel, ...storyPresentation,
+  ...localization, ...gamePreferences, ...storyModel, ...storyPresentation, ...storyFlow,
   createMusicPlayer(getPreferences, environment) {
     const player = createMusicPlayer(getPreferences, environment);
     return Object.fromEntries(['unlock', 'setScene', 'sync', 'stop'].map(method => [method, (...args) => {
@@ -107,6 +108,21 @@ await events.click({ isTrusted: true, target: { closest: () => null } });
 assert.equal(musicCalls.filter(call => call[0] === 'unlock').length, 1);
 await click('start-game');
 assert.equal(run('state.page'), 'story');
+assert.equal(run('state.story.phase'), 'intro');
+assert.equal(run('state.story.introStep'), 0);
+assert.ok(!nodes.app.innerHTML.includes('data-action="story-select"'));
+await click('intro-next');
+assert.equal(run('state.story.introStep'), 1);
+await run('restoreStory()');
+assert.equal(run('state.story.introStep'), 1, 'The prologue resumes on the saved frame.');
+await click('intro-back');
+for (let frame = 0; frame < 4; frame += 1) {
+  assert.equal(run('state.story.introStep'), frame);
+  assert.equal(run('state.story.evaluation.remaining'), 100);
+  await click('intro-next');
+}
+assert.equal(run('state.story.phase'), 'meeting');
+assert.equal(run('state.story.choices.length'), 0);
 assert.ok(nodes.app.innerHTML.includes('Айгуль Садыкова'));
 assert.ok(nodes.app.innerHTML.includes('/portraits/character-0.png'));
 await click('story-simulator');
@@ -240,8 +256,22 @@ for (let step = 0; step < 5; step += 1) {
   assert.equal(run('state.story.evaluation.decisions.length'), step + 1);
   assert.ok(nodes.app.innerHTML.includes('story-acknowledgement'));
   await click('story-next');
+  assert.equal(run('state.story.phase'), 'transition');
+  assert.equal(run('state.story.step'), step);
+  assert.ok(nodes.app.innerHTML.includes('data-action="transition-next"'));
+  assert.ok(!nodes.app.innerHTML.includes('data-action="story-select"'));
+  await click('story-back');
+  assert.equal(run('state.story.phase'), 'meeting');
+  assert.equal(run('state.story.step'), step, 'Back from a reaction returns to its own meeting.');
+  await click('story-next');
+  const savedChoices = run('JSON.stringify(state.story.choices)');
+  await run('restoreStory()');
+  assert.equal(run('state.story.phase'), 'transition', 'Reload preserves the city reaction scene.');
+  assert.equal(run('JSON.stringify(state.story.choices)'), savedChoices);
+  await click('transition-next');
 }
 assert.equal(run('state.story.step'), 5);
+assert.equal(run('state.story.phase'), 'ending');
 assert.deepEqual(musicCalls.at(-1), ['setScene', 'finale']);
 assert.equal(run('state.story.evaluation.spent'), 83);
 assert.equal(run('state.story.evaluation.complete'), true);
@@ -256,10 +286,54 @@ assert.equal(run('state.story.step'), 5);
 assert.equal(run('state.story.choices.length'), 5);
 assert.equal(run('state.story.evaluation.score'), storyScore);
 assert.equal(JSON.parse(storySave).datasetVersion, bootstrap.version);
+assert.equal(JSON.parse(storySave).version, 2);
+assert.deepEqual(JSON.parse(storySave).decisionIds, ['M7', 'M4', 'M1', 'M10', 'M12']);
+assert.equal(JSON.parse(storySave).choices, undefined, 'New saves use stable initiative IDs.');
+
+// All five endings must be reachable with real validated server calculations.
+const endingExamples = {
+  social: [0, 0, 0, 0, 0], green: [0, 1, 0, 0, 0], quick: [2, 0, 0, 0, 0],
+  balanced: [0, 0, 2, 1, 0], strained: [0, 0, 0, 0, 1],
+};
+for (const [id, indices] of Object.entries(endingExamples)) {
+  const result = await localApi('/api/evaluate', storyModel.storyDecisions(indices));
+  for (const language of ['ru', 'kk', 'en']) {
+    const ending = storyFlow.classifyEnding(result, bootstrap.initiatives, language);
+    assert.equal(ending.id, id);
+    assert.ok(ending.title && ending.body && ending.reasons.length);
+  }
+}
+
+// Legacy saves continue their meeting and keep the original choices.
+storage.set('akim-story-v1', JSON.stringify({ version: 1, datasetVersion: bootstrap.version, choices: [0, 1], step: 1 }));
+await run('restoreStory()');
+assert.equal(run('state.story.phase'), 'meeting');
+assert.equal(run('state.story.step'), 1);
+assert.equal(run('JSON.stringify(state.story.choices)'), '[0,1]');
+storage.set('akim-story-v1', storySave);
+await run('restoreStory()');
 
 // Revisiting a meeting is harmless until a different answer is confirmed.
+const healthyFetch = context.fetch;
+context.fetch = async () => { throw new Error('Temporary prefix-evaluation failure'); };
+await click('story-edit');
+assert.equal(run('state.story.phase'), 'ending', 'Failed scene evaluation leaves the current scene intact.');
+assert.equal(run('state.story.choices.length'), 5);
+assert.equal(run('state.storyBusy'), false);
+context.fetch = healthyFetch;
 await click('story-edit');
 assert.equal(run('state.story.choices.length'), 5);
+assert.equal(run('state.story.evaluation.spent'), 83, 'Revisiting keeps the full confirmed plan.');
+assert.equal(run('state.story.sceneEvaluation.spent'), 24, 'The scene shows only decisions made by this point.');
+assert.equal(run('state.story.sceneEvaluation.remaining'), 76);
+assert.equal(run('state.story.sceneEvaluation.decisions.length'), 1);
+await click('story-next');
+assert.equal(run('state.story.phase'), 'transition');
+assert.equal(run('state.story.sceneEvaluation.decisions.length'), 1, 'Early maps cannot reveal later initiatives or synergies.');
+await run('restoreStory()');
+assert.equal(run('state.story.sceneEvaluation.spent'), 24, 'Restoring an early scene reevaluates its own prefix.');
+assert.equal(run('state.story.evaluation.spent'), 83);
+await click('story-back');
 await click('story-select', { id: '2' });
 assert.equal(run('state.story.choices.length'), 5);
 await click('story-confirm');
@@ -273,12 +347,15 @@ await click('story-restart');
 await click('story-restart-confirm');
 assert.equal(run('state.story.choices.length'), 0);
 assert.equal(run('state.story.evaluation.remaining'), 100);
+assert.equal(run('state.story.phase'), 'intro');
+for (let frame = 0; frame < 4; frame += 1) await click('intro-next');
 
 // Expensive choices are blocked before they make the final meetings impossible.
 for (const id of ['0', '1']) {
   await click('story-select', { id });
   await click('story-confirm');
   await click('story-next');
+  await click('transition-next');
 }
 await click('story-select', { id: '2' }); // 24 + 25 + 30 + minimum 10 + 14 = 103.
 assert.equal(run('state.story.selected'), null);
@@ -346,6 +423,36 @@ assert.equal(run('state.page'), 'story');
 assert.equal(run('state.storyRestorePending'), false);
 assert.equal(run('state.story.choices.length'), 5);
 assert.equal(run('state.loadError'), '');
+
+// A failed draft/report restore must preserve stored data too, even when an
+// empty story needs no evaluation and therefore cannot catch the outage first.
+const completeStorySave = storage.get('akim-story-v1');
+const completeSimulatorSave = storage.get('akim-simulator-v1');
+const recoveryReport = { id: 'recovery', name: 'Saved report', savedAt: '2026-09-23T10:00:00.000Z', ...example };
+for (const failure of ['draft', 'report']) {
+  storage.set('akim-story-v1', JSON.stringify(storyFlow.serializeStoryProgress(storyFlow.createStoryProgress(), bootstrap.version)));
+  const original = JSON.stringify({ version: bootstrap.version, name: 'Saved plan', decisions: failure === 'draft' ? choices : [], saved: failure === 'report' ? [recoveryReport] : [] });
+  storage.set('akim-simulator-v1', original);
+  context.fetch = async path => {
+    if (path === '/api/bootstrap') return { ok: true, json: async () => bootstrap };
+    throw new Error('Temporary restore outage');
+  };
+  run('state.page="menu"');
+  await run('boot()');
+  assert.ok(run('state.loadError.length') > 0);
+  await click('exit-game');
+  assert.equal(storage.get('akim-simulator-v1'), original, `${failure} data survives a network outage.`);
+}
+context.recoveryReport = recoveryReport;
+context.fetch = async () => ({ ok: false, status: 400, json: async () => ({ error: 'Invalid saved decisions' }) });
+assert.equal(await run('restoreSavedReport(recoveryReport,state.data.version)'), null, 'An actual validation rejection still discards an invalid report.');
+context.fetch = healthyFetch;
+storage.set('akim-story-v1', completeStorySave);
+storage.set('akim-simulator-v1', completeSimulatorSave);
+run('state.page="menu"');
+await run('boot()');
+assert.equal(run('state.loadError'), '');
+assert.equal(run('state.story.choices.length'), 5);
 
 context.document.hidden = true;
 events.visibilitychange();

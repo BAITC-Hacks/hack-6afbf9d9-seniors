@@ -30,9 +30,9 @@ Drafts and up to 12 distinct recent reports are stored in this browser's `localS
 
 ## Story mode
 
-1. Open the app and press **Start game** to begin the story **"One day to save a district"**. Budget **100**, baseline Score **52.56**.
-2. Work through five meetings: read the dialogue, choose a reply on the right, and press **Confirm decision**. After the character responds, continue to the next meeting.
-3. After the fifth decision press **End the day**. The epilogue shows the Score, the improvements, the critical indicators and the initiatives left unfunded.
+1. Press **Start game** to begin **"One day to save a district"**. A four-scene prologue introduces your work at the city laboratory, an urgent call appointing you temporary akim, the city map and the five-hour deadline. Enter city headquarters with budget **100** and baseline Score **52.56**. An existing save resumes its current scene; **Restart story** replays the prologue.
+2. Work through five meetings: read the dialogue, choose a reply on the right, and press **Confirm decision**. Continue to a city reaction before the next meeting. Later characters remember your decisions, and some replies change to address them.
+3. After the fifth decision and its reaction, review the day. The evening scene and one of five endings explain your priorities alongside the server-calculated Score, improvements, critical indicators and initiatives left unfunded.
 4. Press **Get a breakdown** to open the AI or demo report. Download it as JSON or print it, including to PDF through your browser.
 5. For free choice of initiatives and districts, open **Free simulator** in the top bar. The map and indicators recalculate after each decision; the Now/Forecast toggle compares original and new district scores.
 6. Change decisions and analyse again. The **Comparison** tab ranks saved scenarios by Score. **Return to meetings** resumes the story.
@@ -53,7 +53,23 @@ The clock marks five meetings rather than counting real time. Indicator changes 
 
 Choosing a reply highlights it first; confirming submits the decisions to `/api/evaluate`. No money is spent before confirmation. Unavailable replies explain why the remaining budget could not cover the rest of the day: the client enumerates possible completions and the server revalidates the accepted initiatives. Of 162 complete routes, 127 fit within the budget of 100; the cheapest costs 67.
 
-Meeting progress is stored separately from the simulator draft. Going back does not change decisions; confirming a different reply resets the later meetings. Restarting the day requires confirmation in-game and preserves existing reports. Final numbers are recalculated by the server on restore rather than read from the save. The epilogue buttons **Open decisions in the simulator** and **Get a breakdown** carry the story's decisions into the current draft.
+Meeting progress is stored separately from the simulator draft. Version 2 saves store initiative IDs, scene phase and prologue frame; version 1 saves migrate automatically. Going back does not change decisions; confirming a different reply resets later meetings. Revisited scenes use only their decision prefix, including a fresh server evaluation for their map and budget. Restarting the day requires confirmation in-game and preserves existing reports. Final numbers are recalculated by the server on restore rather than read from the save. The epilogue buttons **Open decisions in the simulator** and **Get a breakdown** carry the story's decisions into the current draft.
+
+### Branches and endings
+
+Each of the 14 available replies leads to its own reaction scene. The teacher's decision changes the environmental meeting and the doctor's priorities; the ecological choice changes the taxi driver's conversation; transport changes the pensioner's requests; safety changes the adviser's reply and evening scene. The adviser recalls all four earlier choices. A school or clinic changes the utility-modernization reply, and lighting plus the digital appeals platform opens a reply explaining their existing model synergy. Reactions describe resident messages and project preparation today; actual indicator changes remain the **two-year model forecast**.
+
+Ending styles are deterministic narrative interpretations, not extra Score bonuses. The first matching rule wins:
+
+| Ending | Rule using the evaluated plan |
+| --- | --- |
+| A stretched budget | At most 5 units remain and at least one indicator is below 40 |
+| Faster first steps | At least three selected initiatives have a one-quarter lag |
+| A city for families | M7 or M8 is selected, and social spending is a largest category (ties count) |
+| A greener direction | M5 or M6 is selected, and the server's green-category delta is at least 0.9 |
+| Balancing the city's needs | All remaining mixed approaches |
+
+All five endings are reachable among the 127 affordable story routes. Spending beyond 100 is still rejected; a stretched-budget ending means unresolved needs with little reserve, not permitted overspending. Story text, save handling and the ending classifier never calculate or modify the Score.
 
 The five characters are fictional. Portraits were produced with the built-in image generator and are included in the repository: [files and exact prompts](docs/character-art.md).
 
@@ -153,6 +169,27 @@ This takes about a minute. A missing cache returns HTTP 503 for optimization; ev
 
 `GET /api/scenarios` returns two plans that buy **the same five initiatives for the same 100 units**, differing only in the target district:
 
+| File | Purpose |
+|---|---|
+| `data/city.json` | Five districts, ten indicators, weights and 14 initiatives |
+| `city_model.py` | Server validation, lags, synergies, constraints and Score |
+| `ai_analysis.py` | Real AI analysis and transparent deterministic fallback |
+| `server.py` | API and public-file serving |
+| `public/app.js` | Interface state, map, catalog, report and comparison |
+| `public/preferences.js` | Volume, brightness, language and interface sounds |
+| `public/music.js` | Procedural meeting and finale music with volume controls |
+| `public/i18n.js` | Russian, Kazakh and English translations |
+| `public/menu.css` | Main menu, settings and exit screen |
+| `public/story.js` | Three-language meetings, progress and budget checks |
+| `public/narrative.js` | Localized prologue, reactions, contextual dialogue and evening scenes |
+| `public/story-flow.js` | Scene navigation, save migration and ending classification |
+| `public/story-view.js` | Dialogue and epilogue rendering |
+| `public/story.css` | Dialogue frame, portraits, choices and responsive layout |
+| `public/portraits/` | Five local character portraits |
+| `analysis_locale.py` | Localized result explanations |
+| `public/styles.css` | Responsive interface, states and print layout |
+| `public/city-map.svg` | Schematic city illustration |
+| `tests/` | Model, API and frontend checks |
 | Plan | City average | Score |
 |---|---:|---:|
 | Everything into Yesil | 58.75 | 54.01 |
@@ -244,6 +281,8 @@ node tests/frontend_smoke.mjs
 node tests/preferences.test.mjs
 node tests/story.test.mjs
 node tests/demo_page.test.mjs
+node tests/story-flow.test.mjs
+node tests/narrative.test.mjs
 node tests/music.test.mjs
 ```
 
