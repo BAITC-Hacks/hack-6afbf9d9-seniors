@@ -21,8 +21,10 @@ Every participant starts with the same synthetic data and **100 budget units**. 
 - **Stress testing against city shocks.** Six deterministic events — a harsh winter, a burst heating main, a population surge and others — re-score a plan under pressure, so a plan can be judged on the bad year as well as the good one.
 - **Story mode:** a four-scene prologue, budget planning, five investigations with ten discoveries, connected meetings, a mid-day council and a branching epilogue built from the server's real calculation.
 - **Interface:** schematic map, current/forecast comparison, saved scenario ranking, JSON export, print and PDF output, three languages, and sound, music and brightness settings.
-- **101 Python tests and 10 Node suites**, covering the reference figures, every rule, API validation, private-file protection, provider failure, the optimizer's agreement with the engine, story investigations, budget allocation and the figures quoted in this file.
+- **110 Python tests and 14 Node suites**, covering the reference figures, every rule, API validation, private-file protection, provider failure, the optimizer's agreement with the engine, story investigations, budget allocation and the figures quoted in this file.
 - **Read-only replay** is covered alongside the story investigations, budget allocation and the figures quoted in this file.
+- **A living headquarters:** four transparent narrative reputation indices, five milestones, district condition markers, a saved random city event and a separate server-calculated event forecast.
+- **A 2½-minute jury presentation**, plus a team and AI-transparency screen. The presentation uses its own server-evaluated example without changing the participant's progress.
 
 ## Technologies
 
@@ -96,11 +98,35 @@ The final screen presents the city map, the hero's address, three strongest impr
 | 12:00 | Serik Akhmetov, pensioner | M10 / M11 in Nura |
 | 13:00 | Aliya Nurlanova, doctor and adviser | City-wide M12 / M14, or M13 in Nura |
 
-The clock marks five meetings rather than counting real time. Indicator changes are still calculated over the original horizon of **8 quarters**, not within a single day. The story draws only on initiatives from the shared catalogue and offers one per category; the free simulator keeps the original "at most two per category" rule.
+Meeting timestamps mark the five chapters. The prologue also has a gentle **90-second countdown**: continue before it expires or read at your own pace afterward. It pauses when the tab is hidden or the prologue is left; expiry does not advance a scene, penalize the participant or change the budget. Indicator changes are still calculated over the original horizon of **8 quarters**, not within a single day. The story draws only on initiatives from the shared catalogue and offers one per category; the free simulator keeps the original "at most two per category" rule.
 
 Choosing a reply highlights it first; confirming submits the decisions to `/api/evaluate`. No money is spent before confirmation. Unavailable replies explain why the remaining budget could not cover the rest of the day: the client enumerates possible completions and the server revalidates the accepted initiatives. Of 162 complete routes, 127 fit within the budget of 100; the cheapest costs 67.
 
-Meeting progress is stored separately from the simulator draft. Version 3 saves store initiative IDs, scene phase, prologue frame, approved allocations, investigations and council choice; versions 1 and 2 migrate automatically. Existing saves continue their scene with unrestricted envelopes until the participant opens planning. Going back does not change decisions; confirming a different reply resets later meetings. Revisited scenes use only their decision prefix, including a fresh server evaluation for their map and budget. Restarting the day requires confirmation in the simulator and preserves existing reports. Final numbers are recalculated by the server on restore rather than read from the save. The epilogue buttons **Open free mode** and **Get a breakdown** carry the story's decisions into the current draft.
+Meeting progress is stored separately from the simulator draft. Version 3 saves store initiative IDs, scene phase, prologue frame, approved allocations, investigations, council choice and the day's `eventId`; versions 1 and 2 migrate automatically. Existing saves continue their scene with unrestricted envelopes until the participant opens planning. Going back does not change decisions; confirming a different reply resets later meetings. Revisited scenes use only their decision prefix, including a fresh server evaluation for their map and budget. Restarting the day requires confirmation in the simulator and preserves existing reports. Final numbers are recalculated by the server on restore rather than read from the save. The epilogue buttons **Open free mode** and **Get a breakdown** carry the story's decisions into the current draft.
+
+### Reputation, milestones and the final review
+
+The headquarters sidebar shows **resident trust, business support, environmental reputation and efficiency**. These are explicitly labelled **illustrative narrative indices, not a poll or Score**. Each starts at 50; fixed rules use the current server-evaluated category changes, critical indicators and confirmed implementation lags, then round and clamp to 0–100. Expand **How the indices are calculated** to see every formula. Values are derived again for the visible decision prefix, so revisiting or rendering a scene never accumulates points.
+
+The final review includes five milestones with visible earned/locked conditions. Their Russian names match the story; all labels and conditions are also translated into Kazakh and English.
+
+| Milestone | Condition |
+| --- | --- |
+| «Голос районов» / Voice of the districts | Approved initiatives target at least three districts; a citywide initiative covers all five |
+| «Ни одного лишнего тенге» / Not one extra tenge | Exactly five decisions spend exactly the full 100-unit budget without overspending; the title is figurative, since units are not real tenge |
+| «Зелёный курс» / A greener direction | An environmental initiative is selected and the server's environment-category delta is at least 0.9 |
+| «Сначала люди» / People first | A school or clinic is funded in Nura and Nura's forecast district score improves by at least 2 points |
+| «Аким за пять часов» / Akim in five hours | Five server-validated decisions complete the day within budget |
+
+Neither reputation nor milestones add funds or Score points. The expanded ending also lists districts with positive server-calculated changes, explains trade-offs such as M11's negative T1 contribution, long implementation lags and a need with no direct improvement, and adds a social, environmental, crisis, reformer or balanced leadership profile. This profile supplements the original five ending types; it does not replace their classification or change the calculation.
+
+District markers distinguish **an indicator below 40**, **an improved district score**, and **no score improvement**, in that priority order. A visible legend explains the states and category dots; a marker can remain critical even when its district score rises. Transport lines are illustrative effects on a schematic map, not real routes.
+
+### An unexpected event during the day
+
+After the second confirmed decision, the story draws one of four existing events: `harsh-winter`, `heating-main-burst`, `population-surge` or `traffic-accidents`. Its ID is saved once for the day in the existing version 3 save. The event card appears automatically when at least two decisions are visible; **Calculate the event forecast** sends that visible prefix to `/api/story-event`.
+
+The response keeps the ordinary evaluation and the event forecast separate. It shows the event's Score, critical count and district changes without modifying approved decisions, the main budget, the ordinary Score or the free-mode draft. An event has deterministic effects; only its selection for a new day is random. Reopening a save does not draw another event. Changing the visible decisions or language requires a matching fresh preview; a failed request leaves the plan intact and can be retried.
 
 ### Allocate and reconsider
 
@@ -136,13 +162,18 @@ The integration uses the Responses API with structured JSON output. The key stay
 
 ## Menu, settings and music
 
-The main menu offers **Start**, **Settings** and **Exit simulator**. Start opens exactly three choices: **Story**, **Free mode** and **Back to menu**. Interface sound, music, brightness and language settings are stored in this browser.
+The main menu's primary actions are **Start**, **Settings** and **Exit simulator**. Start opens exactly three choices: **Story**, **Free mode** and **Back to menu**. Secondary menu links open **Jury presentation · 2½ minutes** and **Team and AI transparency**. Interface sound, music, brightness and language settings are stored in this browser.
+
+The jury presentation has six 25-second scenes: the city problem, temporary appointment, five decisions, forecast results, a city event and the concluding value of the simulator. It offers pause/resume, previous/next, restart and exit; hiding the tab pauses it. Its example and each decision prefix are evaluated by the server, with a separate event forecast. Presentation navigation does not modify story saves, accepted decisions, reports or the free-mode draft.
+
+The team screen identifies Seniors and explains three responsibilities: Python validates and calculates; AI explains already calculated results; a labelled deterministic demo remains available without an AI key or after a provider error. It also shows the configured AI availability, local-save policy and which synthetic data is sent for AI analysis.
 
 - A calm background theme plays in the menu, the settings, the free simulator and during meetings. A separate finale melody plays on the epilogue screen after the fifth decision.
 - Settings carry a **Background music** toggle and a separate **music volume, 0–100%** (30% by default). Muting the interface sounds does not mute the music, and the reverse is also true. A volume of zero stops the music player entirely.
 - Nothing plays before the first click or Enter/Space press: the AudioContext is created or resumed inside a user gesture, following the [Web Audio guidance](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Best_practices#autoplay_policy).
 - Hiding the tab, leaving the page and exiting the simulator stop the music voices and their timer. Returning to the tab resumes the music if it was playing and enabled; it stays off on the exit screen.
 - Both pieces were written for this project as note sequences and are synthesised through Web Audio. There are no external recordings, samples, downloads or libraries; the source is `public/music.js`.
+- Five additional procedural scene cues in `public/preferences.js` identify headquarters, the city, a phone call, a news bulletin and an urgent alert. They follow interface-sound volume/mute, user-interaction gating and visibility/exit stopping independently of music.
 
 Resetting the settings re-enables music at 30% volume. Saves from an earlier version pick those values up automatically while keeping their existing sound, brightness and language settings. A browser without Web Audio continues to work without sound.
 
@@ -261,7 +292,7 @@ The plan with the **higher** city average loses by more than three points. That 
 
 A Score describes a good year. `events.py` asks what a plan is worth in a bad one.
 
-Six events re-score the city after the plan has been applied: a harsh winter, a burst heating main, a population surge, school overcrowding, a smog episode and a spike in road accidents. Each is a **fixed rule, never a random draw**, so every figure below is reproducible. Two of them are adaptive — the main bursts in the district whose utility reliability is already lowest, and overcrowding lands where social infrastructure is weakest. Real failures do not fall on the strongest neighbourhood.
+Six events re-score the city after the plan has been applied: a harsh winter, a burst heating main, a population surge, school overcrowding, a smog episode and a spike in road accidents. Each has **fixed deterministic effects**, so every figure below is reproducible. `/api/stress` evaluates all six; story mode separately draws one of four eligible events and saves that choice. Two events are adaptive — the main bursts in the district whose utility reliability is already lowest, and overcrowding lands where social infrastructure is weakest. Real failures do not fall on the strongest neighbourhood.
 
 A shocked city is scored by `city_model._score_state`, the same function that scores an unshocked one. The module never re-implements the Score.
 
@@ -302,11 +333,14 @@ ai_analysis.py ─────► OpenAI Responses API (when a key is set)
 | `city_model.py` | Server-side validation, lags, synergies, constraints, Score |
 | `optimizer.py`, `data/optimum.json` | Exhaustive search and cached ranking |
 | `scenarios.py` | Named demonstration scenarios, including the controlled pair |
-| `events.py` | Deterministic city shocks and the stress test |
+| `events.py` | Deterministic city shocks, full stress test and separate story-event forecasts |
 | `ai_analysis.py`, `analysis_locale.py` | Optional AI analysis and localized deterministic explanations |
 | `server.py` | JSON API and serving of public files only |
 | `public/app.js` | Interface state, map, catalogue, report, comparison |
 | `public/story.js`, `public/story-view.js`, `public/story.css` | Meetings, dialogue, epilogue and their layout |
+| `public/civic.js`, `public/civic-view.js`, `public/civic.css` | Transparent narrative reputation, five milestones, leadership profiles, district states and final trade-offs |
+| `public/live-city.js`, `public/live-city.css` | Saved random-event cards, decision news, gentle prologue timer and team/AI transparency |
+| `public/jury.js`, `public/jury.css` | Six-scene jury presentation, controlled timer and independent demonstration state |
 | `public/portraits/` | Five local character portraits |
 | `public/preferences.js`, `public/menu.css` | Volume, brightness, language, main menu |
 | `public/i18n.js` | Interface and catalogue translations |
@@ -323,6 +357,7 @@ ai_analysis.py ─────► OpenAI Responses API (when a key is set)
 - `POST /api/analyze` — validate exactly five decisions and return the evaluation plus an explanation.
 - `GET /api/events` — the shock catalogue.
 - `POST /api/stress` — re-score a plan under every city shock.
+- `POST /api/story-event` — validate 0–5 decisions and calculate one eligible event separately from the ordinary evaluation; accepts `eventId` and optional `language`.
 - `POST /api/optimize` — validate five decisions and return the gap to the proven optimum. `POST /api/advice` is an alias of the same operation.
 
 Example request body:
@@ -341,6 +376,14 @@ Example request body:
 ```
 
 Optional `language`: `ru` (default), `kk`, or `en`. The response includes `analysis.language`; language does not affect the model's numbers. An invalid plan returns HTTP 400 with an explanation and no Score. Client changes are committed only after successful server validation; if the connection drops, the last confirmed scenario is kept.
+
+For a story-event preview, use the same decision format plus an allowed `eventId`:
+
+```json
+{"language":"en","eventId":"harsh-winter","decisions":[]}
+```
+
+`/api/story-event` returns `{event, evaluation, forecast}`. `evaluation` is the unchanged ordinary calculation; `forecast` contains the separate event Score, delta, critical count and district indicators. The API accepts empty or incomplete valid plans, even though the story card is introduced after two decisions. Unknown events, extra fields, invalid initiatives and budget violations are rejected. `/api/stress`, `/api/analyze` and optimization retain their five-decision requirement.
 
 ## Deployment
 
@@ -368,10 +411,15 @@ node tests/story-budget.test.mjs
 node tests/narrative.test.mjs
 node tests/campaign.test.mjs
 node tests/drama.test.mjs
+node tests/civic.test.mjs
+node tests/jury.test.mjs
+node tests/live-city.test.mjs
 node tests/music.test.mjs
 ```
 
 These exercise JavaScript, screen generation, the menu, settings, the full story, every budget branch, returning to meetings, corrupted saves, transitions, language, sound events, brightness, loading the example, export, late responses and server failure. They do not launch a browser and do not check visual layout or audibility on a physical device. No paid AI requests are made.
+
+The new suites can also be run with `npm run test:civic`, `npm run test:jury` and `npm run test:live-city`. They cover reputation formulas and exact milestone conditions, causal map states, jury pause/seek behaviour, the gentle countdown and event-preview isolation. Backend event checks exercise partial drafts and keep the ordinary evaluation separate from the shocked forecast.
 
 Reproduce the headline figures directly:
 
@@ -387,4 +435,4 @@ Music tests use a fake AudioContext and a controlled clock: they check autoplay 
 
 ## Limitations
 
-There is no shared database, real geography, random-event simulation or calibration against real city statistics. The standard-library HTTP server is intended for a hackathon demo. A public production service needs a suitable production server, authentication, AI request limits and shared storage.
+There is no shared database, real geography or calibration against real city statistics. Random story events use a small predefined catalogue with deterministic synthetic effects; they do not predict actual emergencies. The standard-library HTTP server is intended for a hackathon demo. A public production service needs a suitable production server, authentication, AI request limits and shared storage.

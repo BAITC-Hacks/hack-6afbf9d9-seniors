@@ -2,12 +2,13 @@ import { STORY_VERSION, normalizeStory, storyDecisions, getStory } from './story
 import { normalizeAllocations } from './story-budget.js';
 
 export const FLOW_VERSION = 3;
+export const STORY_EVENT_IDS = Object.freeze(['harsh-winter', 'heating-main-burst', 'population-surge', 'traffic-accidents']);
 const INTRO_SCREENS = 4;
 const meetingIds = getStory().map(meeting => meeting.choices.map(choice => choice.initiativeId));
 const MEETING_COUNT = meetingIds.length;
 
 export function createStoryProgress() {
-  return { choices: [], step: 0, phase: 'intro', introStep: 0, allocations: null, inquiries: Array(MEETING_COUNT).fill(null), council: null, planReturn: null };
+  return { choices: [], step: 0, phase: 'intro', introStep: 0, allocations: null, inquiries: Array(MEETING_COUNT).fill(null), council: null, planReturn: null, eventId: null };
 }
 
 function normalizeFields(value) {
@@ -18,6 +19,9 @@ function normalizeFields(value) {
     && (value.inquiries[index] === 0 || value.inquiries[index] === 1) ? value.inquiries[index] : null);
   const allocations = normalizeAllocations(value.allocations, null);
   const council = choices.length >= 3 && ['hold', 'review'].includes(value.council) ? value.council : null;
+  // Keep the day's draw through backtracking and replanning. Presentation hides
+  // it until two choices are visible; only a new day clears the selection.
+  const eventId = STORY_EVENT_IDS.includes(value.eventId) ? value.eventId : null;
   const fallback = step === MEETING_COUNT ? 'ending' : 'meeting';
   let phase = value.phase;
   const validPhase = candidate => (candidate === 'intro' && choices.length === 0 && step === 0)
@@ -37,7 +41,7 @@ function normalizeFields(value) {
   const introStep = phase === 'intro'
     ? Number.isInteger(value.introStep) && value.introStep >= 0 && value.introStep < INTRO_SCREENS ? value.introStep : 0
     : INTRO_SCREENS - 1;
-  return { choices, step, phase, introStep, allocations, inquiries, council, planReturn };
+  return { choices, step, phase, introStep, allocations, inquiries, council, planReturn, eventId };
 }
 
 /** Migrate indexed v1 and durable-ID v2 saves. Existing decisions resume without
@@ -66,7 +70,7 @@ export function normalizeStoryProgress(saved) {
   }
   const fields = saved.version === 2
     ? { choices, step: saved.step, phase: choices.length ? ['intro', 'meeting', 'transition', 'ending'].includes(saved.phase) ? saved.phase : undefined : 'intro', introStep: saved.introStep }
-    : { choices, step: saved.step, phase: saved.phase, introStep: saved.introStep, allocations: saved.allocations, inquiries: saved.inquiries, council: saved.council, planReturn: saved.planReturn };
+    : { choices, step: saved.step, phase: saved.phase, introStep: saved.introStep, allocations: saved.allocations, inquiries: saved.inquiries, council: saved.council, planReturn: saved.planReturn, eventId: saved.eventId };
   const progress = normalizeFields(fields);
   return progress ? { version: FLOW_VERSION, ...progress } : null;
 }
@@ -85,6 +89,7 @@ export function serializeStoryProgress(state, datasetVersion) {
     inquiries: progress.inquiries,
     council: progress.council,
     planReturn: progress.planReturn,
+    eventId: progress.eventId,
   };
 }
 

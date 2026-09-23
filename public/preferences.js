@@ -50,7 +50,13 @@ export function createSoundPlayer(getPreferences, environment = globalThis) {
       const latest = getPreferences();
       if (ownGeneration !== generation || !active || latest.muted || latest.volume === 0 || environment.document?.hidden) return false;
       const at = context.currentTime;
-      const notes = kind === 'success' ? [523.25, 659.25] : kind === 'error' ? [220] : [440];
+      const cues = {
+        success: [523.25, 659.25], error: [220], click: [440],
+        headquarters: [196, 293.66, 392], city: [174.61, 261.63, 349.23],
+        call: [659.25, 523.25, 659.25, 523.25], news: [392, 587.33, 783.99],
+        alert: [220, 293.66, 220, 293.66],
+      };
+      const notes = cues[kind] || cues.click;
       for (const [index, frequency] of notes.entries()) {
         const oscillator = context.createOscillator();
         const gain = context.createGain();

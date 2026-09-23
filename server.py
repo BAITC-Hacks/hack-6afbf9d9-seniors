@@ -13,7 +13,7 @@ from urllib.parse import unquote, urlsplit
 from ai_analysis import ai_status, analyze, load_environment
 from analysis_locale import validate_language
 from city_model import evaluate, load_data
-from events import catalogue as event_catalogue, stress as stress_test
+from events import catalogue as event_catalogue, stress as stress_test, story_event, STORY_EVENT_IDS
 from optimizer import advise
 from scenarios import listing as scenario_listing
 
@@ -23,7 +23,7 @@ MAX_BODY_BYTES = 65_536
 # /api/advice and /api/optimize are the same operation under two names:
 # the interface calls the latter, the test suite the former.
 OPTIMISE_PATHS = {"/api/advice", "/api/optimize"}
-POST_PATHS = {"/api/evaluate", "/api/analyze", "/api/stress"} | OPTIMISE_PATHS
+POST_PATHS = {"/api/evaluate", "/api/analyze", "/api/stress", "/api/story-event"} | OPTIMISE_PATHS
 STATIC_TYPES = {
     ".html": "text/html; charset=utf-8",
     ".css": "text/css; charset=utf-8",
@@ -140,7 +140,7 @@ class SimulatorHandler(BaseHTTPRequestHandler):
         except (socket.timeout, TimeoutError):
             raise RequestError(408, "Превышено время передачи запроса.") from None
 
-    def _read_decisions(self, raw: bytes) -> tuple[list, str]:
+    def _read_decisions(self, raw: bytes, *, allow_event: bool = False) -> tuple[list, str, str | None]:
         origin = self.headers.get("Origin")
         if origin is not None:
             parsed = urlsplit(origin)
@@ -152,14 +152,18 @@ class SimulatorHandler(BaseHTTPRequestHandler):
             data = json.loads(raw, parse_constant=_reject_json_constant)
         except (ValueError, UnicodeDecodeError, RecursionError):
             raise RequestError(400, "Некорректный JSON.") from None
+        allowed_fields = {"decisions", "language", "eventId"} if allow_event else {"decisions", "language"}
         if (not isinstance(data, dict) or "decisions" not in data
-                or set(data) - {"decisions", "language"} or not isinstance(data["decisions"], list)):
+                or set(data) - allowed_fields or not isinstance(data["decisions"], list)):
             raise RequestError(400, "Ожидается объект с массивом decisions.")
+        event_id = data.get("eventId")
+        if allow_event and (not isinstance(event_id, str) or event_id not in STORY_EVENT_IDS):
+            raise RequestError(400, "Неизвестное сюжетное событие.")
         try:
             language = validate_language(data.get("language", "ru"))
         except ValueError as error:
             raise RequestError(400, str(error)) from None
-        return data["decisions"], language
+        return data["decisions"], language, event_id
 
     def do_POST(self) -> None:
         path = urlsplit(self.path).path
@@ -167,12 +171,14 @@ class SimulatorHandler(BaseHTTPRequestHandler):
             raw = self._read_body()
             if path not in POST_PATHS:
                 raise RequestError(404, "API-маршрут не найден.")
-            decisions, language = self._read_decisions(raw)
+            decisions, language, event_id = self._read_decisions(raw, allow_event=path == "/api/story-event")
             try:
-                result = evaluate(decisions, require_complete=path != "/api/evaluate")
+                result = evaluate(decisions, require_complete=path not in {"/api/evaluate", "/api/story-event"})
             except ValueError as error:
                 raise RequestError(400, str(error)) from None
-            if path in OPTIMISE_PATHS:
+            if path == "/api/story-event":
+                self._json(200, story_event(decisions, event_id, language))
+            elif path in OPTIMISE_PATHS:
                 # /api/advice and /api/optimize are the same operation; the
                 # interface calls the latter and the tests the former.
                 advice = advise(decisions)

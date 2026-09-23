@@ -3,10 +3,12 @@ import { DEFAULT_SETTINGS, loadSettings, saveSettings, normalizeSettings, bright
 import { storyText, storyDecisions, storyOptionAvailability } from './story.js';
 import { renderStory } from './story-view.js';
 import { createMusicPlayer } from './music.js';
-import { createStoryProgress, normalizeStoryProgress, serializeStoryProgress, nextStoryProgress, commitStoryChoice, chooseStoryInquiry, setStoryAllocations } from './story-flow.js';
+import { createStoryProgress, normalizeStoryProgress, serializeStoryProgress, nextStoryProgress, commitStoryChoice, chooseStoryInquiry, setStoryAllocations, STORY_EVENT_IDS } from './story-flow.js';
 import { STORY_CATEGORIES, defaultAllocations, allocationSummary, plannedOptionAvailability } from './story-budget.js';
 import { campaignText } from './campaign.js';
 import { getVisibleDecisions } from './drama.js';
+import { liveText, renderTransparency, drawCityEvent, eventPreviewKey, createIntroClock } from './live-city.js';
+import { renderJury, createJuryClock, juryText, JURY_ROUTE } from './jury.js';
 
 const app = document.querySelector('#app');
 const toastElement = document.querySelector('#toast');
@@ -19,6 +21,29 @@ state.storyBusy = false;
 state.storyRestorePending = false;
 const sound = createSoundPlayer(() => preferences, window);
 const music = createMusicPlayer(() => preferences, window);
+state.jury = null;
+const introClock = createIntroClock((remaining, owner) => {
+  if (state.story !== owner) return;
+  owner.introRemaining = remaining;
+  if (state.page === 'story' && owner.phase === 'intro') {
+    const output = document.querySelector('#intro-countdown-value');
+    if (output) output.textContent = remaining ? `${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, '0')}` : liveText('ready', preferences.language);
+  }
+});
+const juryClock = createJuryClock({
+  environment: { document: null },
+  onTick(clock) {
+    if (!state.jury || state.page !== 'jury') return;
+    const previous = state.jury.clock;
+    state.jury.clock = clock;
+    if (!previous || ['index', 'paused', 'finished'].some(key => previous[key] !== clock[key])) render();
+    else {
+      const output = document.querySelector('.jury-countdown');
+      if (output) output.textContent = juryText(clock.finished ? 'finished' : clock.paused ? 'paused' : 'seconds', preferences.language, { seconds: clock.remaining });
+    }
+  },
+  onAdvance(index) { void sound.play(index === 4 ? 'alert' : index === 5 ? 'success' : 'news'); },
+});
 const locale = () => ({ ru: 'ru-RU', kk: 'kk-KZ', en: 'en-US' })[preferences.language];
 const localize = html => localizeMarkup(html, preferences.language);
 let toastTimer;
@@ -77,10 +102,10 @@ const mapPositions = { esil: [46, 73], almaty: [78, 33], saryarka: [22, 24], bai
 const categoryCodes = { transport: ['T1', 'T2'], green: ['E1', 'E2'], social: ['S1', 'S2'], safety: ['B1', 'B2'], services: ['C1', 'C2'] };
 const indicatorTitles = { T1: 'Разгрузка дорог', T2: 'Доступность транспорта', E1: 'Озеленение', E2: 'Качество воздуха', S1: 'Школы и детсады', S2: 'Первичная медицина', B1: 'Безопасность улиц', B2: 'Безопасность движения', C1: 'Надёжность ЖКХ', C2: 'Обращения жителей' };
 
-async function api(path, decisions, language) {
+async function api(path, decisions, language, extra = {}) {
   let response;
   try {
-    response = await fetch(path, { signal: AbortSignal.timeout(path.includes('analyze') ? 65000 : 10000), ...(decisions === undefined ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ decisions, ...(language ? { language } : {}) }) }) });
+    response = await fetch(path, { signal: AbortSignal.timeout(path.includes('analyze') ? 65000 : 10000), ...(decisions === undefined ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ decisions, ...(language ? { language } : {}), ...extra }) }) });
   } catch (error) {
     throw new Error(error.name === 'TimeoutError' ? 'Сервер не успел ответить. Попробуйте ещё раз.' : 'Нет связи с сервером. Проверьте, запущено ли приложение.');
   }
@@ -217,7 +242,17 @@ function render() {
   const focus = !pageChanged && document.activeElement?.id === 'main' && pendingFocus ? pendingFocus : captureRenderFocus();
   syncViewRevision();
   applyPreferences();
-  void music.setScene(state.page === 'exited' ? null : state.page === 'story' && state.story.phase === 'ending' && !Number.isInteger(state.story.replayIndex) ? 'finale' : 'ambient');
+  state.story.introRemaining = introClock.sync(state.page === 'story' && state.story.phase === 'intro' && !document.hidden, state.story);
+  if (state.page !== 'jury') juryClock.stop();
+  void music.setScene(state.page === 'exited' ? null : (state.page === 'story' && state.story.phase === 'ending' && !Number.isInteger(state.story.replayIndex)) || (state.page === 'jury' && state.jury?.clock?.index === 5) ? 'finale' : 'ambient');
+  if (state.page === 'jury') {
+    app.innerHTML = renderJury({ data: state.data, evaluations: state.jury.evaluations, eventResult: state.jury.eventResult, language: preferences.language, ...(state.jury.clock || {index:0,remaining:25,paused:true}), busy: state.jury.loading, icon, num, signed });
+    restoreRenderFocus(focus); return;
+  }
+  if (state.page === 'about') {
+    app.innerHTML = renderTransparency({data:state.data, language:preferences.language, icon});
+    restoreRenderFocus(focus); return;
+  }
   if (state.page === 'story') {
     // Interactions reveal the current scene; entering a different scene starts
     // its entrance animation. Full text remains in the accessible document.
@@ -279,6 +314,7 @@ function menuView() {
       <button class="menu-button" data-action="open-settings">${icon('settings')}<span>Настройки</span><span class="menu-button-number" aria-hidden="true">02</span></button>
       <button class="menu-button exit" data-action="exit-game">${icon('exit')}<span>Выйти из симулятора</span><span class="menu-button-number" aria-hidden="true">03</span></button>
     </nav>
+    <div class="menu-extra-actions" data-i18n-skip><button data-action="jury-start" ${state.loading ? 'disabled' : ''}>${esc(liveText('jury', preferences.language))}</button><button data-action="about-simulator">${esc(liveText('about', preferences.language))}</button></div>
     <p class="menu-session-note ${state.loadError ? 'error' : ''}" role="status">${state.loading ? 'Загружаем районы и инициативы…' : state.loadError ? esc(state.loadError) : state.story.choices.length || state.decisions.length ? 'Ваш сценарий сохранён.' : 'Ваши решения сохраняются при выходе.'}</p>
     <footer class="menu-footer">${icon('shield')}<span>Учебная модель · Данные условные · Seniors, 2026</span></footer>
   </div><aside class="menu-scene" aria-hidden="true"><img src="/city-map.svg" alt=""/><div class="menu-scene-note"><span>ASTANA · CITY OF TOMORROW</span><h2>Большие перемены начинаются с малого.</h2><div class="menu-facts"><div><strong>5</strong><span>районов</span></div><div><strong>100</strong><span>единиц бюджета</span></div><div><strong>∞</strong><span>возможностей</span></div></div></div></aside></main>`;
@@ -341,6 +377,61 @@ function persistStory() {
   } catch { toast('Хранилище браузера недоступно. Экспортируйте отчёт, чтобы сохранить результат.', true); }
 }
 
+async function startJuryPresentation() {
+  if (!state.data || state.loading || state.storyBusy || state.busy || state.analyzing) return;
+  const presentation = { loading: true, evaluations: [], eventResult: null, clock: null };
+  state.jury = presentation;
+  openScreen('jury');
+  const departure = viewRevision.departure;
+  const language = preferences.language;
+  try {
+    const results = await Promise.all(Array.from({length:5}, (_, index) => api('/api/evaluate', JURY_ROUTE.slice(0, index + 1))));
+    // Event failure is optional; the slide explicitly identifies unavailable data.
+    const eventResult = await api('/api/story-event', JURY_ROUTE, language, {eventId:'harsh-winter'}).catch(() => null);
+    syncViewRevision();
+    if (state.jury !== presentation || state.page !== 'jury' || departure !== viewRevision.departure) return;
+    Object.assign(presentation, {loading:false, evaluations:[state.data.baseline, ...results], eventResult});
+    juryClock.start();
+    if (document.hidden) juryClock.pause();
+    render();
+  } catch (error) {
+    syncViewRevision();
+    if (state.jury === presentation && state.page === 'jury' && departure === viewRevision.departure) { openScreen('menu'); toast(error.message, true); }
+  }
+}
+
+async function calculateCityEvent() {
+  const source = state.story;
+  const visible = getVisibleDecisions(source);
+  if (state.page !== 'story' || state.storyBusy || state.busy || state.analyzing || source.eventLoading || visible.length < 2 || !STORY_EVENT_IDS.includes(source.eventId)) return;
+  const language = preferences.language;
+  const key = eventPreviewKey(source, language);
+  syncViewRevision();
+  const departure = viewRevision.departure;
+  source.eventLoading = true; source.eventError = false;
+  render();
+  try {
+    const result = await api('/api/story-event', visible, language, {eventId:source.eventId});
+    syncViewRevision();
+    if (state.story !== source || state.page !== 'story' || departure !== viewRevision.departure || key !== eventPreviewKey(source, preferences.language)) return;
+    if (!result?.forecast?.districts || !Number.isFinite(result.forecast.score)) throw new Error(liveText('failed', language));
+    source.eventPreview = {key, result};
+    void sound.play('alert');
+  } catch {
+    syncViewRevision();
+    if (state.story === source && state.page === 'story' && departure === viewRevision.departure && key === eventPreviewKey(source, preferences.language)) source.eventError = key;
+  } finally { source.eventLoading = false; if (state.story === source) render(); }
+}
+
+function storySceneCue() {
+  if (state.page !== 'story') return;
+  const {phase, introStep, step} = state.story;
+  const cue = phase === 'intro' ? introStep === 1 ? 'call' : 'headquarters'
+    : phase === 'transition' ? step === 1 && state.story.eventId ? 'alert' : 'news'
+    : phase === 'briefing' ? step === 2 ? 'call' : 'city' : phase === 'ending' ? 'success' : 'headquarters';
+  void sound.play(cue);
+}
+
 async function evaluateStoryScene(progress, evaluation) {
   const count = getVisibleDecisions(progress).length;
   return count === progress.choices.length ? evaluation
@@ -373,6 +464,7 @@ async function applyStoryProgress(progress) {
       openScreen('story');
       if (enteringEnding) celebrateResult(evaluation?.score);
     }
+  if (state.page === page) storySceneCue();
   } catch (error) { toast(error.message, true); }
   finally { state.storyBusy = false; render(); }
 }
@@ -415,6 +507,9 @@ async function confirmStoryChoice() {
     Object.assign(state.story, progress);
     state.story.evaluation = evaluation;
     state.story.sceneEvaluation = evaluation;
+    if (!state.story.eventId && progress.choices.length >= 2) state.story.eventId = drawCityEvent(STORY_EVENT_IDS);
+    state.story.focusDistrict = null;
+    state.story.eventError = false;
     persistStory();
     void sound.play('success');
   } catch (error) { toast(error.message, true); }
@@ -711,9 +806,22 @@ document.addEventListener('click', async event => {
     return;
   }
   if (!['exit-game', 'test-sound', 'toggle-sound'].includes(action)) void sound.play();
+  if (action === 'about-simulator') { openScreen('about'); return; }
+  if (action === 'jury-start') { await startJuryPresentation(); return; }
+  if (action.startsWith('jury-')) {
+    if (action === 'jury-exit') { openScreen('menu'); return; }
+    if (state.page !== 'jury' || !state.jury || state.jury.loading) return;
+    if (action === 'jury-toggle') { if (juryClock.getState().paused) juryClock.resume(); else juryClock.pause(); }
+    if (action === 'jury-next') juryClock.seek(juryClock.getState().index + 1);
+    if (action === 'jury-prev') juryClock.seek(juryClock.getState().index - 1);
+    if (action === 'jury-restart') juryClock.start();
+    return;
+  }
+  if (action === 'city-event-calculate') { await calculateCityEvent(); return; }
   if (['start-game', 'mode-story', 'mode-free'].includes(action)) {
     if (!state.data || state.loadError || state.storyRestorePending) { await boot(); if (!state.data || state.loadError) return; }
     openScreen(action === 'start-game' ? 'modes' : action === 'mode-story' ? 'story' : 'simulation');
+    if (action === 'mode-story') storySceneCue();
     return;
   }
   if (action === 'story-simulator') { openScreen('simulation'); return; }
@@ -868,14 +976,16 @@ document.addEventListener('input', event => {
   if (event.target.name === 'scenario-name') { state.name = event.target.value; persist(); }
 });
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) sound.stop();
+  if (document.hidden) { sound.stop(); juryClock.pause(); introClock.stop(); }
+  else introClock.sync(state.page === 'story' && state.story.phase === 'intro', state.story);
   void music.sync();
 });
-window.addEventListener('pagehide', () => { sound.stop(); music.stop(); });
-window.addEventListener('pageshow', () => { void music.sync(); });
+window.addEventListener('pagehide', () => { sound.stop(); music.stop(); juryClock.pause(); introClock.stop(); });
+window.addEventListener('pageshow', () => { introClock.sync(state.page === 'story' && state.story.phase === 'intro' && !document.hidden, state.story); void music.sync(); });
 document.addEventListener('keydown', event => {
   if (event.isTrusted && !event.repeat && ['Enter', ' '].includes(event.key) && event.target.dataset?.action !== 'exit-game') void music.unlock();
   if (event.key === 'Escape' && ['settings', 'modes'].includes(state.page)) { event.preventDefault(); openScreen('menu'); return; }
+  if (event.key === 'Escape' && ['jury', 'about'].includes(state.page)) { event.preventDefault(); openScreen('menu'); return; }
   if (event.target.matches('[role="tab"]') && ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
     event.preventDefault();
     const ids = state.data.categories.map(c => c.id); const current = ids.indexOf(state.category);

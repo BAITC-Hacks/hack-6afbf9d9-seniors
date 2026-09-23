@@ -1,0 +1,72 @@
+/* Fictional civic indices remain visually separate from the numeric city model. */
+.civic-reputation { border-top: 1px solid var(--hq-line, #c0c69d4a); padding-top: 17px; }
+.civic-reputation h2, .civic-achievements > h2, .civic-winners > h2, .civic-tradeoffs > h2 { color: #ded4b8; font-size: 14px; line-height: 1.5; margin: 0 0 10px; }
+.civic-notice, .civic-profile > small { color: #b8c5ae; font-size: 11px; line-height: 1.7; }
+.civic-reputation-grid { display: grid; gap: 12px; margin-top: 16px; }
+.civic-index-heading { display: flex; justify-content: space-between; gap: 9px; align-items: baseline; margin-bottom: 5px; }
+.civic-index label { color: #d3dac5; font-size: 11px; line-height: 1.5; }
+.civic-index-heading > span { color: #e7d6a8; font-size: 13px; font-variant-numeric: tabular-nums; }
+.civic-index small { color: #a6bba4; font-size: 9px; margin-left: 3px; }
+.civic-index meter { display: block; width: 100%; height: 9px; background: #24372d; border: 0; border-radius: 3px; overflow: hidden; }
+.civic-index meter::-webkit-meter-bar { background: #24372d; border: 0; }
+.civic-index meter::-webkit-meter-optimum-value { background: #b9c99a; }
+.civic-index meter::-moz-meter-bar { background: #b9c99a; }
+.civic-index-business meter::-webkit-meter-optimum-value { background: #d4c194; }
+.civic-index-environment meter::-webkit-meter-optimum-value { background: #9ec99c; }
+.civic-index-efficiency meter::-webkit-meter-optimum-value { background: #a4c1ca; }
+.civic-rules { color: #b4c4ad; font-size: 11px; line-height: 1.7; margin-top: 14px; }
+.civic-rules summary { cursor: pointer; padding: 7px 0; min-height: 35px; color: #dbd1b3; }
+.civic-rules ul { padding-left: 17px; display: grid; gap: 8px; margin-top: 9px; }
+.civic-pending { color: #b8c5ae; font-size: 12px; }
+.civic-finale { display: grid; gap: 29px; margin: 32px 0; border-top: 1px solid var(--hq-line, #c0c69d4a); padding-top: 29px; }
+.civic-profile h2 { margin: 8px 0 13px; color: #e5d7b6; font-size: 27px; line-height: 1.3; }
+.civic-profile p { max-width: 85ch; color: #c4d0b8; font-size: 14px; line-height: 1.9; margin-bottom: 9px; }
+.civic-reputation-expanded .civic-reputation-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
+.civic-reputation-expanded .civic-index label { font-size: 13px; }
+.civic-achievement-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; margin-top: 16px; }
+.civic-achievement { min-width: 0; padding: 17px; border: 1px solid #96ae852f; background: #172e2380; }
+.civic-achievement.is-earned { border-color: #d4c19175; background: #31433180; }
+.civic-achievement-status { display: flex; align-items: center; gap: 7px; color: #b4c4aa; font-size: 10px; line-height: 1.5; }
+.civic-achievement-status > span { font-size: 15px; }
+.civic-achievement.is-earned .civic-achievement-status { color: #e1d39f; }
+.civic-achievement h3 { color: #ded8bd; font-size: 16px; line-height: 1.5; margin: 10px 0 7px; }
+.civic-achievement p { color: #b9c7b0; font-size: 12px; line-height: 1.8; }
+.civic-outcome-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 27px; }
+.civic-winners ul { padding: 0; list-style: none; }
+.civic-winners li, .civic-tradeoffs article { border-top: 1px solid #b2bf992e; padding: 13px 0; }
+.civic-winners li > div { display: flex; justify-content: space-between; gap: 10px; color: #d5d9bb; font-size: 14px; }
+.civic-winners li > div > span { color: #c9d4a0; font-variant-numeric: tabular-nums; }
+.civic-winners p, .civic-tradeoffs p { color: #becab3; font-size: 12px; line-height: 1.8; margin-top: 6px; }
+.civic-tradeoffs h3 { color: #dfcfab; font-size: 14px; line-height: 1.5; margin: 0; }
+.hq-map-district[data-state='critical'] { background: #392e26e8; border-color: #d5a582; box-shadow: 0 0 15px #cb886220; }
+.hq-map-district[data-state='improving'] { background: #223d2ee8; border-color: #b7c993; box-shadow: 0 0 15px #abc59520; }
+.hq-map-district[data-state='stable'] { background: #29362ce8; border-color: #a5b49a; }
+.hq-map-district[data-state='critical'] .hq-map-dot { background: #d5a582; }
+.hq-map-district[data-state='improving'] .hq-map-dot { background: #b7c993; }
+.hq-map-district[data-state='stable'] .hq-map-dot { background: #a5b49a; }
+.civic-map-legend { margin-top: 10px; color: #b9c7b0; font-size: 10px; line-height: 1.6; }
+.civic-map-legend > strong { display: block; font-weight: 500; margin-bottom: 5px; color: #d4d2b4; }
+.civic-map-legend ul { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 10px; }
+.civic-map-legend li { display: inline-flex; gap: 5px; align-items: center; }
+.civic-map-legend i { display: inline-block; flex-shrink: 0; height: 6px; width: 6px; border-radius: 50%; background: #a5b49a; }
+.civic-map-legend [data-state='critical'] i { background: #d5a582; }
+.civic-map-legend [data-state='improving'] i { background: #b7c993; }
+.civic-map-legend details { margin-top: 6px; }
+.civic-map-legend summary { cursor: pointer; padding: 6px 0; min-height: 30px; }
+.civic-map-legend [data-category='social'] i { background: #e3c28a; }
+.civic-map-legend [data-category='green'] i { background: #b9d79b; }
+.civic-map-legend [data-category='transport'] i { background: #b2d6ed; }
+.civic-map-legend [data-category='safety'] i { background: #e2b365; }
+.civic-map-legend [data-category='services'] i { background: #a7cabe; }
+@media (max-width: 760px) {
+  .civic-achievement-grid, .civic-reputation-expanded .civic-reputation-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .civic-outcome-grid { grid-template-columns: minmax(0, 1fr); gap: 17px; }
+}
+@media (max-width: 470px) {
+  .civic-achievement-grid, .civic-reputation-expanded .civic-reputation-grid { grid-template-columns: minmax(0, 1fr); }
+  .civic-profile h2 { font-size: 23px; }
+}
+@media print {
+  .civic-finale, .civic-finale p, .civic-finale h2, .civic-finale h3, .civic-finale strong { color: #24372d; }
+  .civic-achievement, .civic-achievement.is-earned { background: white; border-color: #9caf9c; break-inside: avoid; }
+}

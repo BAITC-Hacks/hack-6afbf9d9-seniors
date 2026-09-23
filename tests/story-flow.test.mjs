@@ -2,13 +2,13 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { getStory, storyDecisions } from '../public/story.js';
-import { FLOW_VERSION, createStoryProgress, normalizeStoryProgress, serializeStoryProgress, nextStoryProgress, commitStoryChoice, chooseStoryInquiry, setStoryAllocations, classifyEnding } from '../public/story-flow.js';
+import { FLOW_VERSION, STORY_EVENT_IDS, createStoryProgress, normalizeStoryProgress, serializeStoryProgress, nextStoryProgress, commitStoryChoice, chooseStoryInquiry, setStoryAllocations, classifyEnding } from '../public/story-flow.js';
 import { defaultAllocations } from '../public/story-budget.js';
 
 const data = JSON.parse(await readFile(new URL('../data/city.json', import.meta.url), 'utf8'));
 const jsonClone = value => JSON.parse(JSON.stringify(value));
 const story = getStory();
-const fresh = { choices: [], step: 0, phase: 'intro', introStep: 0, allocations: null, inquiries: [null, null, null, null, null], council: null, planReturn: null };
+const fresh = { choices: [], step: 0, phase: 'intro', introStep: 0, allocations: null, inquiries: [null, null, null, null, null], council: null, planReturn: null, eventId: null };
 assert.equal(FLOW_VERSION, 3);
 assert.deepEqual(createStoryProgress(), fresh);
 const independent = createStoryProgress();
@@ -131,7 +131,7 @@ assert.equal(normalizeStoryProgress({ ...oldSave, phase: 'transition', step: 4 }
 assert.equal(nextStoryProgress({ ...oldCompleted, step: 2, phase: 'meeting' }, 'back').step, 1, 'Legacy meetings with no inquiry retain their old back path.');
 
 const serialized = serializeStoryProgress({ ...completed, evaluation: { score: 999 }, ending: 'forged' }, data.version);
-assert.deepEqual(serialized, { version: 3, datasetVersion: data.version, decisionIds: ['M7', 'M4', 'M1', 'M10', 'M12'], step: 5, phase: 'ending', introStep: 3, allocations, inquiries: [0, 1, 0, 1, 0], council: 'review', planReturn: null });
+assert.deepEqual(serialized, { version: 3, datasetVersion: data.version, decisionIds: ['M7', 'M4', 'M1', 'M10', 'M12'], step: 5, phase: 'ending', introStep: 3, allocations, inquiries: [0, 1, 0, 1, 0], council: 'review', planReturn: null, eventId: null });
 assert.deepEqual(normalizeStoryProgress({ ...serialized, choices: [2], evaluation: { score: 999 } }), { version: 3, ...completed });
 assert.deepEqual(normalizeStoryProgress(serializeStoryProgress({ ...fresh, introStep: 2 }, data.version)), { version: 3, ...fresh, introStep: 2 });
 for (const invalid of [null, [], {}, { version: 0 }, { version: 4 }, { version: 1, choices: [99] },
@@ -172,6 +172,38 @@ for (const planReturn of [null, { phase: 'ending', step: 2 }, { phase: 'meeting'
   assert.equal(restored.phase, 'meeting', 'Broken return flags fall back to the existing meeting.');
   assert.equal(restored.planReturn, null);
 }
+
+// An event belongs to the day. Navigation and branch edits cannot draw another,
+// while saved forecast numbers never become trusted state.
+assert.deepEqual(STORY_EVENT_IDS, ['harsh-winter', 'heating-main-burst', 'population-surge', 'traffic-accidents']);
+assert.ok(Object.isFrozen(STORY_EVENT_IDS));
+for (const eventId of STORY_EVENT_IDS) {
+  const eventDay = { ...completed, eventId };
+  const eventSave = serializeStoryProgress({ ...eventDay, eventForecast: { score: 999 }, eventEffects: { T1: 100 } }, data.version);
+  assert.equal(eventSave.eventId, eventId);
+  assert.equal(Object.hasOwn(eventSave, 'eventForecast'), false);
+  assert.equal(Object.hasOwn(eventSave, 'eventEffects'), false);
+  assert.deepEqual(normalizeStoryProgress(jsonClone(eventSave)), { version: 3, ...eventDay });
+  const editDay = nextStoryProgress(eventDay, 'edit');
+  assert.equal(editDay.eventId, eventId);
+  const earlierDay = nextStoryProgress(editDay, 'replan');
+  assert.equal(earlierDay.choices.length, 0);
+  assert.equal(earlierDay.eventId, eventId, 'A hidden event is retained when revisiting a prefix before its reveal.');
+  const restoredDay = normalizeStoryProgress(serializeStoryProgress(earlierDay, data.version));
+  assert.equal(restoredDay.eventId, eventId);
+  const revisedDay = commitStoryChoice(setStoryAllocations(restoredDay, allocations), 2);
+  assert.equal(revisedDay.eventId, eventId);
+  assert.equal(nextStoryProgress(revisedDay, 'meeting-next').eventId, eventId);
+  assert.equal(nextStoryProgress(eventDay, 'back').eventId, eventId);
+  assert.deepEqual(nextStoryProgress(eventDay, 'restart'), fresh);
+}
+for (const eventId of [undefined, null, '', 'smog-episode', 'school-overcrowding', 'unknown', [], {}, 0, true]) {
+  assert.equal(normalizeStoryProgress({ ...serialized, eventId }).eventId, null);
+}
+const oldV3Save = { ...serialized };
+delete oldV3Save.eventId;
+assert.deepEqual(normalizeStoryProgress(oldV3Save), { version: 3, ...completed });
+assert.equal(normalizeStoryProgress({ ...oldSave, eventId: STORY_EVENT_IDS[0] }).eventId, null, 'The legacy v2 schema never carried an event.');
 
 // Independent test-only oracle reads the supplied city data. It is not imported
 // by the simulator or its classifier. The same route counts were also checked against

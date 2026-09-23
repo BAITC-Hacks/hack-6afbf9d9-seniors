@@ -1,0 +1,17 @@
+import { civicText, getReputation, getCivicFinale } from './civic.js';
+
+const esc = value => String(value ?? '').replace(/[&<>"']/g, value => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[value]);
+
+export function renderCivicReputation({ data, evaluation, story, language }, { expanded = false } = {}) {
+  const reputation = getReputation(data, evaluation, story, language);
+  const t = key => esc(civicText(key, language));
+  const prefix = expanded ? 'civic-final' : 'civic-current';
+  return `<section class="civic-reputation ${expanded ? 'civic-reputation-expanded' : 'civic-reputation-compact'}" aria-labelledby="${prefix}-title"><h2 id="${prefix}-title">${t('reputation')}</h2><p class="civic-notice" id="${prefix}-notice">${esc(reputation.notice)}</p>${reputation.ready ? `<div class="civic-reputation-grid">${reputation.items.map(item => `<div class="civic-index civic-index-${item.id}"><div class="civic-index-heading"><label for="${prefix}-${item.id}">${esc(item.label)}</label><span aria-hidden="true">${item.value}<small>/100</small></span></div><meter id="${prefix}-${item.id}" min="0" max="100" value="${item.value}" aria-describedby="${prefix}-notice">${item.value}/100</meter></div>`).join('')}</div>` : `<p class="civic-pending">${t('pending')}</p>`}<details class="civic-rules"><summary>${esc(reputation.rulesTitle)}</summary><p>${t('rounding')}</p><ul>${reputation.items.map(item => `<li><strong>${esc(item.label)}.</strong> ${esc(item.rule)}</li>`).join('')}</ul></details></section>`;
+}
+
+export function renderCivicFinale(context) {
+  const { data, evaluation, story, language, signed } = context;
+  const report = getCivicFinale(data, evaluation, story, language);
+  const t = key => esc(civicText(key, language));
+  return `<section class="civic-finale" aria-labelledby="civic-final-title"><div class="civic-profile civic-profile-${esc(report.profile.id)}"><div class="hq-chapter">${t('profile')}</div><h2 id="civic-final-title">${esc(report.profile.title)}</h2><p>${esc(report.profile.body)}</p><small>${t('profileNote')}</small></div>${renderCivicReputation(context, { expanded: true })}<section class="civic-achievements" aria-labelledby="civic-achievements-title"><h2 id="civic-achievements-title">${t('achievements')}</h2><p class="civic-notice">${t('achievementNotice')}</p><div class="civic-achievement-grid">${report.achievements.map(item => `<article class="civic-achievement ${item.earned ? 'is-earned' : 'is-locked'}" data-achievement="${esc(item.id)}" data-earned="${item.earned}"><div class="civic-achievement-status"><span aria-hidden="true">${item.earned ? '✓' : '○'}</span><strong>${t(item.earned ? 'earned' : 'locked')}</strong></div><h3>${esc(item.label)}</h3><p>${esc(item.detail)}</p></article>`).join('')}</div></section><div class="civic-outcome-grid"><section class="civic-winners" aria-labelledby="civic-winners-title"><h2 id="civic-winners-title">${t('winners')}</h2>${report.winners.length ? `<ul>${report.winners.map(item => `<li><div><strong>${esc(item.label)}</strong><span>${esc(signed(item.delta))}</span></div><p>${esc(item.detail)}</p></li>`).join('')}</ul>` : `<p>${t('noWinners')}</p>`}</section><section class="civic-tradeoffs" aria-labelledby="civic-tradeoffs-title"><h2 id="civic-tradeoffs-title">${t('tradeoffs')}</h2>${report.tradeoffs.map(item => `<article data-tradeoff="${esc(item.id)}"><h3>${esc(item.label)}</h3><p>${esc(item.detail)}</p></article>`).join('')}</section></div></section>`;
+}

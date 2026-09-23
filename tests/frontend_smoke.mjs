@@ -16,11 +16,13 @@ import * as storyFlow from '../public/story-flow.js';
 import * as storyBudget from '../public/story-budget.js';
 import * as campaign from '../public/campaign.js';
 import * as drama from '../public/drama.js';
+import * as liveCity from '../public/live-city.js';
+import * as jury from '../public/jury.js';
 import { createMusicPlayer } from '../public/music.js';
 
-function localApi(path, decisions) {
+function localApi(path, decisions, extra = {}) {
   return new Promise((resolve, reject) => {
-    const body = decisions === undefined ? null : JSON.stringify({ decisions });
+    const body = decisions === undefined ? null : JSON.stringify({ decisions, ...extra });
     const req = request({
       hostname: '127.0.0.1', port: Number(process.env.TEST_PORT || 8080), path,
       method: body ? 'POST' : 'GET', timeout: 5000,
@@ -69,7 +71,9 @@ const musicCalls = [];
 let downloaded;
 let downloadClicks = 0;
 const context = vm.createContext({
-  ...localization, ...gamePreferences, ...storyModel, ...storyPresentation, ...storyFlow, ...storyBudget, ...campaign, ...drama,
+  ...localization, ...gamePreferences, ...storyModel, ...storyPresentation, ...storyFlow, ...storyBudget, ...campaign, ...drama, ...liveCity, ...jury,
+  createIntroClock(onTick) { return liveCity.createIntroClock(onTick, {setTimeout(){}, clearTimeout(){}}); },
+  createJuryClock(options) { return jury.createJuryClock({...options, environment:{document:null, setTimeout(){}, clearTimeout(){}}}); },
   createMusicPlayer(getPreferences, environment) {
     const player = createMusicPlayer(getPreferences, environment);
     return Object.fromEntries(['unlock', 'setScene', 'sync', 'stop'].map(method => [method, (...args) => {
@@ -124,7 +128,9 @@ async function enterMeeting(approach = 0) {
 
 run('state.data=bootstrap; state.evaluation=bootstrap.baseline; state.loading=false; render();');
 assert.ok(nodes.app.innerHTML.includes('Начать</span>'));
-assert.equal((nodes.app.innerHTML.match(/data-action=/g) || []).length, 3);
+assert.equal((nodes.app.innerHTML.match(/<button class="menu-button(?:\s|")/g) || []).length, 3);
+assert.ok(nodes.app.innerHTML.includes('data-action="jury-start"'));
+assert.ok(nodes.app.innerHTML.includes('data-action="about-simulator"'));
 assert.ok(musicCalls.some(call => call[0] === 'setScene' && call[1] === 'ambient'));
 assert.ok(!musicCalls.some(call => call[0] === 'unlock'), 'Rendering alone never unlocks autoplay.');
 await click('start-game');
@@ -331,6 +337,8 @@ for (let step = 0; step < 5; step += 1) {
   await click('story-confirm');
   assert.equal(run('state.story.choices.length'), step + 1);
   assert.equal(run('state.story.evaluation.decisions.length'), step + 1);
+  if (step === 0) assert.equal(run('state.story.eventId'), null);
+  if (step >= 1) assert.ok(storyFlow.STORY_EVENT_IDS.includes(run('state.story.eventId')));
   assert.ok(nodes.app.innerHTML.includes('hq-resident-reaction'));
   await click('story-next');
   assert.equal(run('state.story.phase'), 'transition');
@@ -357,6 +365,50 @@ assert.ok(nodes.app.innerHTML.includes('ASTANA QUALITY OF LIFE SCORE'));
 assert.ok(!/undefined|NaN/.test(nodes.app.innerHTML));
 const storyScore = run('state.story.evaluation.score');
 const storySave = storage.get('akim-story-v1');
+const savedEventId = run('state.story.eventId');
+assert.equal(JSON.parse(storySave).eventId, savedEventId);
+const beforeExtrasFetch = context.fetch;
+context.fetch = async (path, options) => {
+  const payload = options?.body ? JSON.parse(options.body) : undefined;
+  return {ok:true, json:async()=>localApi(path, payload?.decisions, payload ? {language:payload.language || 'ru', ...(payload.eventId ? {eventId:payload.eventId} : {})} : {})};
+};
+await click('city-event-calculate');
+assert.equal(run('state.story.eventPreview.result.event.id'), savedEventId);
+assert.ok(run('state.story.eventPreview.result.forecast.score') < storyScore);
+assert.equal(run('state.story.evaluation.score'), storyScore);
+assert.equal(storage.get('akim-story-v1'), storySave, 'Event forecasts are not saved as authoritative results.');
+await click('about-simulator');
+assert.ok(nodes.app.innerHTML.includes('AI не назначает стоимость'));
+assert.ok(nodes.app.innerHTML.includes('Команда Seniors'));
+await click('jury-start');
+assert.equal(run('state.page'), 'jury');
+assert.equal(run('state.jury.evaluations.length'), 6);
+assert.equal(run('state.jury.eventResult.event.id'), 'harsh-winter');
+await click('jury-toggle');
+assert.equal(run('juryClock.getState().paused'), true);
+await click('jury-next');
+assert.equal(run('juryClock.getState().index'), 1);
+await click('jury-toggle');
+context.document.hidden = true;
+events.visibilitychange();
+assert.equal(run('juryClock.getState().paused'), true);
+context.document.hidden = false;
+await click('jury-exit');
+assert.equal(run('juryClock.getState().running'), false);
+assert.equal(storage.get('akim-story-v1'), storySave);
+assert.equal(run('decisionKey(state.decisions)'), decisionsBeforeExit);
+let releaseJury;
+const juryGate = new Promise(resolve => { releaseJury = resolve; });
+context.fetch = async () => { await juryGate; return {ok:true, json:async()=>evaluation}; };
+const lateJury = click('jury-start');
+await click('exit-game');
+releaseJury();
+await lateJury;
+assert.equal(run('state.page'), 'exited', 'A late presentation cannot reopen the simulator.');
+assert.equal(run('juryClock.getState().running'), false);
+assert.equal(storage.get('akim-story-v1'), storySave);
+await click('story-resume');
+context.fetch = beforeExtrasFetch;
 // Replay uses fresh prefix calculations without rewriting the ending or draft.
 const replayFetch = context.fetch;
 await click('story-replay');

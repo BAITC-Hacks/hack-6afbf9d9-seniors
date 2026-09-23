@@ -21,6 +21,7 @@ from __future__ import annotations
 from copy import deepcopy
 
 from city_model import evaluate, load_data, _score_state
+from analysis_locale import LABELS, validate_language
 
 # How a shock chooses its target.
 #   "city"    - every district
@@ -30,8 +31,10 @@ EVENTS = [
         "id": "harsh-winter",
         "title": "Суровая зима",
         "titleEn": "A harsh winter",
+        "titleKk": "Қатал қыс",
         "summary": "Затяжные морозы. Нагрузка на теплосети растёт, частный сектор топит углём.",
         "summaryEn": "A long cold spell. Heating networks strain and the private sector burns more coal.",
+        "summaryKk": "Ұзақ аяз. Жылу желілеріне жүктеме артып, жеке секторда көмір көбірек жағылады.",
         "scope": "city",
         "effects": {"C1": -12, "E2": -8},
     },
@@ -39,8 +42,10 @@ EVENTS = [
         "id": "heating-main-burst",
         "title": "Прорыв теплотрассы",
         "titleEn": "A heating main bursts",
+        "titleKk": "Жылу магистралінің жарылуы",
         "summary": "Авария в районе с самыми изношенными сетями. Отопление и вода пропадают на несколько дней.",
         "summaryEn": "A failure in the district with the most worn networks. Heating and water are lost for days.",
+        "summaryKk": "Желілері ең тозған ауданда апат болды. Жылу мен су бірнеше күнге тоқтайды.",
         "scope": "weakest",
         "focus": "C1",
         "effects": {"C1": -25, "C2": -8},
@@ -49,8 +54,10 @@ EVENTS = [
         "id": "population-surge",
         "title": "Приток населения",
         "titleEn": "A surge in population",
+        "titleKk": "Халық санының күрт өсуі",
         "summary": "Быстрый рост числа жителей. Школы переходят на вторую смену, к врачам очереди.",
         "summaryEn": "Rapid growth in residents. Schools move to a second shift and clinic queues grow.",
+        "summaryKk": "Тұрғындар саны тез өседі. Мектептер екінші ауысымға көшіп, емхана кезектері ұзарады.",
         "scope": "city",
         "effects": {"S1": -10, "S2": -8},
     },
@@ -58,8 +65,10 @@ EVENTS = [
         "id": "school-overcrowding",
         "title": "Перегрузка школ",
         "titleEn": "Schools overcrowded",
+        "titleKk": "Мектептердің шамадан тыс толуы",
         "summary": "Район со слабейшей соцсферой принимает больше всего новых семей.",
         "summaryEn": "The district with the weakest social infrastructure takes in the most new families.",
+        "summaryKk": "Әлеуметтік инфрақұрылымы ең әлсіз ауданға жаңа отбасылар ең көп қоныстанады.",
         "scope": "weakest",
         "focus": "S1",
         "effects": {"S1": -18, "S2": -6},
@@ -68,8 +77,10 @@ EVENTS = [
         "id": "smog-episode",
         "title": "Смоговый эпизод",
         "titleEn": "A smog episode",
+        "titleKk": "Түтін тұманы",
         "summary": "Безветренная неделя. Выбросы частного сектора скапливаются над городом.",
         "summaryEn": "A windless week. Emissions from the private sector settle over the city.",
+        "summaryKk": "Желсіз апта. Жеке сектордың шығарындылары қала үстіне жиналады.",
         "scope": "city",
         "effects": {"E2": -15},
     },
@@ -77,14 +88,25 @@ EVENTS = [
         "id": "traffic-accidents",
         "title": "Всплеск ДТП",
         "titleEn": "A spike in road accidents",
+        "titleKk": "Жол апаттарының көбеюі",
         "summary": "Гололёд и ранние сумерки. Аварийность на дорогах резко растёт.",
         "summaryEn": "Ice and early darkness. Road accident rates rise sharply.",
+        "summaryKk": "Көктайғақ пен ерте қараңғылық. Жол апаттарының саны күрт өседі.",
         "scope": "city",
         "effects": {"B2": -12, "T1": -5},
     },
 ]
 
 EVENT_BY_ID = {event["id"]: event for event in EVENTS}
+STORY_EVENT_IDS = ("harsh-winter", "heating-main-burst", "population-surge", "traffic-accidents")
+
+
+def _event_text(event, field, language):
+    return event[field + {"ru": "", "en": "En", "kk": "Kk"}[language]]
+
+
+def _district_name(district, language):
+    return LABELS.get(language, {}).get(district["id"], district["name"])
 
 
 def _state_from(result):
@@ -123,7 +145,7 @@ def stress(decisions, language="ru"):
     base_score = result["score"]
     baseline = evaluate([])["score"]
 
-    english = language == "en"
+    language = validate_language(language)
     entries = []
     for event in EVENTS:
         shocked = apply_event(base_state, event)
@@ -131,11 +153,11 @@ def stress(decisions, language="ru"):
         targets = _target_ids(event, base_state)
         entries.append({
             "id": event["id"],
-            "title": event["titleEn"] if english else event["title"],
-            "summary": event["summaryEn"] if english else event["summary"],
+            "title": _event_text(event, "title", language),
+            "summary": _event_text(event, "summary", language),
             "scope": event["scope"],
-            "districts": [data["districts"][i]["name"]
-                          for i, d in enumerate(data["districts"]) if d["id"] in targets],
+            "districts": [_district_name(district, language)
+                          for district in data["districts"] if district["id"] in targets],
             "score": round(scored["score"], 2),
             "drop": round(base_score - scored["score"], 2),
             "belowBaseline": scored["score"] < baseline,
@@ -168,16 +190,86 @@ def stress(decisions, language="ru"):
 
 def catalogue(language="ru"):
     """The event list on its own, without scoring a plan."""
-    english = language == "en"
+    language = validate_language(language)
     return {
         "events": [
             {
                 "id": event["id"],
-                "title": event["titleEn"] if english else event["title"],
-                "summary": event["summaryEn"] if english else event["summary"],
+                "title": _event_text(event, "title", language),
+                "summary": _event_text(event, "summary", language),
                 "scope": event["scope"],
-                "effects": event["effects"],
+                "effects": dict(event["effects"]),
             }
             for event in EVENTS
         ]
+    }
+
+
+def _precise_evaluated_state(data, result):
+    """Restore the engine's state from its unrounded contribution ledger.
+
+    The engine already computed lag factors and synergies. Reusing those
+    numbers avoids feeding display-rounded district metrics into a new score.
+    """
+    state = {district["id"]: dict(district["metrics"]) for district in data["districts"]}
+    for contribution in result["contributions"]:
+        targets = [contribution["districtId"]] if contribution["districtId"] else state
+        for district_id in targets:
+            for indicator_id, delta in contribution["effects"].items():
+                state[district_id][indicator_id] += delta
+    for synergy in result["synergies"]:
+        for indicator_id, delta in synergy["effects"].items():
+            state[synergy["districtId"]][indicator_id] += delta
+    return {district_id: {key: max(0, min(100, value)) for key, value in metrics.items()}
+            for district_id, metrics in state.items()}
+
+
+def story_event(decisions, event_id, language="ru"):
+    """One reproducible what-if forecast for a draft or completed story plan.
+
+    It never changes the approved evaluation, project costs or budget. Event
+    selection happens once in the story controller; this function has no draw.
+    """
+    language = validate_language(language)
+    if not isinstance(event_id, str) or event_id not in STORY_EVENT_IDS:
+        raise ValueError("Неизвестное сюжетное событие.")
+    data = load_data()
+    evaluation = evaluate(decisions, require_complete=False)
+    event = EVENT_BY_ID[event_id]
+    state = _precise_evaluated_state(data, evaluation)
+    before = _score_state(data, state)
+    shocked = apply_event(state, event)
+    after = _score_state(data, shocked)
+    targets = _target_ids(event, state)
+    return {
+        "event": {
+            "id": event_id,
+            "title": _event_text(event, "title", language),
+            "summary": _event_text(event, "summary", language),
+            "scope": event["scope"],
+            "districtIds": targets,
+            "districts": [_district_name(district, language) for district in data["districts"]
+                          if district["id"] in targets],
+            "effects": dict(event["effects"]),
+        },
+        "evaluation": evaluation,
+        "forecast": {
+            "score": round(after["score"], 2),
+            "baseScore": evaluation["score"],
+            "delta": round(after["score"] - before["score"], 2),
+            "criticalCount": after["criticalCount"],
+            "baseCriticalCount": before["criticalCount"],
+            "weightedAverage": round(after["weightedAverage"], 2),
+            "minDistrict": round(after["minDistrict"], 2),
+            "districts": [{
+                "id": district["id"],
+                "name": _district_name(district, language),
+                "before": round(before["districtScores"][district["id"]], 2),
+                "after": round(after["districtScores"][district["id"]], 2),
+                "delta": round(after["districtScores"][district["id"]] - before["districtScores"][district["id"]], 2),
+                "metrics": {key: round(value, 2) for key, value in shocked[district["id"]].items()},
+                "beforeMetrics": {key: round(value, 2) for key, value in state[district["id"]].items()},
+                "affected": district["id"] in targets,
+            } for district in data["districts"]],
+        },
     }

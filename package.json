@@ -11,6 +11,9 @@
     "test:story-budget": "node tests/story-budget.test.mjs",
     "test:campaign": "node tests/campaign.test.mjs",
     "test:drama": "node tests/drama.test.mjs",
+    "test:civic": "node tests/civic.test.mjs",
+    "test:jury": "node tests/jury.test.mjs",
+    "test:live-city": "node tests/live-city.test.mjs",
     "test:music": "node tests/music.test.mjs"
   }
 }

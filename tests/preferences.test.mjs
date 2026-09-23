@@ -85,4 +85,16 @@ assert.ok(localized.includes('data-action="start-game"'));
 assert.ok(localized.includes('value="Запустить симулятор"'));
 assert.ok(localized.includes('<span data-i18n-skip>Запустить симулятор</span>'));
 assert.equal(localizeMarkup(html, 'ru'), html);
+const cueFingerprints=[];
+for(const kind of ['headquarters','city','call','news','alert']) {
+  const frequencies=[];
+  class CueContext extends FakeAudioContext {
+    createOscillator(){const voice=super.createOscillator();voice.frequency.setValueAtTime=value=>frequencies.push(value);return voice;}
+  }
+  const cue=createSoundPlayer(()=>({...DEFAULT_SETTINGS}),{AudioContext:CueContext});
+  assert.equal(await cue.play(kind),true);
+  cueFingerprints.push(frequencies.join(','));
+  cue.stop();
+}
+assert.equal(new Set(cueFingerprints).size,5,'Scene cues have distinct original note sequences.');
 console.log('PASS: preferences validation/storage, brightness, audio gain/mute/exit, localization boundaries.');
