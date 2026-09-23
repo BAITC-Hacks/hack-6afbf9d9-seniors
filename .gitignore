@@ -1,3 +1,4 @@
+.qa-chrome/
 .qa-chrome/__pycache__/
 *.py[cod]
 .env
