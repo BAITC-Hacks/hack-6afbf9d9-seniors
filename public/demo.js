@@ -35,6 +35,16 @@ const TEXT = {
     punchC: 'Score на 70% состоит из среднего по городу и на 30% — из балла худшего района. Поэтому вложить всё в сильный район не получится: город силён настолько, насколько силён его слабейший район.',
     failed: 'Не удалось загрузить сценарии. Запущен ли сервер?',
     handedOver: 'План передан в симулятор',
+    shockTitle: 'А если год окажется тяжёлым',
+    shockLede: 'Score описывает хороший год. Шесть детерминированных потрясений пересчитывают город после того, как план уже применён.',
+    plan: 'План',
+    goodYear: 'Хороший год',
+    worstCase: 'Худший случай',
+    vsNothing: 'Против бездействия',
+    worstShock: 'Худшее потрясение',
+    belowBaseline: 'ниже, чем ничего не делать',
+    shockPunch: 'Весь бюджет в Есиль — и одна суровая зима опускает город ниже отметки, которая досталась бы даром. Те же деньги в Нуре почти удерживают результат.',
+    doNothing: 'Ничего не делать',
   },
   en: {
     eyebrow: 'Team Seniors · Astana Innovations',
@@ -58,12 +68,25 @@ const TEXT = {
     punchC: 'The Score is 70% the city average and 30% the weakest district alone. Pouring everything into a strong district cannot win: a city is only as strong as its weakest district.',
     failed: 'Could not load the scenarios. Is the server running?',
     handedOver: 'Plan handed to the simulator',
+    shockTitle: 'And if the year goes badly',
+    shockLede: 'The Score describes a good year. Six deterministic shocks re-score the city after the plan has already been applied.',
+    plan: 'Plan',
+    goodYear: 'Good year',
+    worstCase: 'Worst case',
+    vsNothing: 'vs doing nothing',
+    worstShock: 'Worst shock',
+    belowBaseline: 'worse than doing nothing',
+    shockPunch: 'The whole budget into Yesil, and a single harsh winter drops the city below the score it would have had for free. The same money in Nura very nearly holds.',
+    doNothing: 'Do nothing',
   },
 };
 
 let language = 'ru';
 let payload = null;
 let datasetVersion = null;
+// Stress reports for the controlled pair, keyed by scenario id. Null until
+// they load; the page renders without them rather than waiting.
+let stressByScenario = null;
 
 const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, character => (
   { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]
@@ -108,6 +131,56 @@ function card(scenario, isWinner) {
     </div>`;
 }
 
+function shockSection(wealthy, weakest) {
+  if (!stressByScenario) return '';
+  const rows = [wealthy, weakest]
+    .map(scenario => ({ scenario, report: stressByScenario[scenario.id] }))
+    .filter(entry => entry.report);
+  if (rows.length < 2) return '';
+
+  const baseline = rows[0].report.baseline;
+
+  return `
+    <h3>${escapeHtml(t('shockTitle'))}</h3>
+    <p class="lede" style="margin:0 0 14px">${escapeHtml(t('shockLede'))}</p>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>${escapeHtml(t('plan'))}</th>
+            <th class="n">${escapeHtml(t('goodYear'))}</th>
+            <th class="n">${escapeHtml(t('worstCase'))}</th>
+            <th class="n">${escapeHtml(t('vsNothing'))}</th>
+            <th>${escapeHtml(t('worstShock'))}</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(({ scenario, report }) => {
+            const below = !report.holdsAboveBaseline;
+            return `
+            <tr>
+              <td>${escapeHtml(titleOf(scenario))}</td>
+              <td class="n">${fixed(report.score)}</td>
+              <td class="n ${below ? 'down' : 'up'}"><strong>${fixed(report.worstCase.score)}</strong></td>
+              <td class="n ${report.worstCaseVsBaseline < 0 ? 'down' : 'up'}">${signed(report.worstCaseVsBaseline)}</td>
+              <td>${escapeHtml(report.worstCase.title)}</td>
+            </tr>`;
+          }).join('')}
+          <tr>
+            <td style="color:var(--muted)">${escapeHtml(t('doNothing'))}</td>
+            <td class="n" style="color:var(--muted)">${fixed(baseline)}</td>
+            <td class="n" style="color:var(--muted)">${fixed(baseline)}</td>
+            <td class="n" style="color:var(--muted)">0.00</td>
+            <td style="color:var(--muted)">—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="punch">
+      <p style="margin:0">${escapeHtml(t('shockPunch'))}</p>
+    </div>`;
+}
+
 function render() {
   applyStaticText();
   if (!payload) return;
@@ -132,6 +205,8 @@ function render() {
       <p style="margin:0 0 8px"><b>${escapeHtml(t('punchA'))} ${fixed(gap)} ${escapeHtml(t('punchB'))}</b></p>
       <p style="margin:0">${escapeHtml(t('punchC'))}</p>
     </div>
+
+    ${shockSection(wealthy, weakest)}
 
     <h3>${escapeHtml(t('allScenarios'))}</h3>
     <div class="scroll">
@@ -182,6 +257,9 @@ document.addEventListener('click', event => {
   if (languageButton) {
     language = languageButton.dataset.lang;
     render();
+    // The shock names come from the server in the requested language, so
+    // they have to be fetched again rather than re-rendered.
+    if (payload) loadStress();
     return;
   }
   const openButton = event.target.closest('[data-open]');
@@ -202,8 +280,33 @@ document.addEventListener('click', event => {
     payload = scenarios;
     datasetVersion = bootstrap ? bootstrap.version : null;
     render();
+    loadStress();
   } catch {
     content.className = 'err';
     content.textContent = t('failed');
   }
 })();
+
+/* Stress-test the controlled pair after the page is already on screen.
+ * The section appears when the reports arrive; if the endpoint is missing
+ * or fails, the page simply stays as it was rather than showing an error
+ * for something it can do without. */
+async function loadStress() {
+  const [wealthyId, weakestId] = payload.controlledPair;
+  const wanted = payload.scenarios.filter(item => [wealthyId, weakestId].includes(item.id));
+  try {
+    const reports = await Promise.all(wanted.map(async scenario => {
+      const response = await fetch('/api/stress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decisions: scenario.decisions, language }),
+      });
+      if (!response.ok) throw new Error(String(response.status));
+      return [scenario.id, await response.json()];
+    }));
+    stressByScenario = Object.fromEntries(reports);
+    render();
+  } catch {
+    stressByScenario = null;
+  }
+}
