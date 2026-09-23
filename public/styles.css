@@ -21,3 +21,20 @@
 .btn.telegram-share:hover{background:#06678f;border-color:#06678f}
 .btn.telegram-share:focus-visible{outline:3px solid #38bdf8;outline-offset:3px}
 @media print{.telegram-share{display:none!important}}
+
+@keyframes shake {
+  0%,100% { transform:translateX(0); }
+  20%,60% { transform:translateX(-4px); }
+  40%,80% { transform:translateX(4px); }
+}
+#budget-counter.shake,.story-budget.shake {
+  animation:shake .3s ease-in-out;
+  background:#fee2e2;
+  color:#b91c1c;
+  box-shadow:0 0 0 2px #ef4444;
+}
+#budget-counter.shake .stat-value,.story-budget.shake strong { color:#b91c1c; }
+button[aria-disabled="true"] { opacity:.65; cursor:not-allowed; }
+@media(prefers-reduced-motion:reduce) {
+  #budget-counter.shake,.story-budget.shake { animation:none; }
+}

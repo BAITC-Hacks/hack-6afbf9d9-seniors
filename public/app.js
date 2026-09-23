@@ -487,7 +487,7 @@ function simulationView() {
   const e = state.evaluation;
   return `${pageHeader('Астана · Симулятор городских решений', 'Ваш город. Ваши решения.', 'Распределите бюджет и посмотрите, как изменится жизнь города.', `<button class="btn" data-action="preset" ${state.busy ? 'disabled' : ''}>${icon('sparkle')}Пример из задания</button><button class="btn primary" data-action="reset" ${state.busy ? 'disabled' : ''}>${icon('plus')}Новый сценарий</button>`)}
   <section class="stats" aria-label="Показатели сценария">
-    <div class="stat-card"><div class="stat-title">${icon('wallet')}Доступный бюджет</div><span class="stat-badge">${icon('wallet')}</span><div class="stat-value">${num(e.remaining)}<span class="unit">из ${e.budget} ед.</span></div><div class="budget-track" aria-label="Использовано ${e.spent} из ${e.budget}"><span style="width:${e.spent / e.budget * 100}%"></span></div><div class="stat-foot">Распределено <strong>${e.spent} ед.</strong> · одинаковый старт для всех</div></div>
+    <div class="stat-card" id="budget-counter"><div class="stat-title">${icon('wallet')}Доступный бюджет</div><span class="stat-badge">${icon('wallet')}</span><div class="stat-value">${num(e.remaining)}<span class="unit">из ${e.budget} ед.</span></div><div class="budget-track" aria-label="Использовано ${e.spent} из ${e.budget}"><span style="width:${e.spent / e.budget * 100}%"></span></div><div class="stat-foot">Распределено <strong>${e.spent} ед.</strong> · одинаковый старт для всех</div></div>
     <div class="stat-card score-card"><div class="stat-title">${icon('green')}Astana Quality of Life Score</div><span class="stat-badge">${icon('chart')}</span><div class="stat-value">${num(e.score)}<span class="unit">/ 100</span>${e.delta ? `<span class="delta ${e.delta < 0 ? 'negative' : 'positive'}">${signed(e.delta)}</span>` : ''}</div><div class="stat-foot">${state.decisions.length ? 'Прогноз через 8 кварталов' : 'Исходное качество жизни города'}</div></div>
     <div class="stat-card"><div class="stat-title">${icon('layers')}Ваши управленческие решения</div><span class="stat-badge">${icon('flag')}</span><div class="stat-value">${state.decisions.length}<span class="unit">/ 5 решений</span></div><div class="decision-dots" aria-hidden="true">${Array.from({ length: 5 }, (_, i) => `<span class="${i < state.decisions.length ? 'filled' : ''}"></span>`).join('')}</div><div class="stat-foot">${state.decisions.length === 5 ? 'Все решения приняты. Время оценить результат.' : 'До 2 мероприятий из одного направления'}</div></div>
   </section>
@@ -521,6 +521,21 @@ function scenarioView() {
   <div class="scenario-footer"><div class="scenario-total"><span>Стоимость сценария</span><b>${e.spent} <span>/ ${e.budget} ед.</span></b></div><button class="btn primary full" data-action="analyze" ${!e.complete || state.busy || state.analyzing ? 'disabled' : ''}>${icon('sparkle')}${state.analyzing ? 'Анализируем…' : 'Оценить мой сценарий'}${icon('arrow')}</button><p class="scenario-hint">${e.complete ? 'Получите итоговый Score и разбор решений' : `Добавьте ещё ${5 - state.decisions.length} ${5 - state.decisions.length === 1 ? 'решение' : (5 - state.decisions.length < 5 ? 'решения' : 'решений')}, чтобы получить анализ`}</p><div class="scenario-help">${icon('shield')}Бюджет и правила проверяются автоматически</div></div></section>`;
 }
 
+const budgetShakeTimers = new WeakMap();
+
+function shakeBudget() {
+  const counter = document.querySelector(state.page === 'story' ? '.story-budget' : '#budget-counter');
+  if (!counter?.classList) return;
+  clearTimeout(budgetShakeTimers.get(counter));
+  counter.classList.remove('shake');
+  void counter.offsetWidth; // Restart the animation even on repeated clicks.
+  counter.classList.add('shake');
+  budgetShakeTimers.set(counter, setTimeout(() => {
+    counter.classList.remove('shake');
+    budgetShakeTimers.delete(counter);
+  }, 500));
+}
+
 function blockedReason(m, target) {
   if (state.decisions.some(d => d.initiativeId === m.id)) return '';
   if (state.decisions.length >= 5) return 'Уже выбрано 5 решений. Уберите одно для замены.';
@@ -537,9 +552,10 @@ function initiativeView(m) {
   const selected = state.decisions.find(d => d.initiativeId === m.id);
   const target = selected?.districtId || state.targets[m.id] || state.district;
   const blocked = blockedReason(m, target);
+  const overBudget = !selected && state.decisions.length < 5 && m.cost > state.evaluation.remaining;
   return `<article class="initiative-card ${selected ? 'selected' : ''}" data-measure="${m.id}"><div class="initiative-top">${categoryIcon(m.categoryId)}<span class="measure-id">${m.id}</span><span class="scope-chip">${icon(m.scope === 'city' ? 'city' : 'pin')}${m.scope === 'city' ? 'Весь город' : 'Один район'}</span></div><h3>${esc(m.title)}</h3><p class="initiative-description">${esc(m.description)}</p><div class="effect-chips">${Object.entries(m.effects).map(([id, value]) => { const effect = value * (8 - m.lag) / 8; return `<span class="effect-chip ${effect < 0 ? 'negative' : ''}" title="${esc(indicatorTitles[id])}">${id} ${signed(effect)} ${esc(indicatorTitles[id])}</span>`; }).join('')}</div><div class="initiative-meta"><b>${m.cost} <small>ед.</small></b><span>${icon('clock')}Запуск через ${m.lag} кв.</span></div>
   ${m.scope === 'district' ? `<select class="card-select" data-target="${m.id}" aria-label="Район для ${esc(m.title)}" ${state.busy ? 'disabled' : ''}>${state.data.districts.map(d => `<option value="${d.id}" ${d.id === target ? 'selected' : ''}>${esc(d.name)}${d.id === 'nura' ? ' · приоритетный район' : ''}</option>`).join('')}</select>` : `<div class="city-target">${icon('city')}Эффект во всех пяти районах</div>`}
-  <button class="btn add-btn full ${selected ? 'selected' : ''}" data-action="${selected ? 'remove' : 'add'}" data-id="${m.id}" ${blocked || state.busy ? 'disabled' : ''}>${icon(selected ? 'check' : 'plus')}${selected ? 'В сценарии · убрать' : 'Добавить в сценарий'}</button>${blocked ? `<p class="blocked-reason">${esc(blocked)}</p>` : ''}</article>`;
+  <button class="btn add-btn full ${selected ? 'selected' : ''}" data-action="${selected ? 'remove' : 'add'}" data-id="${m.id}" ${state.busy || (blocked && !overBudget) ? 'disabled' : ''} ${overBudget ? 'aria-disabled="true"' : ''}>${icon(selected ? 'check' : 'plus')}${selected ? 'В сценарии · убрать' : 'Добавить в сценарий'}</button>${blocked ? `<p class="blocked-reason">${esc(blocked)}</p>` : ''}</article>`;
 }
 
 function optimizerView() {
@@ -734,7 +750,11 @@ document.addEventListener('click', async event => {
     if (action === 'story-replan-confirm' && state.story.confirmReplan) await moveStory('replan');
     if (action === 'story-select') {
       const selected = Number(button.dataset.id);
-      if (state.story.phase === 'meeting' && plannedOptionAvailability(state.story.choices, state.story.step, selected, state.data.initiatives, state.data.budget, state.story.allocations).allowed) { state.story.selected = selected; render(); }
+      if (state.story.phase === 'meeting') {
+        const availability = plannedOptionAvailability(state.story.choices, state.story.step, selected, state.data.initiatives, state.data.budget, state.story.allocations);
+        if (availability.allowed) { state.story.selected = selected; render(); }
+        else if (availability.reason === 'budget') { toast(storyText('locked', preferences.language), true); shakeBudget(); }
+      }
     }
     if (action === 'story-confirm') await confirmStoryChoice();
     if (action === 'story-next' && state.story.choices[state.story.step] === state.story.selected) await moveStory('meeting-next');
@@ -784,7 +804,11 @@ document.addEventListener('click', async event => {
   if (action === 'add') {
     const m = initiative(button.dataset.id); const target = state.targets[m.id] || state.district;
     const reason = blockedReason(m, target);
-    if (reason) { toast(reason, true); return; }
+    if (reason) {
+      toast(reason, true);
+      if (state.decisions.length < 5 && m.cost > state.evaluation.remaining) shakeBudget();
+      return;
+    }
     await setDecisions([...state.decisions, { categoryId: m.categoryId, initiativeId: m.id, ...(m.scope === 'district' ? { districtId: target } : {}) }], `${m.id}: инициатива добавлена в сценарий.`);
   }
   if (action === 'remove') await setDecisions(state.decisions.filter(d => d.initiativeId !== button.dataset.id), 'Инициатива убрана. Бюджет пересчитан.');
