@@ -15,6 +15,7 @@ import * as storyPresentation from '../public/story-view.js';
 import * as storyFlow from '../public/story-flow.js';
 import * as storyBudget from '../public/story-budget.js';
 import * as campaign from '../public/campaign.js';
+import * as drama from '../public/drama.js';
 import { createMusicPlayer } from '../public/music.js';
 
 function localApi(path, decisions) {
@@ -68,7 +69,7 @@ const musicCalls = [];
 let downloaded;
 let downloadClicks = 0;
 const context = vm.createContext({
-  ...localization, ...gamePreferences, ...storyModel, ...storyPresentation, ...storyFlow, ...storyBudget, ...campaign,
+  ...localization, ...gamePreferences, ...storyModel, ...storyPresentation, ...storyFlow, ...storyBudget, ...campaign, ...drama,
   createMusicPlayer(getPreferences, environment) {
     const player = createMusicPlayer(getPreferences, environment);
     return Object.fromEntries(['unlock', 'setScene', 'sync', 'stop'].map(method => [method, (...args) => {
@@ -178,6 +179,12 @@ await click('story-inquiry', { id: '0' });
 await click('discovery-next');
 assert.ok(nodes.app.innerHTML.includes('Айгуль Садыкова'));
 assert.ok(nodes.app.innerHTML.includes('/portraits/character-0.png'));
+await click('story-dialogue-reveal');
+assert.equal(run('state.story.dialogueExpanded'), true);
+await click('story-map-district', { id: 'nura' });
+assert.equal(run('state.story.focusDistrict'), 'nura');
+await click('story-map-district', { id: '<script>' });
+assert.equal(run('state.story.focusDistrict'), 'nura', 'The map only accepts known districts.');
 await click('story-simulator');
 assert.ok(nodes.app.innerHTML.includes('52,56'));
 assert.ok(nodes.app.innerHTML.includes('city-map.svg'));
@@ -324,7 +331,7 @@ for (let step = 0; step < 5; step += 1) {
   await click('story-confirm');
   assert.equal(run('state.story.choices.length'), step + 1);
   assert.equal(run('state.story.evaluation.decisions.length'), step + 1);
-  assert.ok(nodes.app.innerHTML.includes('story-acknowledgement'));
+  assert.ok(nodes.app.innerHTML.includes('hq-resident-reaction'));
   await click('story-next');
   assert.equal(run('state.story.phase'), 'transition');
   assert.equal(run('state.story.step'), step);
@@ -350,6 +357,36 @@ assert.ok(nodes.app.innerHTML.includes('ASTANA QUALITY OF LIFE SCORE'));
 assert.ok(!/undefined|NaN/.test(nodes.app.innerHTML));
 const storyScore = run('state.story.evaluation.score');
 const storySave = storage.get('akim-story-v1');
+// Replay uses fresh prefix calculations without rewriting the ending or draft.
+const replayFetch = context.fetch;
+await click('story-replay');
+assert.equal(run('state.story.replayIndex'), 0);
+assert.equal(run('state.story.replayEvaluation.spent'), 24);
+assert.equal(run('state.story.evaluation.spent'), 83);
+assert.deepEqual(musicCalls.at(-1), ['setScene', 'ambient']);
+assert.ok(!nodes.app.innerHTML.includes('data-action="story-select"'));
+await click('story-select', { id: '2' });
+assert.equal(run('state.story.choices[0]'), 0, 'Replay cannot edit decisions.');
+context.fetch = async () => { throw new Error('Replay unavailable'); };
+await click('story-replay-next');
+assert.equal(run('state.story.replayIndex'), 0, 'A failed replay request keeps its current frame.');
+context.fetch = replayFetch;
+for (let index = 1; index < 5; index += 1) {
+  await click('story-replay-next');
+  assert.equal(run('state.story.replayIndex'), index);
+  assert.equal(run('state.story.replayEvaluation.decisions.length'), index + 1);
+  assert.equal(run('state.story.evaluation.score'), storyScore);
+}
+await click('story-replay-next');
+assert.equal(run('state.story.replayIndex'), 4);
+await click('story-replay-prev');
+assert.equal(run('state.story.replayIndex'), 3);
+await click('story-replay-close');
+assert.equal(run('state.story.replayIndex'), null);
+assert.equal(run('state.story.phase'), 'ending');
+assert.deepEqual(musicCalls.at(-1), ['setScene', 'finale']);
+assert.equal(storage.get('akim-story-v1'), storySave);
+assert.equal(run('decisionKey(state.decisions)'), decisionsBeforeExit);
 run('state.story.choices=[]; state.story.step=0; state.story.evaluation=null');
 await run('restoreStory()');
 assert.equal(run('state.story.step'), 5);
@@ -446,7 +483,7 @@ for (const id of ['0', '1']) {
 await enterMeeting();
 await click('story-select', { id: '2' }); // 24 + 25 + 30 + minimum 10 + 14 = 103.
 assert.equal(run('state.story.selected'), null);
-assert.ok(nodes.app.innerHTML.includes('story-choice-reason'));
+assert.ok(nodes.app.innerHTML.includes('hq-answer-reason'));
 assert.equal(run('state.story.evaluation.spent'), 49);
 await click('story-select', { id: '0' });
 context.fetch = async () => ({ ok: false, json: async () => ({ error: 'Story evaluation rejected' }) });
@@ -488,6 +525,21 @@ await click('exit-game');
 resolveStoryTransfer({ ok: true, json: async () => evaluation });
 await transfer;
 assert.equal(run('state.page'), 'exited');
+
+// Late replay calculations must not reopen the story or alter its save.
+await click('game-menu');
+await click('story-resume');
+const beforeLateReplay = storage.get('akim-story-v1');
+const beforeReplayIndex = run('state.story.replayIndex');
+let resolveReplay;
+context.fetch = () => new Promise(resolve => { resolveReplay = resolve; });
+const replayRequest = click('story-replay');
+await click('exit-game');
+resolveReplay({ ok: true, json: async () => evaluation });
+await replayRequest;
+assert.equal(run('state.page'), 'exited');
+assert.equal(run('state.story.replayIndex'), beforeReplayIndex);
+assert.equal(storage.get('akim-story-v1'), beforeLateReplay);
 
 // A transient restore failure must not erase valid saved progress on exit.
 const preservedStory = storage.get('akim-story-v1');

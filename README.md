@@ -22,6 +22,7 @@ Every player starts with the same synthetic data and **100 budget units**. Choos
 - **Story mode:** a four-scene prologue, budget planning, five investigations with ten discoveries, connected meetings, a mid-day council and a branching epilogue built from the server's real calculation.
 - **Interface:** schematic map, current/forecast comparison, saved scenario ranking, JSON export, print and PDF output, three languages, and sound, music and brightness settings.
 - **101 Python tests and 10 Node suites**, covering the reference figures, every rule, API validation, private-file protection, provider failure, the optimizer's agreement with the engine, story investigations, budget allocation and the figures quoted in this file.
+- **Read-only replay** is covered alongside the story investigations, budget allocation and the figures quoted in this file.
 
 ## Technologies
 
@@ -81,7 +82,11 @@ Drafts and up to 12 distinct recent reports are stored in this browser's `localS
 
 ### Meetings and dialogue
 
-The character portrait, name and role sit on the left, their lines in the centre, and the replies with their cost and effects on the right. On a narrow screen the blocks stack vertically. All meetings are available in Russian, Kazakh and English, and share the sound and brightness settings.
+Meetings take place in a dark headquarters: the day's agenda sits on the left, a large portrait and conversation occupy the centre, and the budget, approved decisions and city map sit on the right. Replies are spoken lines with a cost label and expandable project details. Dialogue appears gradually; **Show the full conversation** reveals it immediately. Reduced-motion preferences disable the animation. On a narrow screen the panels stack vertically. All meetings are available in Russian, Kazakh and English, and share the sound and brightness settings.
+
+Before each meeting, a short fictional city transmission uses a different format: camera, resident message, call, news or map report. The event feed and category colours retain visible traces of confirmed choices. Select a district on the map to inspect its original and forecast indicators. The immediate resident reaction is separate from the delayed project effect: contributions come directly from the server, already adjusted for lag; the total district forecast also includes synergies and clipping.
+
+The final screen presents the city map, the hero's address, three strongest improvements, two remaining needs and the management style. **Show the day again** reviews the five confirmed meetings with server-evaluated decision prefixes. This is read-only: it leaves the completed story, saved progress and free-mode draft intact. Close the review to return to the ending; use the existing restart control to start a new story.
 
 | Time | Character | Initiatives and area |
 | --- | --- | --- |
@@ -233,7 +238,8 @@ This takes about a minute. A missing cache returns HTTP 503 for optimization; ev
 | `public/story-flow.js` | Scene navigation, save migration and ending classification |
 | `public/story-budget.js` | Category spending envelopes and remaining-story feasibility |
 | `public/campaign.js`, `public/campaign-view.js` | Localized investigations, council, budget screen and evening journal |
-| `public/story-view.js` | Dialogue and epilogue rendering |
+| `public/story-view.js` | Scene routing, prologue and epilogue rendering |
+| `public/drama.js`, `public/drama-view.js`, `public/drama.css` | Localized city transmissions, headquarters, consequence map, finale and read-only replay |
 | `public/story.css` | Dialogue frame, portraits, choices and responsive layout |
 | `public/portraits/` | Five local character portraits |
 | `analysis_locale.py` | Localized result explanations |
@@ -361,6 +367,7 @@ node tests/story-flow.test.mjs
 node tests/story-budget.test.mjs
 node tests/narrative.test.mjs
 node tests/campaign.test.mjs
+node tests/drama.test.mjs
 node tests/music.test.mjs
 ```
 

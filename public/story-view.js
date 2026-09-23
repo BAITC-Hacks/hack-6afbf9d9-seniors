@@ -2,8 +2,9 @@ import { getStory, storyText } from './story.js';
 import { getIntro, getMeeting, getTransition, getClosing, narrativeText } from './narrative.js';
 import { classifyEnding } from './story-flow.js';
 import { campaignText, getBriefing, getDiscovery, enrichMeeting, getCouncil, getCampaignClosing } from './campaign.js';
-import { STORY_CATEGORIES, plannedOptionAvailability } from './story-budget.js';
 import { renderCampaignPlan, renderCampaignConversation, renderCampaignChronicle } from './campaign-view.js';
+import { dramaText, getCityBeat, getVisibleDecisions } from './drama.js';
+import { renderHQMeeting, renderHQImpact, renderCityBeat, renderHQFinale } from './drama-view.js';
 import { translate } from './i18n.js';
 
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -35,13 +36,17 @@ export function renderStory({ data, story, language, busy, icon, num, signed }) 
   const t = (key, vars) => escape(storyText(key, language, vars));
   const n = (key, vars) => escape(narrativeText(key, language, vars));
   const c = (key, vars) => escape(campaignText(key, language, vars));
+  const d = (key, vars) => escape(dramaText(key, language, vars));
   const tr = value => escape(translate(value, language));
-  const e = story.sceneEvaluation || story.evaluation || data.baseline;
+  const readOnly = Number.isInteger(story.replayIndex) && story.replayIndex >= 0 && story.replayIndex < meetings.length;
+  const e = readOnly ? story.replayEvaluation || data.baseline : story.sceneEvaluation || story.evaluation || data.baseline;
   const phase = story.phase || (story.step === meetings.length ? 'ending' : 'meeting');
   const ended = phase === 'ending';
   const intro = phase === 'intro';
-  const visibleDecisions = Math.min(story.choices.length, story.step + 1);
-  const current = enrichMeeting(getMeeting(Math.min(story.step, meetings.length - 1), story.choices, language, data), story, language);
+  const visibleDecisions = getVisibleDecisions(story).length;
+  const renderStep = readOnly ? story.replayIndex : Math.min(story.step, meetings.length - 1);
+  const narrativeStory = readOnly ? { ...story, step: renderStep, choices: story.choices.slice(0, renderStep + 1), inquiries: (story.inquiries || []).map((value, index) => index <= renderStep ? value : null), council: renderStep >= 3 ? story.council : null } : story;
+  const current = enrichMeeting(getMeeting(renderStep, narrativeStory.choices, language, data), narrativeStory, language);
   const introScenes = getIntro(language);
   const introStep = Math.min(Math.max(story.introStep || 0, 0), introScenes.length - 1);
   const scene = intro ? introScenes[introStep] : phase === 'transition' ? getTransition(story.step, story.choices, language, data) : phase === 'discovery' ? getDiscovery(story.step, story, language) : null;
@@ -59,17 +64,19 @@ export function renderStory({ data, story, language, busy, icon, num, signed }) 
   const footer = `<footer class="story-footnote"><span>${icon('shield')}${t('saved')}</span><span>${t('effectTiming')}</span>${button('story-restart', t('restart'), 'refresh', 'story-header-button')}</footer>`;
   const replan = phase === 'meeting' && story.choices.length > story.step && story.confirmReplan ? `<section class="story-restart story-replan-warning" role="group" aria-label="${c('replanFromHere')}"><p><strong>${c('replanFromHere')}</strong><br/>${c('replanWarning')}</p><div class="story-button-row">${button('story-replan-confirm', c('replanConfirm'), 'refresh', 'story-primary')}${button('story-replan-cancel', t('cancel'))}</div></section>` : '';
 
+  if (phase === 'meeting' || readOnly) return `<main class="story-screen hq-screen ${readOnly ? 'hq-readonly-replay' : 'story-phase-meeting'}" data-story-phase="${readOnly ? 'replay' : 'meeting'}" data-i18n-skip id="main" tabindex="-1">${heading}${readOnly ? '' : restart + replan}${renderHQMeeting({ data, story, evaluation: e, current, language, icon, num, signed, busy, button, readOnly })}${readOnly ? `<footer class="story-footnote"><span>${d('replayNotice')}</span></footer>` : footer}</main>`;
+
   if (phase === 'planning') return `<main class="story-screen story-phase-planning" data-story-phase="planning" data-i18n-skip id="main" tabindex="-1">${heading}${status}${progress}${restart}${renderCampaignPlan({ data, story, language, busy, icon, num, button })}${footer}</main>`;
 
   if (briefing || council) {
-    return `<main class="story-screen story-phase-${phase}" data-story-phase="${phase}" data-i18n-skip id="main" tabindex="-1">${heading}${status}${progress}${restart}${renderCampaignConversation({ scene: conversation, story, language, icon, busy, council, button })}${footer}</main>`;
+    return `<main class="story-screen story-phase-${phase}" data-story-phase="${phase}" data-i18n-skip id="main" tabindex="-1">${heading}${status}${progress}${restart}${briefing ? renderCityBeat(getCityBeat(story.step, story, language), { language, icon, step: story.step }) : ''}${renderCampaignConversation({ scene: conversation, story, language, icon, busy, council, button })}${footer}</main>`;
   }
 
   if (intro || phase === 'transition' || phase === 'discovery') {
     const controls = intro
       ? `<span class="cinematic-page-number">${n('introProgress', { current: introStep + 1, total: introScenes.length })}</span><div class="story-button-row">${button('intro-back', n('back'), '', 'story-secondary', introStep === 0 ? 'disabled' : '')}${button('intro-next', escape(scene.cta), 'arrow', 'story-primary')}</div>`
       : `<div class="story-button-row">${button('story-back', n('back'))}${button(phase === 'discovery' ? 'discovery-next' : 'transition-next', scene.cta ? escape(scene.cta) : n(story.step === 4 ? 'ending' : 'nextMeeting'), 'arrow', 'story-primary')}</div>`;
-    return `<main class="story-screen story-phase-${escape(phase)}" data-story-phase="${escape(phase)}" data-i18n-skip id="main" tabindex="-1">${heading}${status}${progress}${restart}${renderCinematic(scene, { data, evaluation: e, meetings, icon, num, t, n, tr, controls, transition: phase === 'transition' || phase === 'discovery' })}${footer}</main>`;
+    return `<main class="story-screen story-phase-${escape(phase)}" data-story-phase="${escape(phase)}" data-i18n-skip id="main" tabindex="-1">${heading}${status}${progress}${restart}${renderCinematic(scene, { data, evaluation: e, meetings, icon, num, t, n, tr, controls, transition: phase === 'transition' || phase === 'discovery' })}${intro ? '' : renderHQImpact({ data, evaluation: e, story, language, icon, num, signed })}${footer}</main>`;
   }
 
   if (ended) {
@@ -80,36 +87,17 @@ export function renderStory({ data, story, language, busy, icon, num, signed }) 
     // Unfunded alternatives are concrete trade-offs, not invented penalties.
     const missed = meetings.map((meeting, index) => ({ meeting, choices: meeting.choices.filter((_, choice) => choice !== story.choices[index]) }));
     return `<main class="story-screen story-phase-ending" data-story-phase="ending" data-i18n-skip id="main" tabindex="-1">${heading}${status}${progress}${restart}<section class="story-ending story-ending-${escape(classification.id)}">
-      <div class="story-ending-hero"><div><div class="story-chapter">${t('epilogue')} · 18:40</div><h1>${escape(classification.title)}</h1><p>${escape(classification.body)}</p></div><div class="story-ending-score"><span>ASTANA QUALITY OF LIFE SCORE</span><strong>${num(e.score)}</strong><small>${num(e.baselineScore)} → ${num(e.score)} <b>(${signed(e.delta)})</b></small></div></div>
+      ${renderHQFinale({ data, evaluation: e, story, language, icon, num, signed, button })}
       <section class="story-freeplay" aria-labelledby="story-freeplay-title"><div><h2 id="story-freeplay-title">${t('freePlayTitle')}</h2><p>${t('freePlayHint')}</p></div><div class="story-button-row">${button('story-open-scenario', t('freePlay'), 'play', 'story-primary')}${button('game-menu', t('menu'), 'menu')}</div></section>
-      <section class="story-evening" aria-labelledby="story-evening-title"><div class="story-evening-art" aria-hidden="true"><img src="/city-map.svg" alt=""/><span>18:40</span></div><div><div class="story-chapter">${n('today')}</div><h2 id="story-evening-title">${escape(closing.title)}</h2>${closing.lines.map(line => `<p>${escape(line)}</p>`).join('')}</div></section>
+      <details class="hq-final-stats"><summary class="hq-details-title">${d('finalDetails')}</summary><section class="story-evening" aria-labelledby="story-evening-title"><div class="story-evening-art" aria-hidden="true"><img src="/city-map.svg" alt=""/><span>18:40</span></div><div><div class="story-chapter">${n('today')}</div><h2 id="story-evening-title">${escape(closing.title)}</h2>${closing.lines.map(line => `<p>${escape(line)}</p>`).join('')}</div></section>
       ${renderCampaignChronicle(getCampaignClosing(story, language), language, icon)}
       <section class="story-ending-reasons"><h2>${n('endingReason')}</h2><ul>${classification.reasons.map(reason => `<li>${icon('check')}<span>${escape(reason)}</span></li>`).join('')}</ul><p class="cinematic-forecast">${icon('clock')}${n('forecastNotice')}</p></section>
       <div class="story-ending-grid"><section class="story-ending-card"><h2>${t('improved')}</h2>${improved.length ? improved.map(metric => `<div class="story-stat-row"><span>${tr(metric.name)}</span><b>${num(metric.before)} → ${num(metric.after)} <em>${signed(metric.delta)}</em></b></div>`).join('') : `<p>${t('noImprovements')}</p>`}</section>
       <section class="story-ending-card"><h2>${t('unresolved')}</h2><p>${t('critical')}: <strong>${e.criticalCount}</strong></p>${critical.map(item => `<div class="story-stat-row"><span>${tr(item.district.name)} · ${tr(data.indicators.find(indicator => indicator.id === item.id)?.name || item.id)}</span><b>${num(item.value)} / 100</b></div>`).join('')}<div class="story-stat-row"><span>${t('spent')}</span><b>${e.spent} / ${e.budget}</b></div><div class="story-stat-row"><span>${t('remaining')}</span><b>${e.remaining}</b></div></section>
       <section class="story-ending-card"><h2>${t('outcome')}</h2>${meetings.map((meeting, index) => { const choice = meeting.choices[story.choices[index]]; const measure = data.initiatives.find(item => item.id === choice.initiativeId); return `<div class="story-stat-row"><span>${tr(measure.title)}<small>${tr(choice.districtId ? data.districts.find(item => item.id === choice.districtId).name : 'Весь город')}</small></span><b>${measure.cost}</b></div>`; }).join('')}</section>
       <section class="story-ending-card"><h2>${t('missed')}</h2>${missed.map(({ meeting, choices }) => `<div class="story-stat-row"><span><strong>${escape(meeting.role)}</strong><small>${choices.map(choice => tr(data.initiatives.find(item => item.id === choice.initiativeId).title)).join(' · ')}</small></span></div>`).join('')}</section></div>
-      <div class="story-button-row">${button('story-analyze', busy ? t('analyzing') : t('analyze'), 'sparkle', 'story-primary')}${button('story-edit', t('editChoices'), 'refresh')}</div></section>${footer}</main>`;
+      <div class="story-button-row">${button('story-analyze', busy ? t('analyzing') : t('analyze'), 'sparkle', 'story-primary')}${button('story-edit', t('editChoices'), 'refresh')}</div></details></section>${footer}</main>`;
   }
 
-  const accepted = story.choices[story.step] !== undefined && story.choices[story.step] === story.selected;
-  const selectedChoice = current.choices[story.selected];
-  const choices = current.choices.map((choice, index) => {
-    const measure = data.initiatives.find(item => item.id === choice.initiativeId);
-    const available = plannedOptionAvailability(story.choices, story.step, index, data.initiatives, data.budget, story.allocations);
-    const selected = story.selected === index;
-    const effects = Object.entries(measure.effects).map(([code, full]) => `<span title="${tr(data.indicators.find(item => item.id === code)?.name || code)}">${code} ${signed(full * (data.horizon - measure.lag) / data.horizon)}</span>`).join(' ');
-    return `<button class="story-choice ${selected ? 'selected' : ''} ${!available.allowed ? 'unavailable' : ''} ${choice.context ? 'story-choice-contextual' : ''}" data-action="story-select" data-id="${index}" aria-pressed="${selected}" ${busy || !available.allowed ? 'disabled' : ''}>
-      <span class="story-choice-top"><span class="story-choice-number">${String(index + 1).padStart(2, '0')}</span><span class="story-choice-cost">${icon('wallet')}${measure.cost} / ${data.budget}</span></span>
-      ${choice.context ? `<span class="story-context-badge">${icon('sparkle')}${escape(choice.context)}</span>` : ''}<span class="story-choice-reply">${escape(choice.reply)}</span><span class="story-choice-label">${tr(measure.title)} · ${tr(choice.districtId ? data.districts.find(item => item.id === choice.districtId).name : 'Весь город')}</span><span class="story-choice-effect">${effects}</span>
-      ${!available.allowed ? `<span class="story-choice-reason">${available.reason === 'allocation' ? c('allocationLocked', { cap: story.allocations?.[measure.categoryId], cost: measure.cost }) : t(available.reason === 'budget' ? 'locked' : available.reason)}${available.reason !== 'allocation' && available.minimumTotal !== null ? ` ${t('futureCost', { cost: available.minimumTotal })}` : ''}</span>` : ''}
-    </button>`;
-  }).join('');
-  return `<main class="story-screen story-phase-meeting" data-story-phase="meeting" data-i18n-skip id="main" tabindex="-1">${heading}${status}${progress}${restart}${replan}
-    <div class="story-layout"><figure class="story-character"><div class="story-portrait"><img src="/portraits/character-${current.portrait}.png" alt="${escape(current.name)}" fetchpriority="high"/></div><figcaption><h2 class="story-character-name">${escape(current.name)}</h2><p class="story-character-role">${escape(current.role)}</p><span class="story-location">${icon('pin')}${escape(current.districtName)}</span></figcaption></figure>
-    <section class="story-dialogue" aria-labelledby="story-dialogue-title"><div class="story-nameplate">${escape(current.name)}</div><div class="story-chapter">${t('meeting', { current: story.step + 1, total: 5 })} · ${escape(current.time)}</div><h1 class="story-dialogue-title" id="story-dialogue-title">${escape(current.title)}</h1><div class="story-lines">${current.lines.map(line => `<p>${escape(line)}</p>`).join('')}</div>
-    ${current.cityNote ? `<div class="story-city-note">${icon('city')}<div><b>${n('decisionContext')}</b><p>${escape(current.cityNote)}</p></div></div>` : ''}
-    ${accepted ? `<div class="story-acknowledgement" role="status">${icon('check')}<p>${escape(selectedChoice.acknowledgement)}</p></div>` : ''}
-    <div class="story-dialogue-footer">${story.choices.length > story.step + 1 && !accepted ? `<p class="story-change-warning">${t('changeWarning')}</p>` : ''}<div class="story-button-row">${button('story-back', t('back'), '', 'story-secondary', story.step === 0 && story.inquiries?.[0] == null ? 'disabled' : '')}${accepted ? button('story-next', n('shortTerm'), 'arrow', 'story-primary') : button('story-confirm', t(busy ? 'evaluating' : 'accept'), 'check', 'story-primary', !selectedChoice ? 'disabled' : '')}</div></div></section>
-    <aside class="story-choices" aria-label="${n('availableReplies')}"><h2>${n('availableReplies')}</h2>${story.allocations ? `<div class="story-category-plan"><span>${c('categoryCap')}</span><strong>${num(story.allocations[STORY_CATEGORIES[story.step]])}<small> / ${num(data.budget)}</small></strong></div>` : ''}${choices}${story.choices.length > story.step ? button('story-replan', c('replanFromHere'), 'refresh', 'story-header-button story-replan-button') : ''}</aside></div>${footer}</main>`;
+  throw new Error('Unknown story phase');
 }

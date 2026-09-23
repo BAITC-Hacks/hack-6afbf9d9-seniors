@@ -6,6 +6,7 @@ import { createMusicPlayer } from './music.js';
 import { createStoryProgress, normalizeStoryProgress, serializeStoryProgress, nextStoryProgress, commitStoryChoice, chooseStoryInquiry, setStoryAllocations } from './story-flow.js';
 import { STORY_CATEGORIES, defaultAllocations, allocationSummary, plannedOptionAvailability } from './story-budget.js';
 import { campaignText } from './campaign.js';
+import { getVisibleDecisions } from './drama.js';
 
 const app = document.querySelector('#app');
 const toastElement = document.querySelector('#toast');
@@ -216,8 +217,15 @@ function render() {
   const focus = !pageChanged && document.activeElement?.id === 'main' && pendingFocus ? pendingFocus : captureRenderFocus();
   syncViewRevision();
   applyPreferences();
-  void music.setScene(state.page === 'exited' ? null : state.page === 'story' && state.story.phase === 'ending' ? 'finale' : 'ambient');
+  void music.setScene(state.page === 'exited' ? null : state.page === 'story' && state.story.phase === 'ending' && !Number.isInteger(state.story.replayIndex) ? 'finale' : 'ambient');
   if (state.page === 'story') {
+    // Interactions reveal the current scene; entering a different scene starts
+    // its entrance animation. Full text remains in the accessible document.
+    const dialogueKey = JSON.stringify([state.story.phase, state.story.step, state.story.introStep, state.story.replayIndex, state.story.choices, state.story.inquiries, preferences.language]);
+    if (state.story.dialogueKey !== dialogueKey) {
+      state.story.dialogueKey = dialogueKey;
+      state.story.dialogueExpanded = false;
+    }
     app.innerHTML = renderStory({ data: state.data, story: state.story, language: preferences.language, busy: state.storyBusy || state.busy || state.analyzing, icon, num, signed });
     restoreRenderFocus(focus);
     return;
@@ -334,7 +342,7 @@ function persistStory() {
 }
 
 async function evaluateStoryScene(progress, evaluation) {
-  const count = Math.min(progress.choices.length, progress.step + 1);
+  const count = getVisibleDecisions(progress).length;
   return count === progress.choices.length ? evaluation
     : count ? api('/api/evaluate', storyDecisions(progress.choices.slice(0, count))) : state.data.baseline;
 }
@@ -356,7 +364,7 @@ async function applyStoryProgress(progress) {
     const changesDecisions = JSON.stringify(progress.choices) !== JSON.stringify(state.story.choices);
     const evaluation = changesDecisions ? await api('/api/evaluate', storyDecisions(progress.choices)) : state.story.evaluation;
     const sceneEvaluation = await evaluateStoryScene(progress, evaluation);
-    Object.assign(state.story, progress, { evaluation, sceneEvaluation, selected: progress.choices[progress.step] ?? null, confirmRestart: false, confirmReplan: false });
+    Object.assign(state.story, progress, { evaluation, sceneEvaluation, selected: progress.choices[progress.step] ?? null, confirmRestart: false, confirmReplan: false, replayIndex: null, replayEvaluation: null, focusDistrict: null });
     state.story.budgetDraft = progress.phase === 'planning'
       ? { ...(progress.allocations || defaultAllocations(state.data.initiatives, state.data.budget, progress.choices)) } : null;
     persistStory();
@@ -423,6 +431,26 @@ async function openStoryScenario(withAnalysis = false) {
     openScreen('simulation');
     if (withAnalysis) await analyze();
   }
+}
+
+async function openStoryReplay(index) {
+  if (state.storyBusy || state.busy || state.analyzing || state.story.phase !== 'ending' || state.story.choices.length !== 5 || !Number.isInteger(index) || index < 0 || index >= 5) return;
+  const sourceStory = state.story;
+  const sourcePage = state.page;
+  syncViewRevision();
+  const departure = viewRevision.departure;
+  state.storyBusy = true;
+  render();
+  try {
+    const evaluation = await api('/api/evaluate', storyDecisions(sourceStory.choices.slice(0, index + 1)));
+    syncViewRevision();
+    if (state.story !== sourceStory || state.page !== sourcePage || viewRevision.departure !== departure) return;
+    // Replay is a read-only view. Its results never replace the canonical
+    // ending, choices, free-mode draft or saved progress.
+    Object.assign(sourceStory, { replayIndex: index, replayEvaluation: evaluation, focusDistrict: null });
+    openScreen('story');
+  } catch (error) { toast(error.message, true); }
+  finally { state.storyBusy = false; render(); }
 }
 
 async function restoreStory() {
@@ -630,6 +658,7 @@ document.addEventListener('click', async event => {
   if (!button || button.disabled) return;
   event.preventDefault();
   const action = button.dataset.action;
+  if (state.page === 'story') state.story.dialogueExpanded = true;
   if (action === 'optimize') {
     const report = state.report;
     if (!report || report.optimizing) return;
@@ -655,6 +684,19 @@ document.addEventListener('click', async event => {
   if (['intro-next', 'intro-back', 'transition-next', 'discovery-next'].includes(action)) { await moveStory(action); return; }
   if (action.startsWith('story-')) {
     if (state.storyBusy || state.busy || state.analyzing) return;
+    if (action === 'story-replay') { await openStoryReplay(0); return; }
+    if (action === 'story-replay-next') { if (Number.isInteger(state.story.replayIndex)) await openStoryReplay(state.story.replayIndex + 1); return; }
+    if (action === 'story-replay-prev') { if (Number.isInteger(state.story.replayIndex)) await openStoryReplay(state.story.replayIndex - 1); return; }
+    if (action === 'story-replay-close') {
+      Object.assign(state.story, { replayIndex: null, replayEvaluation: null, focusDistrict: null });
+      openScreen('story'); return;
+    }
+    if (action === 'story-map-district') {
+      if (state.data.districts.some(district => district.id === button.dataset.id)) { state.story.focusDistrict = button.dataset.id; render(); }
+      return;
+    }
+    if (action === 'story-dialogue-reveal') { state.story.dialogueExpanded = true; render(); return; }
+    if (Number.isInteger(state.story.replayIndex)) return;
     if (action === 'story-plan-open') await moveStory('planning-open');
     if (action === 'story-plan-cancel') await moveStory('planning-cancel');
     if (action === 'story-plan-reset' && state.story.phase === 'planning') { state.story.budgetDraft = defaultAllocations(state.data.initiatives, state.data.budget, state.story.choices); render(); }
