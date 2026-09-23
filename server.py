@@ -10,6 +10,7 @@ from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 from ai_analysis import ai_status, analyze, load_environment
+from analysis_locale import validate_language
 from city_model import evaluate, load_data
 
 ROOT = Path(__file__).resolve().parent
@@ -125,7 +126,7 @@ class SimulatorHandler(BaseHTTPRequestHandler):
         except (socket.timeout, TimeoutError):
             raise RequestError(408, "Превышено время передачи запроса.") from None
 
-    def _read_decisions(self, raw: bytes) -> list:
+    def _read_decisions(self, raw: bytes) -> tuple[list, str]:
         origin = self.headers.get("Origin")
         if origin is not None:
             parsed = urlsplit(origin)
@@ -137,9 +138,14 @@ class SimulatorHandler(BaseHTTPRequestHandler):
             data = json.loads(raw, parse_constant=_reject_json_constant)
         except (ValueError, UnicodeDecodeError, RecursionError):
             raise RequestError(400, "Некорректный JSON.") from None
-        if not isinstance(data, dict) or set(data) != {"decisions"} or not isinstance(data["decisions"], list):
+        if (not isinstance(data, dict) or "decisions" not in data
+                or set(data) - {"decisions", "language"} or not isinstance(data["decisions"], list)):
             raise RequestError(400, "Ожидается объект с массивом decisions.")
-        return data["decisions"]
+        try:
+            language = validate_language(data.get("language", "ru"))
+        except ValueError as error:
+            raise RequestError(400, str(error)) from None
+        return data["decisions"], language
 
     def do_POST(self) -> None:
         path = urlsplit(self.path).path
@@ -147,7 +153,7 @@ class SimulatorHandler(BaseHTTPRequestHandler):
             raw = self._read_body()
             if path not in {"/api/evaluate", "/api/analyze"}:
                 raise RequestError(404, "API-маршрут не найден.")
-            decisions = self._read_decisions(raw)
+            decisions, language = self._read_decisions(raw)
             try:
                 result = evaluate(decisions, require_complete=path == "/api/analyze")
             except ValueError as error:
@@ -155,7 +161,7 @@ class SimulatorHandler(BaseHTTPRequestHandler):
             if path == "/api/evaluate":
                 self._json(200, result)
             else:
-                self._json(200, {"evaluation": result, "analysis": analyze(result, load_data())})
+                self._json(200, {"evaluation": result, "analysis": analyze(result, load_data(), language=language)})
         except RequestError as error:
             self._json(error.status, {"error": error.message})
         except (OSError, TypeError, KeyError, ValueError):

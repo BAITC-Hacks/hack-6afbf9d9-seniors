@@ -8,6 +8,8 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { request } from 'node:http';
 import vm from 'node:vm';
+import * as localization from '../public/i18n.js';
+import * as gamePreferences from '../public/preferences.js';
 
 function localApi(path, decisions) {
   return new Promise((resolve, reject) => {
@@ -58,8 +60,10 @@ const events = {};
 let downloaded;
 let downloadClicks = 0;
 const context = vm.createContext({
+  ...localization, ...gamePreferences,
   bootstrap, example,
   document: {
+    documentElement: { lang: 'ru', style: { setProperty() {} } },
     activeElement: null,
     querySelector: selector => selector === '#app' ? nodes.app : selector === '#toast' ? nodes.toast : nodes.main,
     addEventListener: (name, handler) => { events[name] = handler; },
@@ -74,13 +78,16 @@ const context = vm.createContext({
   window: { scrollTo() {}, print() {} },
 });
 const source = await readFile(new URL('../public/app.js', import.meta.url), 'utf8');
-vm.runInContext(source.replace(/boot\(\);\s*$/, ''), context);
+vm.runInContext(source.replace(/^import .*;\r?\n/gm, '').replace(/boot\(\);\s*$/, ''), context);
 const run = code => vm.runInContext(code, context);
 const click = (action, extra = {}) => events.click({
   target: { closest: () => ({ dataset: { action, ...extra } }) }, preventDefault() {},
 });
 
-run('state.data=bootstrap; state.evaluation=bootstrap.baseline; render();');
+run('state.data=bootstrap; state.evaluation=bootstrap.baseline; state.loading=false; render();');
+assert.ok(nodes.app.innerHTML.includes('Начать игру'));
+assert.equal((nodes.app.innerHTML.match(/data-action=/g) || []).length, 3);
+await click('start-game');
 assert.ok(nodes.app.innerHTML.includes('52,56'));
 assert.ok(nodes.app.innerHTML.includes('city-map.svg'));
 assert.equal(bootstrap.budget, 100);
@@ -130,4 +137,47 @@ assert.equal(run('state.decisions.length'), 0);
 assert.equal(run('state.evaluation.score'), 52.56);
 assert.equal(run('state.busy'), false);
 
-console.log('PASS: frontend views, preset workflow, export, history validation, stale analysis, rejected mutation.');
+await click('game-menu');
+await click('open-settings');
+assert.equal(run('state.page'), 'settings');
+assert.ok(nodes.app.innerHTML.includes('id="volume"'));
+assert.ok(nodes.app.innerHTML.includes('id="brightness"'));
+assert.ok(nodes.app.innerHTML.includes('id="language"'));
+const input = (setting, value) => events.input({ target: { dataset: { setting }, value, setAttribute() {} } });
+input('volume', '23');
+input('brightness', '70');
+assert.equal(run('preferences.volume'), 23);
+assert.equal(run('preferences.brightness'), 70);
+await click('toggle-sound');
+assert.equal(run('preferences.muted'), true);
+await events.change({ target: { dataset: { setting: 'language' }, value: 'en' } });
+assert.ok(nodes.app.innerHTML.includes('Settings'));
+assert.equal(context.document.documentElement.lang, 'en');
+await click('game-menu');
+assert.ok(nodes.app.innerHTML.includes('Start game'));
+assert.ok(nodes.app.innerHTML.includes('Exit game'));
+await click('start-game');
+assert.ok(nodes.app.innerHTML.includes('Your city. Your decisions.'));
+assert.equal(run('state.evaluation.score'), 52.56);
+await click('game-menu');
+await click('open-settings');
+await events.change({ target: { dataset: { setting: 'language' }, value: 'kk' } });
+assert.ok(nodes.app.innerHTML.includes('Баптаулар'));
+const savedPreferences = JSON.parse(storage.get(gamePreferences.SETTINGS_STORAGE));
+assert.equal(savedPreferences.language, 'kk');
+assert.equal(savedPreferences.volume, 23);
+assert.equal(savedPreferences.brightness, 70);
+await click('reset-settings');
+assert.equal(run('preferences.language'), 'ru');
+assert.equal(run('preferences.brightness'), 100);
+await click('game-menu');
+const decisionsBeforeExit = run('decisionKey(state.decisions)');
+await click('exit-game');
+assert.equal(run('state.page'), 'exited');
+assert.ok(nodes.app.innerHTML.includes('Игра завершена'));
+assert.equal(run('decisionKey(state.decisions)'), decisionsBeforeExit);
+await click('game-menu');
+await click('start-game');
+assert.equal(run('state.page'), 'simulation');
+
+console.log('PASS: frontend workflows, reports, history, menu, settings, language, storage and exit.');

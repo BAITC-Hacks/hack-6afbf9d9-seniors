@@ -1,12 +1,26 @@
+import { translate, localizeMarkup, SUPPORTED_LANGUAGES } from './i18n.js';
+import { DEFAULT_SETTINGS, loadSettings, saveSettings, normalizeSettings, brightnessAppearance, createSoundPlayer } from './preferences.js';
+
 const app = document.querySelector('#app');
 const toastElement = document.querySelector('#toast');
 const STORAGE = 'akim-simulator-v1';
-const state = { data: null, evaluation: null, decisions: [], category: 'transport', district: 'nura', mapMode: 'after', page: 'simulation', name: 'Мой городской сценарий', report: null, saved: [], busy: false, analyzing: false, targets: {}, undo: null };
+const preferences = (() => { try { return loadSettings(localStorage); } catch { return { ...DEFAULT_SETTINGS }; } })();
+const state = { data: null, evaluation: null, decisions: [], category: 'transport', district: 'nura', mapMode: 'after', page: 'menu', name: translate('Мой городской сценарий', preferences.language), report: null, saved: [], busy: false, analyzing: false, targets: {}, undo: null, loading: true, loadError: '' };
+const sound = createSoundPlayer(() => preferences, window);
+const locale = () => ({ ru: 'ru-RU', kk: 'kk-KZ', en: 'en-US' })[preferences.language];
+const localize = html => localizeMarkup(html, preferences.language);
 let toastTimer;
 const viewRevision = { decisions: state.decisions, name: state.name, page: state.page, draft: 0, departure: 0 };
 let pendingFocus = null;
 
 const icons = {
+  play: '<path d="m8 4 12 8-12 8V4Z"/>',
+  settings: '<path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3" fill="currentColor"/><circle cx="15" cy="17" r="3" fill="currentColor"/>',
+  exit: '<path d="M9 3H4v18h5M13 12h9m-4-4 4 4-4 4M9 7v10"/>',
+  volume: '<path d="m11 4-6 5H2v6h3l6 5V4ZM15 8a6 6 0 0 1 0 8M18 5a10 10 0 0 1 0 14"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5"/>',
+  language: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c-5 5-5 13 0 18 5-5 5-13 0-18Z"/>',
+  menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
   grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
   chart: '<path d="M4 3v17h17M8 15v-4M13 15V6M18 15V9"/>',
   compare: '<rect x="3" y="5" width="7" height="15" rx="1.5"/><rect x="14" y="3" width="7" height="17" rx="1.5"/><path d="M6 9h1M6 13h1M17 7h1M17 11h1"/>',
@@ -38,7 +52,7 @@ const icons = {
 };
 const icon = (name, extra = '') => `<svg class="icon ${extra}" viewBox="0 0 24 24" aria-hidden="true">${icons[name] || icons.city}</svg>`;
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-const num = (value, digits = 2) => Number(value || 0).toLocaleString('ru-RU', { maximumFractionDigits: digits });
+const num = (value, digits = 2) => Number(value || 0).toLocaleString(locale(), { maximumFractionDigits: digits });
 const signed = value => `${value > 0 ? '+' : ''}${num(value)}`;
 const directionCount = decisions => `${new Set(decisions.map(d => d.categoryId)).size} ${new Set(decisions.map(d => d.categoryId)).size === 5 ? 'направлений' : 'направления'}`;
 const category = id => state.data.categories.find(c => c.id === id);
@@ -50,10 +64,10 @@ const mapPositions = { esil: [46, 73], almaty: [78, 33], saryarka: [22, 24], bai
 const categoryCodes = { transport: ['T1', 'T2'], green: ['E1', 'E2'], social: ['S1', 'S2'], safety: ['B1', 'B2'], services: ['C1', 'C2'] };
 const indicatorTitles = { T1: 'Разгрузка дорог', T2: 'Доступность транспорта', E1: 'Озеленение', E2: 'Качество воздуха', S1: 'Школы и детсады', S2: 'Первичная медицина', B1: 'Безопасность улиц', B2: 'Безопасность движения', C1: 'Надёжность ЖКХ', C2: 'Обращения жителей' };
 
-async function api(path, decisions) {
+async function api(path, decisions, language) {
   let response;
   try {
-    response = await fetch(path, { signal: AbortSignal.timeout(path.includes('analyze') ? 65000 : 10000), ...(decisions === undefined ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ decisions }) }) });
+    response = await fetch(path, { signal: AbortSignal.timeout(path.includes('analyze') ? 65000 : 10000), ...(decisions === undefined ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ decisions, ...(language ? { language } : {}) }) }) });
   } catch (error) {
     throw new Error(error.name === 'TimeoutError' ? 'Сервер не успел ответить. Попробуйте ещё раз.' : 'Нет связи с сервером. Проверьте, запущено ли приложение.');
   }
@@ -64,7 +78,7 @@ async function api(path, decisions) {
 
 function toast(message, isError = false, undo = false) {
   clearTimeout(toastTimer);
-  toastElement.innerHTML = `${esc(message)}${undo ? '<button data-action="undo">Вернуть</button>' : ''}`;
+  toastElement.innerHTML = localize(`${esc(message)}${undo ? '<button data-action="undo">Вернуть</button>' : ''}`);
   toastElement.className = `toast visible ${isError ? 'error' : ''}`;
   toastTimer = setTimeout(() => { toastElement.className = 'toast'; }, undo ? 10000 : 5500);
 }
@@ -129,15 +143,85 @@ function render() {
   const pageChanged = viewRevision.page !== state.page;
   const focus = !pageChanged && document.activeElement?.id === 'main' && pendingFocus ? pendingFocus : captureRenderFocus();
   syncViewRevision();
+  applyPreferences();
+  if (['menu', 'settings', 'exited'].includes(state.page)) {
+    app.innerHTML = localize(state.page === 'menu' ? menuView() : state.page === 'settings' ? settingsView() : exitView());
+    restoreRenderFocus(focus);
+    return;
+  }
   const nav = [ ['simulation', 'grid', 'Симулятор'], ['report', 'chart', 'Анализ сценария'], ['compare', 'compare', 'Сравнение'], ['method', 'book', 'Как это работает'] ];
   const pageName = nav.find(n => n[0] === state.page)[2];
   app.innerHTML = `<aside class="sidebar">
     <a class="brand" href="#simulation" data-action="nav" data-page="simulation"><img src="/favicon.svg" alt=""/><span>Аким на 5 часов<small>ASTANA CITY LAB</small></span></a>
     <div class="nav-label">ВАШ ГОРОД</div><nav class="nav" aria-label="Основная навигация">${nav.map(([page, name, label]) => `<button class="nav-btn ${state.page === page ? 'active' : ''}" data-action="nav" data-page="${page}" ${state.page === page ? 'aria-current="page"' : ''}>${icon(name)}<span>${label}</span>${page === 'compare' && state.saved.length ? `<span class="nav-count">${state.saved.length}</span>` : ''}</button>`).join('')}</nav>
     <div class="sidebar-bottom"><div class="side-note"><span class="note-icon">${icon('green')}</span><strong>Город начинается с вас</strong><p>Пять решений сегодня.<br/>Качество жизни — на годы вперёд.</p></div><div class="team"><span class="avatar">S</span><div><strong>Команда Seniors</strong><small>Городская лаборатория</small></div>${icon('chevron')}</div></div>
-  </aside><div class="workspace"><header class="topbar"><div class="breadcrumbs">Городская лаборатория ${icon('chevron')} <b>${pageName}</b></div><div class="mobile-brand"><img src="/favicon.svg" alt=""/>Аким на 5 часов</div><div class="top-actions"><span class="status-label"><i class="live-dot"></i>Синтетический город</span><button class="help-btn" data-action="nav" data-page="method">${icon('help')}Правила игры</button></div></header>
+  </aside><div class="workspace"><header class="topbar"><div class="breadcrumbs">Городская лаборатория ${icon('chevron')} <b>${pageName}</b></div><div class="mobile-brand"><img src="/favicon.svg" alt=""/>Аким на 5 часов</div><div class="top-actions"><span class="status-label"><i class="live-dot"></i>Синтетический город</span><button class="game-menu-shortcut" data-action="game-menu" aria-label="Главное меню">${icon('menu')}<span>Главное меню</span></button><button class="help-btn" data-action="nav" data-page="method">${icon('help')}Правила игры</button></div></header>
   <main class="main" id="main" tabindex="-1">${state.page === 'simulation' ? simulationView() : state.page === 'report' ? reportView() : state.page === 'compare' ? comparisonView() : methodologyView()}<footer class="bottom-bar"><span>${icon('city')}ASTANA CITY LAB <strong>· Сделаем город лучше вместе</strong></span><span>Учебная модель · Данные условные · Seniors, 2026</span></footer></main></div>`;
+  app.innerHTML = localize(app.innerHTML);
   restoreRenderFocus(focus);
+}
+
+function applyPreferences() {
+  const appearance = brightnessAppearance(preferences.brightness);
+  document.documentElement.lang = preferences.language;
+  document.documentElement.style.setProperty('--brightness-color', appearance.color);
+  document.documentElement.style.setProperty('--brightness-opacity', String(appearance.opacity));
+  document.title = translate('Аким на 5 часов', preferences.language) + ' · Astana City Lab';
+  const skip = document.querySelector('.skip-link');
+  if (skip) skip.textContent = translate('Перейти к содержимому', preferences.language);
+}
+
+function updatePreference(key, value) {
+  Object.assign(preferences, normalizeSettings({ ...preferences, [key]: value }));
+  applyPreferences();
+  try { if (!saveSettings(localStorage, preferences)) throw new Error('Storage unavailable'); }
+  catch { toast('Настройки действуют до закрытия вкладки: хранилище браузера недоступно.', true); }
+  if (preferences.muted || preferences.volume === 0) sound.stop();
+}
+
+function menuView() {
+  return `<main class="game-screen" id="main" tabindex="-1"><div class="menu-content">
+    <div class="game-brand"><img src="/favicon.svg" alt=""/><div>Аким на 5 часов<small>ASTANA CITY LAB</small></div></div>
+    <div class="menu-copy"><div class="eyebrow">Астана · Симулятор городских решений</div><h1>Город начинается с ваших решений.</h1><p>Пять решений. Один город. Ваше будущее.</p></div>
+    <nav class="menu-actions" aria-label="Главное меню">
+      <button class="menu-button primary" data-action="start-game" ${state.loading ? 'disabled' : ''}>${icon('play')}<span>Начать игру</span><span class="menu-button-number" aria-hidden="true">01</span></button>
+      <button class="menu-button" data-action="open-settings">${icon('settings')}<span>Настройки</span><span class="menu-button-number" aria-hidden="true">02</span></button>
+      <button class="menu-button exit" data-action="exit-game">${icon('exit')}<span>Выйти из игры</span><span class="menu-button-number" aria-hidden="true">03</span></button>
+    </nav>
+    <p class="menu-session-note ${state.loadError ? 'error' : ''}" role="status">${state.loading ? 'Загружаем районы и инициативы…' : state.loadError ? esc(state.loadError) : state.decisions.length ? 'Ваш сценарий сохранён.' : 'Ваши решения сохраняются при выходе.'}</p>
+    <footer class="menu-footer">${icon('shield')}<span>Учебная модель · Данные условные · Seniors, 2026</span></footer>
+  </div><aside class="menu-scene" aria-hidden="true"><img src="/city-map.svg" alt=""/><div class="menu-scene-note"><span>ASTANA · CITY OF TOMORROW</span><h2>Большие перемены начинаются с малого.</h2><div class="menu-facts"><div><strong>5</strong><span>районов</span></div><div><strong>100</strong><span>единиц бюджета</span></div><div><strong>∞</strong><span>возможностей</span></div></div></div></aside></main>`;
+}
+
+function settingsView() {
+  return `<main class="settings-screen" id="main" tabindex="-1"><section class="settings-card" aria-labelledby="settings-title">
+    <button class="settings-back" data-action="game-menu">${icon('arrow')}Назад</button>
+    <header class="settings-header"><div class="eyebrow">ASTANA CITY LAB</div><h1 id="settings-title">Настройки</h1><p>Настройте игру под себя</p></header>
+    <div class="settings-body"><section class="setting-row" aria-labelledby="volume-title">
+      <div class="setting-label">${icon('volume')}<div><strong id="volume-title">Звук</strong><span>Громкость звуков</span></div></div>
+      <div class="setting-range"><input id="volume" name="volume" type="range" min="0" max="100" step="1" value="${preferences.volume}" data-setting="volume" aria-label="Громкость звуков" aria-valuetext="${preferences.volume}%"/><output for="volume" id="volume-value">${preferences.volume}%</output></div>
+      <div class="setting-control"><button class="setting-toggle" data-action="toggle-sound" aria-pressed="${!preferences.muted}" aria-label="Звуки интерфейса">${icon('volume')}<span>${preferences.muted ? 'Выключен' : 'Включён'}</span></button><button class="btn" data-action="test-sound" ${preferences.muted || !preferences.volume ? 'disabled' : ''}>${icon('play')}Проверить звук</button></div>
+    </section><section class="setting-row" aria-labelledby="brightness-title">
+      <div class="setting-label">${icon('sun')}<div><strong id="brightness-title">Яркость игры</strong><span>Стандартная яркость — 100%.</span></div></div>
+      <div class="setting-range"><input id="brightness" name="brightness" type="range" min="50" max="120" step="1" value="${preferences.brightness}" data-setting="brightness" aria-label="Яркость игры" aria-valuetext="${preferences.brightness}%"/><output for="brightness" id="brightness-value">${preferences.brightness}%</output></div>
+      <div class="brightness-preview">${icon('sun')}<span>Город начинается с вас</span></div>
+    </section><section class="setting-row" aria-labelledby="language-title">
+      <div class="setting-label">${icon('language')}<div><strong id="language-title">Язык</strong><span>Язык интерфейса и новых отчётов</span></div></div>
+      <select id="language" name="language" class="setting-language" data-setting="language" aria-labelledby="language-title">${SUPPORTED_LANGUAGES.map(l => `<option value="${l.id}" lang="${l.id}" data-i18n-skip ${preferences.language === l.id ? 'selected' : ''}>${esc(l.label)}</option>`).join('')}</select>
+    </section></div><div class="settings-actions"><button class="btn" data-action="reset-settings">${icon('refresh')}Сбросить настройки</button><button class="btn primary" data-action="game-menu">Вернуться в меню ${icon('arrow')}</button></div><p class="settings-note">Изменения сохраняются автоматически.</p>
+  </section></main>`;
+}
+
+function exitView() {
+  return `<main class="exit-screen" id="main" tabindex="-1"><section class="exit-card">${icon('check')}<h1>Игра завершена</h1><p>Ваш сценарий сохранён.<br/>Теперь можно закрыть эту вкладку.</p><button class="btn primary" data-action="game-menu">${icon('arrow')}Снова в меню</button></section></main>`;
+}
+
+function openScreen(page) {
+  state.page = page;
+  sound.setActive(page !== 'exited');
+  render();
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  document.querySelector('#main')?.focus({ preventScroll: true });
 }
 
 function pageHeader(eyebrow, title, subtitle, buttons = '') {
@@ -208,9 +292,10 @@ function reportView() {
   const { evaluation: e, analysis: a } = state.report;
   const same = decisionKey(state.decisions) === decisionKey(e.decisions);
   const metricRows = e.metrics.map(m => `<div class="metric-compare-row"><span>${esc(category(m.id)?.shortName || m.name)}</span><div class="metric-compare-track"><span class="before" style="width:${m.before}%"></span><span class="after" style="width:${m.after}%"></span></div><b>${signed(m.delta)}</b></div>`).join('');
-  return `${pageHeader('Анализ городского сценария', esc(state.report.name || 'Ваш сценарий'), 'Измеримый результат. Понятные последствия. Следующий шаг.', `<button class="btn" data-action="export">${icon('download')}Скачать JSON</button><button class="btn primary" data-action="print">${icon('print')}Печать отчёта</button>`)}
+  return `${pageHeader('Анализ городского сценария', `<span data-i18n-skip>${esc(state.report.name || 'Ваш сценарий')}</span>`, 'Измеримый результат. Понятные последствия. Следующий шаг.', `<button class="btn" data-action="export">${icon('download')}Скачать JSON</button><button class="btn primary" data-action="print">${icon('print')}Печать отчёта</button>`)}
   ${!same ? '<div class="draft-warning">Это сохранённый результат. Текущие решения изменились — выполните анализ заново, чтобы обновить отчёт.</div>' : ''}
-  <section class="report-hero"><div class="score-ring" style="--score:${Math.max(0, Math.min(100, e.score))}"><div><b>${num(e.score)}</b><span>QUALITY OF LIFE SCORE</span></div></div><div><div class="eyebrow">Астана через 8 кварталов</div><h2>${e.delta > 0 ? 'У города есть изменения к лучшему' : 'У каждого решения есть последствия'}</h2><p>${esc(a.summary)}</p><div class="report-tags"><span class="tag ${e.delta < 0 ? 'negative' : 'positive'}">${signed(e.delta)} к исходным ${num(e.baselineScore)}</span><span class="tag">${e.spent} из ${e.budget} ед.</span><span class="tag">5 решений · ${directionCount(e.decisions)}</span></div></div></section>
+  <section class="report-hero"><div class="score-ring" style="--score:${Math.max(0, Math.min(100, e.score))}"><div><b>${num(e.score)}</b><span>QUALITY OF LIFE SCORE</span></div></div><div><div class="eyebrow">Астана через 8 кварталов</div><h2>${e.delta > 0 ? 'У города есть изменения к лучшему' : 'У каждого решения есть последствия'}</h2><p data-i18n-skip>${esc(a.summary)}</p><div class="report-tags"><span class="tag ${e.delta < 0 ? 'negative' : 'positive'}">${signed(e.delta)} к исходным ${num(e.baselineScore)}</span><span class="tag">${e.spent} из ${e.budget} ед.</span><span class="tag">5 решений · ${directionCount(e.decisions)}</span></div></div></section>
+  ${(a.language || 'ru') !== preferences.language ? '<div class="draft-warning">Этот отчёт создан на другом языке. Выполните анализ заново, чтобы получить новый перевод.</div>' : ''}
   ${a.mode !== 'ai' ? `<div class="analysis-notice">${icon('info')}<span><strong>Демонстрационный разбор · без LLM.</strong> ${esc(a.notice || 'API-ключ не настроен. Объяснение сформировано правилами по рассчитанным данным. Для AI-разбора подключите OpenAI на сервере.')}</span></div>` : `<div class="analysis-notice">${icon('sparkle')}<span><strong>AI-анализ · OpenAI.</strong> Числа рассчитаны моделью; AI объясняет эффекты и компромиссы. ${esc(a.notice || '')}</span></div>`}
   <div class="report-grid"><section class="panel"><h2>${icon('green')}Что удалось улучшить</h2>${insightList(a.strengths)}</section><section class="panel"><h2>${icon('shield')}Риски и компромиссы</h2>${insightList(a.risks)}</section><section class="panel"><h2>${icon('sparkle')}Следующие шаги</h2>${insightList(a.recommendations)}</section><section class="panel"><h2>${icon('chart')}Изменения по направлениям</h2><div class="metric-comparison">${metricRows}</div><p class="panel-subtitle" style="margin-top:18px">Светлая полоса — исходный уровень, тёмная — прогноз.</p></section></div>
   <section class="panel content-panel report-section"><h2>Каждый район имеет значение</h2><div class="table-scroll"><table><thead><tr><th>Район</th><th>Доля населения</th><th>Сейчас</th><th>Через 2 года</th><th>Изменение</th><th>Показателей &lt; 40</th></tr></thead><tbody>${e.districts.map(d => `<tr><td>${esc(d.name)}</td><td>${num(d.population * 100)}%</td><td>${num(d.before)}</td><td>${num(d.after)}</td><td class="${d.delta >= 0 ? 'positive' : 'negative'}">${signed(d.delta)}</td><td>${Object.values(d.metrics).filter(v => v < 40).length}</td></tr>`).join('')}</tbody></table></div></section>
@@ -221,12 +306,12 @@ function reportView() {
   <div class="no-print"><button class="btn primary" data-action="nav" data-page="simulation">${icon('refresh')}Продолжить эксперимент</button><button class="btn text-btn" data-action="nav" data-page="compare">Сравнить сценарии ${icon('arrow')}</button></div>`;
 }
 
-function insightList(items) { return `<ul class="insight-list">${(items || []).map(text => `<li>${esc(text)}</li>`).join('')}</ul>`; }
+function insightList(items) { return `<ul class="insight-list">${(items || []).map(text => `<li data-i18n-skip>${esc(text)}</li>`).join('')}</ul>`; }
 function decisionKey(decisions) { return JSON.stringify(decisions.map(d => [d.initiativeId, d.districtId || null]).sort((a, b) => a[0].localeCompare(b[0]))); }
 
 function comparisonView() {
   return `${pageHeader('Лаборатория сценариев', 'У каждого города есть альтернативы', 'Сравните результаты команд или разные подходы к развитию города.', '<button class="btn primary" data-action="nav" data-page="simulation">'+icon('plus')+'К симулятору</button>')}
-  ${state.saved.length ? `<div class="analysis-notice">${icon('info')}Сценарии сохраняются в этом браузере. У всех одинаковые исходные данные и бюджет 100 ед. Экспортируйте JSON, чтобы передать результат команде.</div><div class="compare-cards">${[...state.saved].sort((a, b) => b.evaluation.score - a.evaluation.score).map((r, index) => `<section class="panel comparison-card"><span class="tag">${index === 0 ? 'Лучший результат' : 'Альтернативный сценарий'}</span><h2>${esc(r.name)}</h2><span class="compare-date">${esc(new Date(r.savedAt).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' }))}</span><div class="comparison-score">${num(r.evaluation.score)} <span class="delta">${signed(r.evaluation.delta)}</span></div><p>${r.evaluation.spent} / 100 ед. · Критических показателей: ${r.evaluation.criticalCount}</p><div class="compare-actions"><button class="btn small primary" data-action="open-report" data-id="${esc(r.id)}">Посмотреть отчёт</button><button class="btn small" data-action="load-report" data-id="${esc(r.id)}">Изменить решения</button></div></section>`).join('')}</div>` : `<section class="panel empty-page">${icon('compare')}<h2>Один город — разные стратегии</h2><p>Завершённые анализы появятся здесь автоматически. Соберите первый сценарий, затем измените решения и сравните результаты.</p><button class="btn primary" data-action="nav" data-page="simulation">Собрать первый сценарий ${icon('arrow')}</button></section>`}`;
+  ${state.saved.length ? `<div class="analysis-notice">${icon('info')}Сценарии сохраняются в этом браузере. У всех одинаковые исходные данные и бюджет 100 ед. Экспортируйте JSON, чтобы передать результат команде.</div><div class="compare-cards">${[...state.saved].sort((a, b) => b.evaluation.score - a.evaluation.score).map((r, index) => `<section class="panel comparison-card"><span class="tag">${index === 0 ? 'Лучший результат' : 'Альтернативный сценарий'}</span><h2 data-i18n-skip>${esc(r.name)}</h2><span class="compare-date">${esc(new Date(r.savedAt).toLocaleString(locale(), { dateStyle: 'short', timeStyle: 'short' }))}</span><div class="comparison-score">${num(r.evaluation.score)} <span class="delta">${signed(r.evaluation.delta)}</span></div><p>${r.evaluation.spent} / 100 ед. · Критических показателей: ${r.evaluation.criticalCount}</p><div class="compare-actions"><button class="btn small primary" data-action="open-report" data-id="${esc(r.id)}">Посмотреть отчёт</button><button class="btn small" data-action="load-report" data-id="${esc(r.id)}">Изменить решения</button></div></section>`).join('')}</div>` : `<section class="panel empty-page">${icon('compare')}<h2>Один город — разные стратегии</h2><p>Завершённые анализы появятся здесь автоматически. Соберите первый сценарий, затем измените решения и сравните результаты.</p><button class="btn primary" data-action="nav" data-page="simulation">Собрать первый сценарий ${icon('arrow')}</button></section>`}`;
 }
 
 function indicatorTable(districts, comparison = false) {
@@ -263,13 +348,14 @@ async function analyze() {
   state.analyzing = true;
   const requestedDecisions = structuredClone(state.decisions);
   const requestedName = state.name.trim() || 'Мой городской сценарий';
+  const requestedLanguage = preferences.language;
   render();
   const requestedRevision = viewRevision.draft;
   const requestedDeparture = viewRevision.departure;
   const requestedReport = state.report;
   try {
-    const result = await api('/api/analyze', requestedDecisions);
-    const saved = { ...result, name: requestedName, savedAt: new Date().toISOString(), id: crypto.randomUUID() };
+    const result = await api('/api/analyze', requestedDecisions, requestedLanguage);
+    const saved = { ...result, analysis: { ...result.analysis, language: result.analysis.language || requestedLanguage }, name: requestedName, savedAt: new Date().toISOString(), id: crypto.randomUUID() };
     const matching = state.saved.findIndex(r => decisionKey(r.evaluation.decisions) === decisionKey(requestedDecisions) && r.name === requestedName);
     if (matching >= 0) state.saved.splice(matching, 1);
     state.saved.unshift(saved);
@@ -279,11 +365,12 @@ async function analyze() {
     const stillCurrent = requestedRevision === viewRevision.draft && requestedDeparture === viewRevision.departure
       && decisionKey(requestedDecisions) === decisionKey(state.decisions)
       && requestedName === (state.name.trim() || 'Мой городской сценарий')
-      && state.report === requestedReport && !state.busy && ['simulation', 'report'].includes(state.page);
+      && preferences.language === requestedLanguage && state.report === requestedReport && !state.busy && ['simulation', 'report'].includes(state.page);
     if (stillCurrent) {
       state.report = saved;
       state.page = 'report';
       window.scrollTo({ top: 0, behavior: 'instant' });
+      void sound.play('success');
     }
     toast(stillCurrent ? 'Сценарий рассчитан и сохранён для сравнения.' : 'Анализ предыдущего сценария готов. Результат доступен в разделе «Сравнение».');
   } catch (error) { toast(error.message, true); }
@@ -304,6 +391,35 @@ document.addEventListener('click', async event => {
   if (!button || button.disabled) return;
   event.preventDefault();
   const action = button.dataset.action;
+  if (!['exit-game', 'test-sound', 'toggle-sound'].includes(action)) void sound.play();
+  if (action === 'start-game') {
+    if (!state.data) { await boot(); if (!state.data) return; }
+    openScreen('simulation');
+    return;
+  }
+  if (action === 'game-menu') { openScreen('menu'); return; }
+  if (action === 'open-settings') { openScreen('settings'); return; }
+  if (action === 'exit-game') {
+    if (state.data) persist();
+    openScreen('exited');
+    // The exit screen also works in normal tabs which browsers do not let scripts close.
+    if (window.opener) { try { window.close(); } catch { /* User can close the tab. */ } }
+    return;
+  }
+  if (action === 'toggle-sound') {
+    updatePreference('muted', !preferences.muted); render();
+    if (!preferences.muted) void sound.play();
+    return;
+  }
+  if (action === 'test-sound') {
+    if (!await sound.play('success')) toast('Звук недоступен в этом браузере.', true);
+    return;
+  }
+  if (action === 'reset-settings') {
+    Object.assign(preferences, DEFAULT_SETTINGS);
+    updatePreference('language', DEFAULT_SETTINGS.language); render();
+    return;
+  }
   if (action === 'nav') { state.page = button.dataset.page; render(); window.scrollTo({ top: 0, behavior: 'instant' }); document.querySelector('#main').focus({ preventScroll: true }); }
   if (action === 'category') { state.category = button.dataset.category; render(); document.querySelector(`#tab-${state.category}`).focus({ preventScroll: true }); }
   if (action === 'district') { state.district = button.dataset.district; render(); }
@@ -344,6 +460,11 @@ document.addEventListener('click', async event => {
 
 document.addEventListener('change', async event => {
   const target = event.target;
+  if (target.dataset?.setting === 'language') {
+    updatePreference('language', target.value); render();
+    return;
+  }
+  if (target.dataset?.setting === 'volume') { void sound.play(); return; }
   if (target.matches('[data-target]')) {
     const id = target.dataset.target;
     const selected = state.decisions.find(d => d.initiativeId === id);
@@ -352,9 +473,20 @@ document.addEventListener('change', async event => {
   }
 });
 document.addEventListener('input', event => {
+  const key = event.target.dataset?.setting;
+  if (['volume', 'brightness'].includes(key)) {
+    updatePreference(key, Number(event.target.value));
+    document.querySelector(`#${key}-value`).textContent = `${preferences[key]}%`;
+    event.target.setAttribute('aria-valuetext', `${preferences[key]}%`);
+    const test = document.querySelector('[data-action="test-sound"]');
+    if (test) test.disabled = preferences.muted || !preferences.volume;
+    return;
+  }
   if (event.target.name === 'scenario-name') { state.name = event.target.value; persist(); }
 });
+document.addEventListener('visibilitychange', () => { if (document.hidden) sound.stop(); });
 document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && state.page === 'settings') { event.preventDefault(); openScreen('menu'); return; }
   if (event.target.matches('[role="tab"]') && ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
     event.preventDefault();
     const ids = state.data.categories.map(c => c.id); const current = ids.indexOf(state.category);
@@ -381,12 +513,15 @@ async function restoreSavedReport(report, version) {
     if (!evaluation.complete || evaluation.decisions.length !== 5) return null;
     return {
       id: report.id, name: report.name, savedAt: report.savedAt, evaluation,
-      analysis: { mode: analysis.mode, summary: analysis.summary, strengths: [...analysis.strengths], risks: [...analysis.risks], recommendations: [...analysis.recommendations], ...(analysis.notice === undefined ? {} : { notice: analysis.notice }) },
+      analysis: { mode: analysis.mode, language: ['ru', 'kk', 'en'].includes(analysis.language) ? analysis.language : 'ru', summary: analysis.summary, strengths: [...analysis.strengths], risks: [...analysis.risks], recommendations: [...analysis.recommendations], ...(analysis.notice === undefined ? {} : { notice: analysis.notice }) },
     };
   } catch { return null; }
 }
 
 async function boot() {
+  state.loading = true;
+  state.loadError = '';
+  render();
   try {
     state.data = await api('/api/bootstrap'); state.evaluation = state.data.baseline;
     let stored;
@@ -403,9 +538,11 @@ async function boot() {
       state.saved = (await restoredReports).filter(Boolean);
       state.report = state.saved.find(r => decisionKey(r.evaluation.decisions) === decisionKey(state.decisions)) || null;
     }
-    render();
   } catch (error) {
-    app.innerHTML = `<div class="initial-loader">${icon('city')}<h1>Не удалось загрузить город</h1><p>${esc(error.message)}</p><button class="btn primary" data-action="retry">Повторить загрузку</button></div>`;
+    state.loadError = error.message;
+  } finally {
+    state.loading = false;
+    render();
   }
 }
 boot();

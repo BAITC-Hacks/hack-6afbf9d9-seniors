@@ -10,6 +10,8 @@ from pathlib import Path
 from urllib.error import URLError
 from urllib.request import Request, urlopen
 
+from analysis_locale import NOTICES, SUMMARIES, SUPPORTED_LANGUAGES, localized_facts, validate_language
+
 API_URL = "https://api.openai.com/v1/responses"
 DEFAULT_MODEL = "gpt-4.1-mini"
 TIMEOUT_SECONDS = 45
@@ -54,29 +56,14 @@ def ai_status() -> dict:
     return {"enabled": enabled, "provider": "OpenAI" if enabled else "demo"}
 
 
-def demo_analysis(evaluation: dict, *, failed: bool = False) -> dict:
-    score = evaluation["score"]
-    delta = evaluation["delta"]
-    summary = (
-        f"Сценарий использует {evaluation['spent']} из {evaluation['budget']} единиц бюджета. "
-        f"Astana Quality of Life Score: {evaluation['baselineScore']:.2f} → {score:.2f} "
-        f"({delta:+.2f} балла). "
-        "Результат рассчитан по фиксированной модели с учётом эффектов, сроков, "
-        "взаимодействий мероприятий и различий между районами."
-    )
+def demo_analysis(evaluation: dict, language: str = "ru", *, failed: bool = False) -> dict:
+    validate_language(language)
     return {
         "mode": "demo",
-        "summary": summary,
-        "strengths": evaluation.get("strengths", []),
-        "risks": evaluation.get("risks", []),
-        "recommendations": evaluation.get("recommendations", []),
-        "notice": (
-            "AI-сервис не ответил или вернул некорректный результат. Показан локальный "
-            "анализ по правилам модели; расчёт показателей не изменился."
-            if failed else
-            "Демонстрационный режим: текст сформирован по правилам модели, без языковой "
-            "модели. Для AI-анализа задайте OPENAI_API_KEY на сервере."
-        ),
+        "language": language,
+        "summary": SUMMARIES[language].format(**evaluation),
+        **localized_facts(evaluation, language),
+        "notice": NOTICES[language]["failed" if failed else "demo"],
     }
 
 
@@ -95,7 +82,8 @@ def _validate_analysis(value: object) -> dict:
     return value
 
 
-def _request_analysis(evaluation: dict, catalog: dict) -> dict:
+def _request_analysis(evaluation: dict, catalog: dict, language: str = "ru") -> dict:
+    validate_language(language)
     model = os.getenv("OPENAI_MODEL", DEFAULT_MODEL).strip() or DEFAULT_MODEL
     if not re.fullmatch(r"[A-Za-z0-9_.:-]{1,128}", model):
         raise ValueError("Invalid model name")
@@ -104,7 +92,9 @@ def _request_analysis(evaluation: dict, catalog: dict) -> dict:
         "store": False,
         "max_output_tokens": 2400,
         "instructions": (
-            "Ты аналитик учебного AI-симулятора «Аким на 5 часов». Пиши по-русски. "
+            "Ты аналитик учебного AI-симулятора «Аким на 5 часов». "
+            f"Write all analysis text in {SUPPORTED_LANGUAGES[language]} (language code: {language}). "
+            "Translate the explanations and initiative names into this language; keep IDs and numbers unchanged. "
             "Данные синтетические. Дай краткое объяснение результата, 2–4 сильные стороны, "
             "2–4 риска и 2–4 рекомендации. Все утверждения опирай исключительно на JSON. "
             "Оценка и показатели уже рассчитаны детерминированно: не пересчитывай их, "
@@ -157,17 +147,18 @@ def _request_analysis(evaluation: dict, catalog: dict) -> dict:
     return _validate_analysis(json.loads("".join(fragments)))
 
 
-def analyze(evaluation: dict, catalog: dict) -> dict:
+def analyze(evaluation: dict, catalog: dict, language: str = "ru") -> dict:
+    validate_language(language)
     if not ai_status()["enabled"]:
-        return demo_analysis(evaluation)
+        return demo_analysis(evaluation, language)
     try:
-        result = _request_analysis(evaluation, catalog)
+        result = _request_analysis(evaluation, catalog, language)
     except (URLError, OSError, TimeoutError, HTTPException, ValueError, KeyError, TypeError):
         # Never put upstream error bodies or credentials into the HTTP response.
-        return demo_analysis(evaluation, failed=True)
+        return demo_analysis(evaluation, language, failed=True)
     return {
         **result,
         "mode": "ai",
-        "notice": "Текст подготовлен AI по результатам фиксированной модели. Данные синтетические; "
-                  "рекомендации требуют проверки в симуляторе.",
+        "language": language,
+        "notice": NOTICES[language]["ai"],
     }
