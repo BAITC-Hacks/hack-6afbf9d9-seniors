@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="500" viewBox="0 0 900 500" role="img" aria-labelledby="map-title map-desc">
+  <title id="map-title">Условная карта Астаны</title>
+  <desc id="map-desc">Схематичная карта города с рекой Есиль, парками, улицами и достопримечательностями. Синтетическая модель пяти районов; географические границы и расположение объектов условны.</desc>
+  <defs>
+    <pattern id="blocks" width="100" height="84" patternUnits="userSpaceOnUse" patternTransform="rotate(-12)">
+      <rect width="100" height="84" fill="#f3f4ee"/>
+      <path d="M0 0H100M0 0V84" fill="none" stroke="#dfe4dd" stroke-width="12"/>
+      <path d="M0 0H100M0 0V84" fill="none" stroke="#fffef8" stroke-width="9"/>
+      <path d="M52 6V79M6 43H94" fill="none" stroke="#fffef8" stroke-width="5"/>
+      <g fill="#dde2dc" stroke="#d5dbd4" stroke-width=".8">
+        <path d="M12 12h31v10H24v10H12z"/>
+        <rect x="61" y="12" width="25" height="18" rx="1.5"/>
+        <rect x="14" y="52" width="12" height="22" rx="1.5"/>
+        <rect x="30" y="52" width="13" height="22" rx="1.5"/>
+        <path d="M60 52h27v22H77V61H60z"/>
+      </g>
+      <g fill="#cbd9c8">
+        <circle cx="36" cy="30" r="3"/><circle cx="77" cy="37" r="2.6"/><circle cx="58" cy="74" r="2.7"/>
+      </g>
+    </pattern>
+    <pattern id="fineBlocks" width="74" height="62" patternUnits="userSpaceOnUse" patternTransform="rotate(21)">
+      <rect width="74" height="62" fill="#f2f3ec"/>
+      <path d="M0 0H74M0 0V62" stroke="#fffef8" stroke-width="8" fill="none"/>
+      <path d="M37 5V57M5 32H68" stroke="#fffef8" stroke-width="3" fill="none"/>
+      <g fill="#dce2dc"><rect x="10" y="10" width="18" height="14" rx="1"/><rect x="45" y="10" width="18" height="14" rx="1"/><rect x="9" y="41" width="19" height="12" rx="1"/><rect x="45" y="40" width="18" height="13" rx="1"/></g>
+    </pattern>
+    <pattern id="trees" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="5" cy="5" r="3.4" fill="#bdcfb4"/><circle cx="16" cy="16" r="3" fill="#c5d5ba"/></pattern>
+    <linearGradient id="river" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#bfdddd"/><stop offset="1" stop-color="#cde5e3"/></linearGradient>
+    <filter id="landmarkShadow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="2" dy="4" stdDeviation="2" flood-color="#72867b" flood-opacity=".13"/></filter>
+  </defs>
+  <rect width="900" height="500" fill="#f5f6ef"/>
+  <path d="M-50-40H945V210L868 251 771 222 657 252 535 222 403 267 271 247 145 293-50 220Z" fill="url(#blocks)"/>
+  <path d="M-20 295L121 342 235 321 364 332 480 287 579 309 687 275 813 303 930 259V540H-20Z" fill="url(#fineBlocks)"/>
+  <!-- Generous connected green spaces and small civic squares. -->
+  <g fill="#dde8d2" stroke="#d5e1cb" stroke-width="1">
+    <path d="M16 32l100-21 15 66-100 22z"/><path d="M301 44l46-9 22 69-49 13z"/>
+    <path d="M554 21l69-15 20 72-74 17z"/><path d="M802 35l84 3-1 92-61-9z"/>
+    <path d="M561 145l66-13 23 70-60 13z"/><path d="M28 150l70-15 11 60-74 13z"/>
+    <path d="M310 170l69-15 15 64-70 10z"/><path d="M753 170l73-13 14 42-77 10z"/>
+    <path d="M52 371l64 25-24 59-65-26z"/><path d="M305 385l47 17-27 72-55-22z"/>
+    <path d="M562 350l53 17-27 71-52-20z"/><path d="M763 380l104 38-27 73-99-39z"/>
+  </g>
+  <g opacity=".7" fill="url(#trees)">
+    <path d="M20 35l94-20 13 58-93 23z"/><path d="M555 25l65-15 17 63-66 17z"/>
+    <path d="M805 40l75 3v81l-51-9z"/><path d="M564 150l59-13 21 59-53 14z"/>
+    <path d="M54 375l57 23-22 51-57-24z"/><path d="M767 387l93 35-23 61-89-35z"/>
+  </g>
+  <!-- River corridor and embankments. -->
+  <path d="M-30 249C64 227 95 286 179 286S285 270 357 282 462 239 531 257 609 269 671 244 762 281 819 265 884 219 931 231" fill="none" stroke="#e0e9d4" stroke-width="83"/>
+  <path d="M-30 249C64 227 95 286 179 286S285 270 357 282 462 239 531 257 609 269 671 244 762 281 819 265 884 219 931 231" fill="none" stroke="#fdfbf3" stroke-width="66"/>
+  <path d="M-30 249C64 227 95 286 179 286S285 270 357 282 462 239 531 257 609 269 671 244 762 281 819 265 884 219 931 231" fill="none" stroke="url(#river)" stroke-width="54"/>
+  <path d="M-10 247C61 235 102 290 174 286M402 269c52-18 74-27 124-15M710 250c41 8 63 23 98 16" fill="none" stroke="#deeeee" stroke-width="1.6" opacity=".8"/>
+  <!-- Main avenues and river crossings. -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <g stroke="#dce1d8" stroke-width="15">
+      <path d="M-30 144L925-49"/><path d="M-30 224L925 26"/><path d="M125-40L219 235 263 338 487 534"/>
+      <path d="M434-40L482 179 496 285 417 533"/><path d="M695-30L729 180 749 281 649 529"/>
+      <path d="M-23 345L109 389 261 356 414 419 625 451 925 365"/>
+      <path d="M157 528L337 324 526 321 918 453"/>
+    </g>
+    <g stroke="#fffdf6" stroke-width="11">
+      <path d="M-30 144L925-49"/><path d="M-30 224L925 26"/><path d="M125-40L219 235 263 338 487 534"/>
+      <path d="M434-40L482 179 496 285 417 533"/><path d="M695-30L729 180 749 281 649 529"/>
+      <path d="M-23 345L109 389 261 356 414 419 625 451 925 365"/>
+      <path d="M157 528L337 324 526 321 918 453"/>
+    </g>
+    <g stroke="#e6d7b6" stroke-width="1.4" opacity=".6">
+      <path d="M-30 144L925-49"/><path d="M125-40L219 235 263 338 487 534"/>
+      <path d="M434-40L482 179 496 285 417 533"/><path d="M695-30L729 180 749 281 649 529"/>
+      <path d="M-23 345L109 389 261 356 414 419 625 451 925 365"/>
+    </g>
+    <g stroke="#d7dfd7" stroke-width="17"><path d="M230 260l20 48"/><path d="M490 236l7 48"/><path d="M739 232l8 49"/></g>
+    <g stroke="#fffdf7" stroke-width="11"><path d="M230 260l20 48"/><path d="M490 236l7 48"/><path d="M739 232l8 49"/></g>
+    <g stroke="#d9d2bd" stroke-width="1"><path d="M230 260l20 48"/><path d="M490 236l7 48"/><path d="M739 232l8 49"/></g>
+  </g>
+  <!-- Civic axis, plazas and pedestrian paths. -->
+  <path d="M293 330L565 421" stroke="#e6ebdc" stroke-width="41"/>
+  <path d="M293 330L565 421" stroke="#fffdf4" stroke-width="16"/>
+  <g fill="#becfb8">
+    <circle cx="316" cy="325" r="4"/><circle cx="333" cy="331" r="4"/><circle cx="350" cy="337" r="4"/><circle cx="367" cy="343" r="4"/>
+    <circle cx="312" cy="350" r="4"/><circle cx="329" cy="356" r="4"/><circle cx="346" cy="362" r="4"/>
+    <circle cx="471" cy="378" r="4"/><circle cx="488" cy="384" r="4"/><circle cx="505" cy="390" r="4"/><circle cx="522" cy="396" r="4"/>
+    <circle cx="460" cy="401" r="4"/><circle cx="477" cy="407" r="4"/><circle cx="494" cy="413" r="4"/><circle cx="511" cy="419" r="4"/>
+  </g>
+  <g fill="#d5dcd6" stroke="#cbd4ce" stroke-width="1">
+    <path d="M515 305l31 11-7 20-31-11z"/><path d="M553 318l30 11-7 20-30-11z"/>
+    <path d="M650 61l28-5 7 28-29 6z"/><path d="M360 49l39-8 7 27-40 8z"/>
+    <path d="M94 426l35 13-7 20-35-13z"/><path d="M544 450l30 11-9 23-30-11z"/>
+    <path d="M760 312l40 14-9 25-40-14z"/><path d="M813 330l38 14-9 25-38-14z"/>
+  </g>
+  <!-- Small, stylized landmarks; positions are deliberately schematic. -->
+  <g filter="url(#landmarkShadow)">
+    <ellipse cx="294" cy="329" rx="25" ry="14" fill="#e5e9dc" stroke="#c9d3c6"/>
+    <path d="M272 328L300 285 314 332Q294 344 272 328Z" fill="#f7f7ec" stroke="#b8c7be" stroke-width="1.4"/>
+    <path d="M300 285L294 339M300 285L306 336M300 285L281 334" fill="none" stroke="#d8e0d4" stroke-width="1.1"/>
+    <ellipse cx="454" cy="391" rx="13" ry="7" fill="#d8dfd2"/>
+    <path d="M450 389L447 352M458 389L461 352M451 389L457 352M457 389L451 352" stroke="#eef1e5" stroke-width="2"/>
+    <path d="M448 352Q454 344 460 352" fill="none" stroke="#afbbb0" stroke-width="1.2"/>
+    <circle cx="454" cy="347" r="8" fill="#dcc276" stroke="#c4ad68" stroke-width="1.3"/>
+    <path d="M450 343a5 5 0 0 1 5-2" fill="none" stroke="#f4e2a6" stroke-width="1.5" stroke-linecap="round"/>
+    <ellipse cx="644" cy="424" rx="30" ry="15" fill="#e1e7da" stroke="#cbd6c8"/>
+    <circle cx="644" cy="410" r="21" fill="#b5d1ce" stroke="#97b5b2" stroke-width="1.5"/>
+    <ellipse cx="644" cy="410" rx="10" ry="21" fill="none" stroke="#d8e9e4" stroke-width="1"/>
+    <path d="M624 405h40M625 417h38M644 389v42" fill="none" stroke="#d8e9e4" stroke-width="1"/>
+    <ellipse cx="553" cy="234" rx="25" ry="12" fill="#e2e7dc"/>
+    <path d="M534 232v-16h38v16z" fill="#e9ede3" stroke="#c2cdc0"/>
+    <path d="M539 216v-7h28v7z" fill="#f8f8ed" stroke="#c2cdc0"/>
+    <path d="M548 209a6 6 0 0 1 12 0" fill="#bad5d0" stroke="#a0bdb6"/>
+    <path d="M543 220v9M550 220v9M557 220v9M564 220v9" stroke="#c2cdc0" stroke-width="2"/>
+  </g>
+  <g font-family="Arial,sans-serif" text-anchor="middle" fill="#9aa99f" font-size="7.5" letter-spacing="1">
+    <text x="294" y="355">ХАН ШАТЫР</text><text x="454" y="409">БАЙТЕРЕК</text><text x="644" y="451">EXPO</text>
+    <text x="553" y="248">АКОРДА</text>
+    <text x="354" y="281" fill="#85aaa8" font-size="9" letter-spacing="3" transform="rotate(-5 354 281)">ЕСИЛЬ</text>
+  </g>
+  <!-- Very faint district divisions avoid suggesting exact administrative boundaries. -->
+  <g fill="none" stroke="#b8c9bc" stroke-width="1.2" stroke-dasharray="4 6" opacity=".45">
+    <path d="M365-10L371 88 392 167 425 231"/><path d="M618-10L648 85 674 213"/>
+    <path d="M260 337L266 417 289 510"/>
+  </g>
+</svg>
