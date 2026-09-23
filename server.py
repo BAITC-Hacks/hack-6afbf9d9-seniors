@@ -12,6 +12,7 @@ from urllib.parse import unquote, urlsplit
 from ai_analysis import ai_status, analyze, load_environment
 from analysis_locale import validate_language
 from city_model import evaluate, load_data
+from scenarios import listing as scenario_listing
 
 ROOT = Path(__file__).resolve().parent
 PUBLIC_ROOT = ROOT / "public"
@@ -75,6 +76,9 @@ class SimulatorHandler(BaseHTTPRequestHandler):
             path = urlsplit(self.path).path
             if path == "/api/bootstrap":
                 self._json(200, {**load_data(), "baseline": evaluate([]), "ai": ai_status()})
+                return
+            if path == "/api/scenarios":
+                self._json(200, scenario_listing())
                 return
             if path == "/health":
                 self._json(200, {"status": "ok"})
